@@ -1,0 +1,197 @@
+{
+  "source": "restoflow_ui_complete.zip",
+  "assets": [
+    {
+      "path": "assets/icons/arrow.svg",
+      "sha256": "4c6858305470a3a4dbcbef15234f7c788be41e749ce92a0f0962a5a177b8dcfe",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/back.svg",
+      "sha256": "cfb21f46635fa6f4591c836f01951a56033a639d7d9956834707f53d74deb6af",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/battery.svg",
+      "sha256": "717bcdfa7d6b86e49d206305c85f8391e995f8b3139b21cebcfb110204d8d128",
+      "viewBox": "0 4 24 16",
+      "usage": "native OS status bar supplies this indicator"
+    },
+    {
+      "path": "assets/icons/camera.svg",
+      "sha256": "9a132fe8e6683a0ebbe7734a87efcb61d2bc829582494852a6015f638e78abf1",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/check.svg",
+      "sha256": "f76cf5729e489600ea4c75b19f6905415f795f2be92d694937ec1ab580c67558",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/clock.svg",
+      "sha256": "c6e93ee22e6bb3e28874be8df9aab45ad348b035433bd2355218bf8976cc8a35",
+      "viewBox": "0 0 24 24",
+      "usage": "not visible in supplied app screens"
+    },
+    {
+      "path": "assets/icons/close.svg",
+      "sha256": "90620f9c4643cf67912595fabce426a11aaf25772172648c513778f5059450cb",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/crown.svg",
+      "sha256": "e303c321deef0b184c18b9889497a981dca39b369593227236809c65e41068e5",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/cutlery.svg",
+      "sha256": "1cd2a03cf27c12fb7cd9b1b031fe38f562b6d4f5af87a660ba3e01051b336c32",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/edit.svg",
+      "sha256": "922f343140fc3933896ad934882ce61c2bdfb5a93ca4a133734ed56cdecf08f5",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/grid.svg",
+      "sha256": "405a343962e93c17c409060cb0df239c6431e1cd1ad065f8e86b4a438306a8a5",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/info.svg",
+      "sha256": "4e18a8ca5724948ab82b253c16a01b42b0ba4efc39afcd2688141c1151351071",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/language.svg",
+      "sha256": "7a3c1abfb84cf0ae8f054c29ed417e1a08ca6bbd0cff04418412c3926fbefa62",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/leaf.svg",
+      "sha256": "8d93673b0aa677fa566af606dc9b4617920a8bf70e8bbca212f98018b60573b3",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/logout.svg",
+      "sha256": "6407d88ea2b079b50dfaae16d0d1ef0d02b419af7d4a41e0efb7258b21fad2ee",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/menu.svg",
+      "sha256": "4c3ff5849f436b3d7f50d970f65f79563d805416d7a94646949f55cb53c00e1f",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/minus.svg",
+      "sha256": "1032f6b6b9821f52e0cd6c67c0b46c3662689389b38cd385599c859e46c2316e",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/people.svg",
+      "sha256": "2a5ac9200cefe18f43fb1f865011a1a94befe9df65692f907224d94de665ac8e",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/plus.svg",
+      "sha256": "d354490df2d1d77418d8fd503b03e03fe7dc182a31b6e7054500f87530353de7",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/print.svg",
+      "sha256": "3717971d88c8d3c16094dc96c81b9aecaccc68d23c0f7a6189fe648aa684c854",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/search.svg",
+      "sha256": "d46327f447f6fffc193f38c67ec49997460a18f3f6d2e3f2028b486ccad08652",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/settings.svg",
+      "sha256": "390dc8deb411e74dc9d9229eff2d8686620af9e738b2ca4ffc282c7cff95def2",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/shield.svg",
+      "sha256": "53ec9ded1daf27bd6d52689ad9cddd680b75550f27d08d5f70f81366d2102260",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/table.svg",
+      "sha256": "287c73ca34887fee025beedc9ffa784d762ffdfca8fff42e04952b88cb063368",
+      "viewBox": "0 0 24 24",
+      "usage": "Icon"
+    },
+    {
+      "path": "assets/icons/wifi.svg",
+      "sha256": "e1a32f7fa7a06b5f978951cc1d9042fd82077f3dba64208a5912741840273ef6",
+      "viewBox": "0 0 24 24",
+      "usage": "native OS status bar supplies this indicator"
+    },
+    {
+      "path": "assets/illustrations/coke.svg",
+      "sha256": "dc8c0733eeb8cdfd2dab9d2e5f4a1d48eac9fa4892d553707bd2b489892872ca",
+      "viewBox": "0 0 160 140",
+      "usage": "DishIllustration"
+    },
+    {
+      "path": "assets/illustrations/dal.svg",
+      "sha256": "4785b420632eed96fef3cf62b7537c2010cb001a1d25fd3803df1d037af3ed3b",
+      "viewBox": "0 0 160 140",
+      "usage": "DishIllustration"
+    },
+    {
+      "path": "assets/illustrations/naan.svg",
+      "sha256": "657a70dd9c98450c10051feef635783c1d39a3bcc8ba2f8cecbbaf587b8f9b3a",
+      "viewBox": "0 0 160 140",
+      "usage": "DishIllustration"
+    },
+    {
+      "path": "assets/illustrations/paneer.svg",
+      "sha256": "0623139a02b51b88e1b2651cd49f482a13ed3a857c5211c32c7d970dd383ff57",
+      "viewBox": "0 0 160 140",
+      "usage": "DishIllustration"
+    },
+    {
+      "path": "assets/illustrations/rice.svg",
+      "sha256": "436442546a6c0ac56dd7cac60a42b2fa0d401bd2e8d094b94e824e0cee4d641a",
+      "viewBox": "0 0 160 140",
+      "usage": "DishIllustration"
+    },
+    {
+      "path": "assets/illustrations/roti.svg",
+      "sha256": "7378ec2aaca682a3d0f95f89ee9f467e5498db66ed998215a8fb19fd13ea8b7a",
+      "viewBox": "0 0 160 140",
+      "usage": "DishIllustration"
+    },
+    {
+      "path": "assets/illustrations/welcome.svg",
+      "sha256": "735c3e687d7cb682bc1839f914caf4d2d29a254eadea47d49a587a5f59470947",
+      "viewBox": "0 0 320 220",
+      "usage": "LoginScreen"
+    }
+  ]
+}

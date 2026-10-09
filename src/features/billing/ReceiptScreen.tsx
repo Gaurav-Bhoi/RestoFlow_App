@@ -1,0 +1,134 @@
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import type { RootScreenProps } from '../../app/navigationTypes';
+import { AppHeader } from '../../components/AppHeader';
+import { AppButton } from '../../components/AppButton';
+import { AppText } from '../../components/AppText';
+import { Screen } from '../../components/Screen';
+import { EmptyState } from '../../components/EmptyState';
+import { colors, layout } from '../../theme/tokens';
+import { formatDate } from '../../utils/date';
+import { useCustomerBill } from './useCustomerBill';
+import { BillBreakdown } from './BillBreakdown';
+
+export function ReceiptScreen({
+  route,
+  navigation,
+}: RootScreenProps<'Receipt'>) {
+  const bill = useCustomerBill(route.params.tableId, route.params.customerId);
+  const handlePrint = async () => {
+    if (await bill.printReceipt()) {
+      navigation.replace('PrintSuccess', route.params);
+    }
+  };
+  if (!bill.order) {
+    return (
+      <Screen>
+        <EmptyState
+          title="Visit completed"
+          description="This order is no longer active."
+        />
+      </Screen>
+    );
+  }
+  return (
+    <Screen
+      header={
+        <AppHeader
+          title="Ready to print"
+          subtitle="Receipt preview"
+          onBack={navigation.goBack}
+        />
+      }
+      footer={
+        <View style={layout.row}>
+          <AppButton
+            variant="secondary"
+            onPress={navigation.goBack}
+            style={styles.cancel}
+          >
+            Cancel
+          </AppButton>
+          <AppButton
+            icon="print"
+            disabled={bill.isPrinting}
+            onPress={handlePrint}
+            style={styles.print}
+          >
+            {bill.isPrinting ? 'Opening…' : 'Print bill'}
+          </AppButton>
+        </View>
+      }
+    >
+      <View style={styles.receipt}>
+        <View style={styles.heading}>
+          <AppText variant="section" style={styles.title}>
+            {bill.restaurant.name}
+          </AppText>
+          <AppText muted variant="helper">
+            Table {route.params.tableId} · {bill.order.name}
+          </AppText>
+          <AppText muted variant="helper">
+            {formatDate(bill.issuedAt)} ·{' '}
+            {bill.issuedAt.toLocaleTimeString('en-IN', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </AppText>
+        </View>
+        <BillBreakdown items={bill.order.items} />
+        <AppText muted style={styles.thanks}>
+          Thank you for dining with us.{'\n'}We hope to see you again.
+        </AppText>
+        <View style={styles.perforations}>
+          {Array.from({ length: 32 }, (_, index) => (
+            <View key={index} style={styles.perforation} />
+          ))}
+        </View>
+      </View>
+      <AppText muted variant="small" style={styles.caption}>
+        Prints through your device’s print service.
+      </AppText>
+    </Screen>
+  );
+}
+const styles = StyleSheet.create({
+  cancel: { width: 115 },
+  print: { flex: 1 },
+  receipt: {
+    paddingVertical: 25,
+    paddingHorizontal: 20,
+    backgroundColor: colors.white,
+    borderRadius: 7,
+    marginHorizontal: 10,
+    marginTop: 12,
+    marginBottom: 25,
+  },
+  heading: {
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderStyle: 'dashed',
+    borderBottomColor: '#cbd5cb',
+    paddingBottom: 18,
+    marginBottom: 22,
+    gap: 4,
+  },
+  title: { fontSize: 19, textAlign: 'center' },
+  thanks: { fontSize: 11, textAlign: 'center', marginTop: 28 },
+  caption: { textAlign: 'center' },
+  perforations: {
+    position: 'absolute',
+    bottom: -4,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    overflow: 'hidden',
+  },
+  perforation: {
+    width: 6,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.paper,
+  },
+});

@@ -1,0 +1,76 @@
+{
+  "name": "RestoFlow restaurant UI",
+  "colors": {
+    "forest": "#173f35",
+    "ink": "#22352d",
+    "sage": "#e5ece2",
+    "terracotta": "#ac5938",
+    "paper": "#f6f5ef",
+    "muted": "#5e6d63",
+    "white": "#ffffff",
+    "error": "#a63c3c"
+  },
+  "type": {
+    "body_family": "SF Pro Text",
+    "heading_family": "SF Pro Display",
+    "script_fallback": "Noto Sans Devanagari",
+    "heading": {
+      "size": 25,
+      "weight": 700
+    },
+    "section": {
+      "size": 21,
+      "weight": 700
+    },
+    "body": {
+      "size": 14,
+      "weight": 400
+    },
+    "helper": {
+      "size": 12,
+      "weight": 400
+    }
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    22,
+    24,
+    32
+  ],
+  "radius": {
+    "field": 17,
+    "card": 24,
+    "button": 28,
+    "table": 38
+  },
+  "motion_ms": {
+    "press": 120,
+    "route": 180,
+    "sheet_entrance": 220,
+    "sheet_dismissal": 150,
+    "confirmation": 280
+  },
+  "canvas": {
+    "width": 390,
+    "height": 844
+  },
+  "icons": {
+    "base_viewbox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "stroke_width": 1.8,
+    "cap": "round",
+    "join": "round",
+    "quantity_size": 16,
+    "settings_leading_size": 20,
+    "settings_trailing_size": 16,
+    "source": "Lucide, with a custom table icon"
+  },
+  "minimum_control_target": 44
+}

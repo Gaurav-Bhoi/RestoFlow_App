@@ -19,3 +19,15 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+// RNPrint's Android package pins SDK 31. Align it with this app's native toolchain.
+subprojects { library ->
+    if (library.name == "react-native-print") {
+        library.afterEvaluate {
+            library.android {
+                compileSdkVersion rootProject.ext.compileSdkVersion
+                buildToolsVersion rootProject.ext.buildToolsVersion
+            }
+        }
+    }
+}

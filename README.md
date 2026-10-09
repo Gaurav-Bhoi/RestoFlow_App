@@ -1,97 +1,60 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+RestoFlow is a native restaurant ordering and billing demo implemented from the supplied `restoflow_ui_complete.zip`. It includes owner and waiter flows, restaurant setup, table management, separate customer orders and bills, menu search, language settings, waiter management, native receipt printing and subscription states.
 
-# Getting Started
+## Try the demo
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Use these numbers on the welcome screen:
 
-## Step 1: Start Metro
+| Role | Mobile number |
+| --- | --- |
+| Restaurant owner | `9876543210` |
+| Waiter Ravi | `9876543211` |
+| New restaurant | `9876543212` |
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+The owner reviews and prints bills, completes individual visits, manages available tables and adds waiters. Waiters add customers and create or edit their orders. Finishing one customer's visit leaves the other guests at that table active. Menu search and category filtering work for both roles.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Restaurant data is saved on the device. Signing out keeps tables, orders and the team. Registering a new restaurant replaces this device's demo restaurant, matching the supplied prototype. Hindi and Marathi update the sample navigation labels; the rest of the copy stays in English.
+
+Authentication and subscription activation are local demonstration flows. There is no OTP service, backend or payment collection. Receipt printing opens the device's real print service; the app asks you to check the printed receipt before finishing the visit.
+
+## Design and code
+
+The ZIP's prototype, screen previews, SVGs and tokens are the implementation reference, as requested. No screenshot is used as a screen asset. All supplied SVGs are preserved byte for byte and imported through the [SVG transformer](https://github.com/kristerkari/react-native-svg-transformer). Icons keep their native 24-unit geometry and are tinted at the call site. Android and iOS supply their own status and navigation bars.
+
+SF Pro binaries were not included in the ZIP. iOS uses its system font, Android uses its system sans-serif, and the supplied Noto Sans Devanagari font is bundled on both platforms. Asset and font licenses are in `licenses/`.
+
+`src/app` contains typed React Navigation stacks and the floating tab bar. `src/components` contains shared UI controls. Each feature owns its screens, components, types or hooks; order calculations, receipt generation and persistence are separate from JSX. Tokens are in `src/theme/tokens.ts` and the supplied rules are preserved in `design/implementation-rules.md`.
+
+## Install and verify
 
 ```sh
-# Using npm
+npm ci --legacy-peer-deps
+npx tsc --noEmit
+npm run lint
+npm test -- --runInBand
+```
+
+The legacy peer flag is needed because `react-native-print` declares a Windows peer dependency incompatible with this project's React Native version. Windows is not a target of this app. Its Android SDK is aligned with the app in `android/build.gradle`.
+
+For iOS, install CocoaPods dependencies on macOS before running the app. Android verification can use an emulator or device. The tests cover independent guest totals and checkout, order edits, zero quantities, occupied-table protection, duplicate phone numbers, receipt escaping, trial calculations and role-specific settings.
+
+Verification details are in [design/verification.md](design/verification.md).
+
+## Run the app
+
+Start Metro in one terminal:
+
+```sh
 npm start
-
-# OR using Yarn
-yarn start
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+With an Android emulator or device connected, run in a second terminal:
 
 ```sh
-# Using npm
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
-### iOS
+`yarn android` runs the same command. It builds native libraries for the connected device’s architecture to keep development builds smaller and faster. If installation reports `INSTALL_FAILED_INSUFFICIENT_STORAGE`, check free space on the emulator or device; clearing disposable caches can help without deleting app data.
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+For iOS on macOS, run `bundle install`, then `bundle exec pod install` from `ios/`, and return to the project root for `npm run ios`. Native iOS compilation has not been verified in this Linux workspace.
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+See React Native’s [environment setup guide](https://reactnative.dev/docs/set-up-your-environment) for the required Android or iOS toolchain.
