@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -14,9 +15,9 @@ import { ConfirmationSheet } from '../../components/ConfirmationSheet';
 import { FilterChips } from '../../components/FilterChips';
 import { EmptyState } from '../../components/EmptyState';
 import { Screen } from '../../components/Screen';
+import { FigmaAsset } from '../../components/FigmaAsset';
 import { colors, layout } from '../../theme/tokens';
 import { useSession } from '../auth/SessionProvider';
-import { useTranslations } from '../settings/translations';
 import { FloorSummary } from './FloorSummary';
 import { TableTile } from './TableTile';
 import { useTables, type TableFilter } from './useTables';
@@ -24,17 +25,19 @@ import { useTables, type TableFilter } from './useTables';
 export function DashboardScreen({
   navigation: tabNavigation,
 }: BottomTabScreenProps<HomeTabsParams, 'Dashboard'>) {
+  const { t } = useTranslation();
   const navigation = useAppNavigation();
   const { session } = useSession();
-  const labels = useTranslations();
   const tables = useTables();
   const filters: { value: TableFilter; label: string }[] = [
     {
       value: 'All tables',
-      label: `All tables · ${tables.restaurant.tables.length}`,
+      label: t('dashboard.allTables', {
+        count: tables.restaurant.tables.length,
+      }),
     },
-    { value: 'Available', label: 'Available' },
-    { value: 'Occupied', label: 'Occupied' },
+    { value: 'Available', label: t('dashboard.available') },
+    { value: 'Occupied', label: t('dashboard.occupied') },
   ];
   return (
     <>
@@ -42,13 +45,13 @@ export function DashboardScreen({
         hasTabs
         header={
           <AppHeader
-            title="Today’s floor"
+            title={t('dashboard.todaySFloor')}
             subtitle={tables.restaurant.name}
             right={
               <Pressable
                 onPress={() => tabNavigation.navigate('Settings')}
                 accessibilityRole="button"
-                accessibilityLabel="Open account settings"
+                accessibilityLabel={t('dashboard.openAccountSettings')}
               >
                 <Avatar name={session?.name ?? ''} photo={session?.photo} />
               </Pressable>
@@ -62,7 +65,14 @@ export function DashboardScreen({
           guests={tables.guestCount}
         />
         <View style={layout.section}>
-          <AppText variant="section">{labels.tables}</AppText>
+          <AppText
+            variant="section"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={styles.sectionTitle}
+          >
+            {t('dashboard.restaurantTables')}
+          </AppText>
           {tables.canManage ? (
             <Pressable
               onPress={() => tables.setIsEditing(!tables.isEditing)}
@@ -70,20 +80,24 @@ export function DashboardScreen({
               style={styles.manage}
             >
               <AppText style={styles.manageLabel}>
-                {tables.isEditing ? 'Done' : 'Manage'}
+                {tables.isEditing ? t('dashboard.done') : t('dashboard.manage')}
               </AppText>
             </Pressable>
           ) : (
-            <Badge>Waiter</Badge>
+            <Badge>{t('dashboard.waiter')}</Badge>
           )}
         </View>
         {!tables.restaurant.tables.length ? (
           <EmptyState
-            title="Your floor starts here"
-            description="Add your restaurant tables and you’re ready to welcome the first guests."
+            art={<FigmaAsset name="table" />}
+            title={t('dashboard.yourFloorStartsHere')}
+            description={t('dashboard.addYourRestaurantTablesAndYouReReadyTo')}
             action={
               tables.canManage
-                ? { label: 'Add first table', onPress: tables.addTable }
+                ? {
+                    label: t('dashboard.addFirstTable'),
+                    onPress: tables.addTable,
+                  }
                 : undefined
             }
           />
@@ -115,7 +129,7 @@ export function DashboardScreen({
             </View>
             {!tables.visibleTables.length && (
               <AppText muted style={styles.empty}>
-                No tables with this status.
+                {t('dashboard.noTablesWithThisStatus')}
               </AppText>
             )}
             {tables.canManage && (
@@ -125,7 +139,7 @@ export function DashboardScreen({
                 variant="secondary"
                 style={styles.add}
               >
-                Add table
+                {t('dashboard.addTable')}
               </AppButton>
             )}
           </>
@@ -133,11 +147,13 @@ export function DashboardScreen({
       </Screen>
       <ConfirmationSheet
         visible={tables.tableToRemove !== null}
-        title="Remove this table?"
-        description="This table is currently available. Existing occupied tables cannot be removed."
+        title={t('dashboard.removeThisTable')}
+        description={t(
+          'dashboard.thisTableIsCurrentlyAvailableExistingOccupiedTablesCannot',
+        )}
         icon="table"
-        confirmLabel="Remove table"
-        cancelLabel="Keep table"
+        confirmLabel={t('dashboard.removeTable')}
+        cancelLabel={t('dashboard.keepTable')}
         onConfirm={tables.removeTable}
         onCancel={() => tables.setTableToRemove(null)}
       />
@@ -147,7 +163,8 @@ export function DashboardScreen({
 const styles = StyleSheet.create({
   filters: { marginTop: 4 },
   manage: { minHeight: 44, justifyContent: 'center' },
-  manageLabel: { fontSize: 12, fontWeight: '700', color: colors.forest },
+  manageLabel: { fontSize: 12, lineHeight: 18, color: colors.forest },
+  sectionTitle: { flex: 1, minWidth: 0 },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

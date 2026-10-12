@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
@@ -22,14 +23,16 @@ export function CustomerCard({
   isOwner: boolean;
   onPress: () => void;
 }) {
+  const { t } = useTranslation();
   const lines = orderLines(order.items);
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${isOwner ? 'Review bill' : 'Edit order'} for ${
-        order.name
-      }`}
+      accessibilityLabel={t(
+        isOwner ? 'orders.reviewBill' : 'orders.editOrderFor',
+        { name: order.name },
+      )}
       style={styles.card}
     >
       <View style={layout.row}>
@@ -38,11 +41,16 @@ export function CustomerCard({
           <View style={styles.name}>
             <AppText style={styles.title}>{order.name}</AppText>
             <AppText muted style={styles.count}>
-              {lines.length} dishes · {countOrderItems(order.items)} items
+              {t('orders.valueDishesValueItems', {
+                value0: lines.length,
+                value1: countOrderItems(order.items),
+              })}
             </AppText>
           </View>
         </View>
-        <Badge>{isOwner ? 'Ready to bill' : 'Order saved'}</Badge>
+        <Badge>
+          {isOwner ? t('orders.readyToBill') : t('orders.orderSaved')}
+        </Badge>
       </View>
       <View style={styles.dishes}>
         {lines.map(line => (
@@ -53,7 +61,7 @@ export function CustomerCard({
       </View>
       <View style={styles.bottom}>
         <AppText style={styles.totalLabel}>
-          {isOwner ? 'Customer total' : 'Order total'}{' '}
+          {isOwner ? t('orders.customerTotal') : t('orders.orderTotal')}{' '}
           <AppText style={styles.total}>
             {formatCurrency(calculateOrderTotal(order.items))}
           </AppText>

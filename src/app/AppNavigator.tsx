@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import {
   NavigationContainer,
@@ -34,6 +35,7 @@ import {
 import { useSubscription } from '../features/subscription/useSubscription';
 import { FloatingTabBar } from './FloatingTabBar';
 import type { HomeTabsParams, RootStackParams } from './navigationTypes';
+import { hideStartupSplash } from './bootstrap';
 
 const Stack = createNativeStackNavigator<RootStackParams>();
 const Tab = createBottomTabNavigator<HomeTabsParams>();
@@ -70,6 +72,7 @@ function HomeScreen() {
   );
 }
 export function AppNavigator() {
+  const { t } = useTranslation();
   const { session, signOut } = useSession();
   const isReducedMotion = useReducedMotion();
   const { isExpired } = useSubscription();
@@ -83,7 +86,10 @@ export function AppNavigator() {
     <NavigationContainer
       ref={navigationRef}
       theme={theme}
-      onReady={updateCurrentRoute}
+      onReady={() => {
+        updateCurrentRoute();
+        hideStartupSplash();
+      }}
       onStateChange={updateCurrentRoute}
     >
       <Stack.Navigator
@@ -134,15 +140,17 @@ export function AppNavigator() {
       </Stack.Navigator>
       <ConfirmationSheet
         visible={!!session && isExpired && !isPurchasing}
-        title="Let’s keep your restaurant flowing."
+        title={t('common.letSKeepYourRestaurantFlowing')}
         description={
           canPurchase
-            ? 'Your 15-day free trial has ended. Activate a subscription to continue taking orders and generating bills.'
-            : 'Your restaurant’s free trial has ended. Ask the restaurant owner to activate a subscription.'
+            ? t('common.your15DayFreeTrialHasEndedActivateA')
+            : t('common.yourRestaurantSFreeTrialHasEndedAskThe')
         }
         icon="crown"
-        confirmLabel={canPurchase ? 'Purchase subscription' : 'Log out'}
-        cancelLabel={canPurchase ? 'Log out' : undefined}
+        confirmLabel={
+          canPurchase ? t('common.purchaseSubscription') : t('common.logOut')
+        }
+        cancelLabel={canPurchase ? t('common.logOut') : undefined}
         isBlocking
         onConfirm={
           canPurchase ? () => navigationRef.navigate('Purchase') : signOut

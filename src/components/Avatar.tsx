@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { colors } from '../theme/tokens';
@@ -14,6 +15,7 @@ export function Avatar({
   size?: number;
   dark?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <View
       style={[
@@ -26,10 +28,13 @@ export function Avatar({
         <Image
           source={{ uri: photo }}
           style={{ width: size, height: size }}
-          accessibilityLabel={`${name} profile photo`}
+          accessibilityLabel={t('common.valueProfilePhoto', { value0: name })}
         />
       ) : (
-        <AppText style={[styles.initials, dark && styles.light]}>
+        <AppText
+          numberOfLines={1}
+          style={[styles.initials, dark && styles.light]}
+        >
           {name.slice(0, 2).toUpperCase()}
         </AppText>
       )}
@@ -44,6 +49,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   dark: { backgroundColor: colors.forest },
-  initials: { color: colors.forest, fontSize: 12, fontWeight: '700' },
+  initials: { color: colors.forest, fontSize: 14 },
   light: { color: colors.white },
 });

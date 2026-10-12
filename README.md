@@ -4,15 +4,15 @@ RestoFlow is a native restaurant ordering and billing demo implemented from the 
 
 Use these numbers on the welcome screen:
 
-| Role | Mobile number |
-| --- | --- |
-| Restaurant owner | `9876543210` |
-| Waiter Ravi | `9876543211` |
-| New restaurant | `9876543212` |
+| Role             | Mobile number |
+| ---------------- | ------------- |
+| Restaurant owner | `9876543210`  |
+| Waiter Ravi      | `9876543211`  |
+| New restaurant   | `9876543212`  |
 
 The owner reviews and prints bills, completes individual visits, manages available tables and adds waiters. Waiters add customers and create or edit their orders. Finishing one customer's visit leaves the other guests at that table active. Menu search and category filtering work for both roles.
 
-Restaurant data is saved on the device. Signing out keeps tables, orders and the team. Registering a new restaurant replaces this device's demo restaurant, matching the supplied prototype. Hindi and Marathi update the sample navigation labels; the rest of the copy stays in English.
+Restaurant data is saved on the device. Signing out keeps tables, orders and the team. Registering a new restaurant replaces this device's demo restaurant, matching the supplied prototype. English and Marathi are bundled; additional languages use the configured API when mock mode is disabled.
 
 Authentication and subscription activation are local demonstration flows. There is no OTP service, backend or payment collection. Receipt printing opens the device's real print service; the app asks you to check the printed receipt before finishing the visit.
 
@@ -53,8 +53,23 @@ With an Android emulator or device connected, run in a second terminal:
 npm run android
 ```
 
-`yarn android` runs the same command. It builds native libraries for the connected device’s architecture to keep development builds smaller and faster. If installation reports `INSTALL_FAILED_INSUFFICIENT_STORAGE`, check free space on the emulator or device; clearing disposable caches can help without deleting app data.
+`npm run android` selects the development flavor. It builds native libraries for the connected device’s architecture to keep development builds smaller and faster. If installation reports `INSTALL_FAILED_INSUFFICIENT_STORAGE`, check free space on the emulator or device; clearing disposable caches can help without deleting app data.
 
-For iOS on macOS, run `bundle install`, then `bundle exec pod install` from `ios/`, and return to the project root for `npm run ios`. Native iOS compilation has not been verified in this Linux workspace.
+For iOS on macOS, run `npm run native:configure`, `bundle install`, then `bundle exec pod install` from `ios/`, and return to the project root for `npm run ios:dev`. Native iOS compilation has not been verified in this Linux workspace.
 
 See React Native’s [environment setup guide](https://reactnative.dev/docs/set-up-your-environment) for the required Android or iOS toolchain.
+
+## Localization
+
+The application now uses i18next with bundled English and Marathi, runtime language
+discovery through our Hono API, and offline resources in the existing AsyncStorage.
+See [docs/LOCALIZATION.md](docs/LOCALIZATION.md) for catalog changes, language
+configuration and verification. The production API origin remains a placeholder until configured. Both environments currently use explicit mock mode, which blocks backend requests.
+
+## Application infrastructure
+
+Axios, Redux Toolkit, native environment configuration, MMKV, BootSplash and Stallion are integrated. DEV and PROD use separate Android flavors, iOS schemes, application identities and native Stallion project IDs. Existing local demo authentication is preserved.
+
+Use `npm run android:dev` / `npm run android:prod`, or on macOS `npm run ios:dev` / `npm run ios:prod`. Their `:release` commands require real environment configuration; mock releases and unconfigured OTA uploads fail explicitly.
+
+See [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md) for exact versions, setup, native identities, signing, OTA publishing, rollout and rollback. [docs/INFRASTRUCTURE_VERIFICATION.md](docs/INFRASTRUCTURE_VERIFICATION.md) records completed checks, remaining checks, and the implementation file list.

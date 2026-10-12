@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { RootScreenProps } from '../../app/navigationTypes';
@@ -15,6 +16,7 @@ import { normalizePhone } from '../auth/validation';
 import { useWaiters } from './useWaiters';
 
 export function AddWaiterScreen({ navigation }: RootScreenProps<'AddWaiter'>) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const { photo, selectPhoto } = useProfilePhoto();
@@ -23,15 +25,17 @@ export function AddWaiterScreen({ navigation }: RootScreenProps<'AddWaiter'>) {
   const handleAddWaiter = () => {
     if (addWaiter(name, phone, photo)) {
       navigation.goBack();
-      showFeedback(`${name.trim()} added to your team`);
+      showFeedback(
+        t('employees.valueAddedToYourTeam', { value0: name.trim() }),
+      );
     }
   };
   return (
     <Screen
       header={
         <AppHeader
-          title="Welcome to the team"
-          subtitle="Add a waiter to your restaurant."
+          title={t('employees.welcomeToTheTeam')}
+          subtitle={t('employees.addAWaiterToYourRestaurant')}
           onBack={navigation.goBack}
         />
       }
@@ -42,31 +46,30 @@ export function AddWaiterScreen({ navigation }: RootScreenProps<'AddWaiter'>) {
             onPress={navigation.goBack}
             style={styles.cancel}
           >
-            Cancel
+            {t('employees.cancel')}
           </AppButton>
           <AppButton onPress={handleAddWaiter} style={styles.submit}>
-            Add waiter
+            {t('employees.addWaiter')}
           </AppButton>
         </View>
       }
     >
       <PhotoPicker photo={photo} onPress={selectPhoto} />
       <AppInput
-        label="Waiter name"
+        label={t('employees.waiterName')}
         value={name}
         onChangeText={setName}
-        placeholder="e.g. Sneha"
+        placeholder={t('employees.eGSneha')}
       />
       <AppInput
-        label="Mobile number"
+        label={t('employees.mobileNumber')}
         isPhone
         value={phone}
         onChangeText={value => setPhone(normalizePhone(value))}
-        placeholder="10-digit mobile number"
+        placeholder={t('employees.10DigitMobileNumber')}
       />
       <Notice>
-        This number gives the waiter access to tables and orders, without owner
-        management controls.
+        {t('employees.thisNumberGivesTheWaiterAccessToTablesAnd')}
       </Notice>
       {!!error && (
         <AppText accessibilityRole="alert" style={styles.error}>

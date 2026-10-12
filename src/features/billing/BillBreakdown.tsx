@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
@@ -7,21 +8,22 @@ import type { OrderItems } from '../restaurant/types';
 import { calculateOrderTotal, orderLines } from '../orders/orderCalculations';
 
 export function BillBreakdown({ items }: { items: OrderItems }) {
+  const { t } = useTranslation('translation', { lng: 'en' });
   const total = calculateOrderTotal(items);
   return (
     <>
       <View style={styles.columns}>
         <AppText muted style={styles.itemHeader}>
-          Item
+          {t('billing.item')}
         </AppText>
         <AppText muted style={styles.qtyHeader}>
-          Qty
+          {t('billing.qty')}
         </AppText>
         <AppText muted style={styles.priceHeader}>
-          Price
+          {t('billing.price')}
         </AppText>
         <AppText muted style={styles.amountHeader}>
-          Amount
+          {t('billing.amount')}
         </AppText>
       </View>
       {orderLines(items).map(line => (
@@ -37,7 +39,7 @@ export function BillBreakdown({ items }: { items: OrderItems }) {
       <View style={styles.totals}>
         <View style={layout.row}>
           <AppText muted variant="small">
-            Subtotal
+            {t('billing.subtotal')}
           </AppText>
           <AppText muted variant="small">
             {formatCurrency(total)}
@@ -45,14 +47,14 @@ export function BillBreakdown({ items }: { items: OrderItems }) {
         </View>
         <View style={[layout.row, styles.tax]}>
           <AppText muted variant="small">
-            Taxes & charges
+            {t('billing.taxesCharges')}
           </AppText>
           <AppText muted variant="small">
             ₹0
           </AppText>
         </View>
         <View style={[layout.row, styles.grand]}>
-          <AppText style={styles.grandLabel}>Total bill</AppText>
+          <AppText style={styles.grandLabel}>{t('billing.totalBill')}</AppText>
           <AppText style={styles.grandAmount}>{formatCurrency(total)}</AppText>
         </View>
       </View>

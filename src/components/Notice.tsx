@@ -3,23 +3,31 @@ import { StyleSheet, View } from 'react-native';
 import { colors } from '../theme/tokens';
 import { AppText } from './AppText';
 import { Icon, type IconName } from './Icon';
+import { FigmaAsset, type FigmaAssetName } from './FigmaAsset';
 
 export function Notice({
   children,
   icon = 'info',
+  assetIcon,
 }: {
   children: string;
   icon?: IconName;
+  assetIcon?: FigmaAssetName;
 }) {
   return (
     <View style={styles.notice}>
-      <Icon name={icon} size={18} />
+      {assetIcon ? (
+        <FigmaAsset name={assetIcon} />
+      ) : (
+        <Icon name={icon} size={18} />
+      )}
       <AppText style={styles.copy}>{children}</AppText>
     </View>
   );
 }
 const styles = StyleSheet.create({
   notice: {
+    minHeight: 72.78125,
     backgroundColor: colors.sage,
     padding: 16,
     borderRadius: 20,
@@ -27,5 +35,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 9,
   },
-  copy: { flex: 1, color: colors.forest, fontSize: 12, lineHeight: 20 },
+  copy: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 40.78125,
+    color: colors.forest,
+    fontSize: 12,
+    lineHeight: 20.4,
+  },
 });

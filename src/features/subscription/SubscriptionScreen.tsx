@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { RootScreenProps } from '../../app/navigationTypes';
@@ -14,15 +15,24 @@ import { useSubscription } from './useSubscription';
 export function SubscriptionScreen({
   navigation,
 }: RootScreenProps<'Subscription'>) {
+  const { t } = useTranslation();
   const { restaurant } = useRestaurant();
   const { daysRemaining, isExpired, progress } = useSubscription();
   const details = [
-    { label: 'Plan status', value: isExpired ? 'Expired' : 'Active' },
-    { label: 'Start date', value: formatDate(restaurant.trialStartedAt) },
     {
-      label: restaurant.isPremium ? 'Renewal details' : 'Trial ends',
+      label: t('subscription.planStatus'),
+      value: t(isExpired ? 'subscription.expired' : 'subscription.active'),
+    },
+    {
+      label: t('subscription.startDate'),
+      value: formatDate(restaurant.trialStartedAt),
+    },
+    {
+      label: restaurant.isPremium
+        ? t('subscription.renewalDetails')
+        : t('subscription.trialEnds'),
       value: restaurant.isPremium
-        ? 'As per your plan'
+        ? t('subscription.asPerYourPlan')
         : formatDate(restaurant.trialEndsAt),
     },
   ];
@@ -30,8 +40,8 @@ export function SubscriptionScreen({
     <Screen
       header={
         <AppHeader
-          title="Your subscription"
-          subtitle="A clear view of your plan."
+          title={t('subscription.yourSubscription')}
+          subtitle={t('subscription.aClearViewOfYourPlan')}
           onBack={navigation.goBack}
         />
       }
@@ -53,8 +63,10 @@ export function SubscriptionScreen({
       </View>
       <Notice icon="shield">
         {restaurant.isPremium
-          ? 'Your plan details are linked to your restaurant account.'
-          : 'Enjoy every ordering and billing feature during your trial.'}
+          ? t('subscription.yourPlanDetailsAreLinkedToYourRestaurantAccount')
+          : t(
+              'subscription.enjoyEveryOrderingAndBillingFeatureDuringYourTrial',
+            )}
       </Notice>
     </Screen>
   );

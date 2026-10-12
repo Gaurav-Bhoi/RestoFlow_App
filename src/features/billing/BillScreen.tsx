@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { RootScreenProps } from '../../app/navigationTypes';
@@ -15,15 +16,16 @@ import { useCustomerBill } from './useCustomerBill';
 import { BillBreakdown } from './BillBreakdown';
 
 export function BillScreen({ navigation, route }: RootScreenProps<'Bill'>) {
+  const { t } = useTranslation();
   const bill = useCustomerBill(route.params.tableId, route.params.customerId);
   if (!bill.order) {
     return (
       <Screen>
         <EmptyState
-          title="Visit completed"
-          description="This customer’s order is no longer active."
+          title={t('billing.visitCompleted')}
+          description={t('billing.thisCustomerSOrderIsNoLongerActive')}
           action={{
-            label: 'Back to floor',
+            label: t('billing.backToFloor'),
             onPress: () => navigation.popToTop(),
           }}
         />
@@ -34,8 +36,8 @@ export function BillScreen({ navigation, route }: RootScreenProps<'Bill'>) {
     <Screen
       header={
         <AppHeader
-          title="Customer bill"
-          subtitle="Review before printing"
+          title={t('billing.customerBill')}
+          subtitle={t('billing.reviewBeforePrinting')}
           onBack={navigation.goBack}
         />
       }
@@ -44,7 +46,7 @@ export function BillScreen({ navigation, route }: RootScreenProps<'Bill'>) {
           icon="print"
           onPress={() => navigation.navigate('Receipt', route.params)}
         >
-          Preview & print
+          {t('billing.previewPrint')}
         </AppButton>
       }
     >
@@ -57,8 +59,10 @@ export function BillScreen({ navigation, route }: RootScreenProps<'Bill'>) {
         </AppText>
         <AppText style={styles.name}>{bill.order.name}</AppText>
         <AppText style={styles.details}>
-          Table {route.params.tableId} · {countOrderItems(bill.order.items)}{' '}
-          items
+          {t('billing.tableValueValueItems', {
+            value0: route.params.tableId,
+            value1: countOrderItems(bill.order.items),
+          })}
         </AppText>
         <View style={[layout.row, styles.dateRow]}>
           <AppText style={styles.date}>{formatDate(bill.issuedAt)}</AppText>
@@ -72,7 +76,11 @@ export function BillScreen({ navigation, route }: RootScreenProps<'Bill'>) {
       </View>
       <BillBreakdown items={bill.order.items} />
       <View style={styles.notice}>
-        <Notice>{`This bill includes only ${bill.order.name}’s order.`}</Notice>
+        <Notice>
+          {t('billing.thisBillIncludesOnlyValueSOrder', {
+            value0: bill.order.name,
+          })}
+        </Notice>
       </View>
     </Screen>
   );

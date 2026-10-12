@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useAppNavigation } from '../../app/navigationTypes';
@@ -11,16 +12,21 @@ import { colors } from '../../theme/tokens';
 import { useSession } from '../auth/SessionProvider';
 import { useRestaurant } from '../restaurant/RestaurantProvider';
 import { useSubscription } from '../subscription/useSubscription';
-import { useTranslations } from './translations';
+import { useLanguage } from '../../localization/LocalizationProvider';
+import { BUNDLED_LANGUAGES } from '../../localization/config/bundledLanguages';
 import { SettingsRow } from './SettingsRow';
 
 export function SettingsScreen() {
+  const { t } = useTranslation();
   const navigation = useAppNavigation();
   const { session, signOut } = useSession();
   const { restaurant } = useRestaurant();
   const { daysRemaining } = useSubscription();
-  const labels = useTranslations();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const language = useLanguage();
+  const currentLanguage =
+    language.available.find(option => option.code === language.language) ??
+    BUNDLED_LANGUAGES.en;
   const isOwner = session?.role === 'owner';
   return (
     <>
@@ -28,8 +34,8 @@ export function SettingsScreen() {
         hasTabs
         header={
           <AppHeader
-            title={labels.Settings}
-            subtitle="Your restaurant, your way."
+            title={t('navigation.settings')}
+            subtitle={t('settings.yourRestaurantYourWay')}
           />
         }
       >
@@ -46,15 +52,17 @@ export function SettingsScreen() {
               {restaurant.name}
             </AppText>
             <View style={styles.role}>
-              <Badge white>Restaurant {session?.role}</Badge>
+              <Badge white>
+                {t(isOwner ? 'settings.owner' : 'settings.waiter')}
+              </Badge>
             </View>
           </View>
         </View>
         <View style={styles.group}>
           <SettingsRow
             icon="language"
-            title="Language"
-            subtitle={restaurant.language}
+            title={t('settings.language')}
+            subtitle={currentLanguage.nativeName}
             onPress={() => navigation.navigate('Language')}
           />
           {isOwner && (
@@ -62,18 +70,22 @@ export function SettingsScreen() {
               <SettingsRow
                 hasDivider
                 icon="people"
-                title="Waiter team"
-                subtitle={`${restaurant.waiters.length} team members`}
+                title={t('settings.waiterTeam')}
+                subtitle={t('settings.valueTeamMembers', {
+                  value0: restaurant.waiters.length,
+                })}
                 onPress={() => navigation.navigate('Waiters')}
               />
               <SettingsRow
                 hasDivider
                 icon="crown"
-                title="Subscription"
+                title={t('settings.subscription')}
                 subtitle={
                   restaurant.isPremium
-                    ? 'Premium · Active'
-                    : `Free trial · ${daysRemaining} days left`
+                    ? t('settings.premiumActive')
+                    : t('settings.freeTrialValueDaysLeft', {
+                        value0: daysRemaining,
+                      })
                 }
                 onPress={() => navigation.navigate('Subscription')}
               />
@@ -83,27 +95,27 @@ export function SettingsScreen() {
         <View style={styles.group}>
           <SettingsRow
             icon="logout"
-            title="Log out"
-            subtitle="End this session"
+            title={t('settings.logOut')}
+            subtitle={t('settings.endThisSession')}
             danger
             onPress={() => setIsLogoutOpen(true)}
           />
         </View>
         <AppText muted style={styles.note}>
-          A little less admin. A little more hospitality.
+          {t('settings.aLittleLessAdminALittleMoreHospitality')}
         </AppText>
         <AppText muted style={styles.version}>
-          RestoFlow · Restaurant workspace
+          {t('settings.restoflowRestaurantWorkspace')}
         </AppText>
       </Screen>
       <ConfirmationSheet
         visible={isLogoutOpen}
-        title="Leaving for now?"
-        description="Your restaurant data stays saved. You can sign back in with your mobile number."
+        title={t('settings.leavingForNow')}
+        description={t('settings.yourRestaurantDataStaysSavedYouCanSignBack')}
         icon="logout"
         danger
-        confirmLabel="Log out"
-        cancelLabel="Stay here"
+        confirmLabel={t('settings.logOut')}
+        cancelLabel={t('settings.stayHere')}
         onConfirm={signOut}
         onCancel={() => setIsLogoutOpen(false)}
       />

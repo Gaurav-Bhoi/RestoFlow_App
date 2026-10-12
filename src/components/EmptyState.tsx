@@ -10,17 +10,17 @@ export function EmptyState({
   description,
   icon = 'table',
   action,
+  art,
 }: {
   title: string;
   description: string;
   icon?: IconName;
   action?: { label: string; onPress: () => void };
+  art?: React.ReactNode;
 }) {
   return (
     <View style={styles.empty}>
-      <View style={styles.art}>
-        <Icon name={icon} size={48} />
-      </View>
+      <View style={styles.art}>{art ?? <Icon name={icon} size={48} />}</View>
       <AppText variant="section" style={styles.center}>
         {title}
       </AppText>
@@ -51,14 +51,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 28,
   },
-  center: { textAlign: 'center' },
+  center: {
+    fontSize: 22,
+    lineHeight: 30.8,
+    textAlign: 'center',
+    marginBottom: -3.3,
+  },
   copy: {
     fontSize: 13,
-    lineHeight: 22,
+    lineHeight: 22.1,
+    minHeight: 44.1875,
     textAlign: 'center',
     maxWidth: 265,
-    marginTop: 10,
-    marginBottom: 24,
+    marginTop: 8,
+    marginBottom: 36,
   },
   action: { alignSelf: 'stretch' },
 });

@@ -1,15 +1,17 @@
+import { useTranslation } from 'react-i18next';
 import { useRestaurant } from '../restaurant/RestaurantProvider';
 import { createDemoRestaurant } from '../restaurant/demoData';
 import { useSession } from './SessionProvider';
 import { isValidPhone, normalizePhone } from './validation';
 
 export function useAuth() {
+  const { t } = useTranslation();
   const { restaurant, dispatch } = useRestaurant();
   const { signIn } = useSession();
   function login(phoneInput: string) {
     const phone = normalizePhone(phoneInput);
     if (!isValidPhone(phone)) {
-      throw new Error('Enter a valid 10-digit Indian mobile number.');
+      throw new Error(t('auth.enterAValid10DigitIndianMobileNumber'));
     }
     const waiter = restaurant.waiters.find(member => member.phone === phone);
     if (waiter) {
@@ -35,13 +37,13 @@ export function useAuth() {
   ) {
     const phone = normalizePhone(phoneInput);
     if (!name.trim() || !owner.trim() || !isValidPhone(phone)) {
-      throw new Error('Add your restaurant, name, and a valid mobile number.');
+      throw new Error(t('auth.addYourRestaurantNameAndAValidMobileNumber'));
     }
     if (
       phone === restaurant.phone ||
       restaurant.waiters.some(waiter => waiter.phone === phone)
     ) {
-      throw new Error('This mobile number already belongs to an account.');
+      throw new Error(t('auth.thisMobileNumberAlreadyBelongsToAnAccount'));
     }
     const startedAt = new Date();
     const endsAt = new Date(startedAt);

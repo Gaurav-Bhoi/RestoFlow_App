@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useRestaurant } from '../restaurant/RestaurantProvider';
 import { useSession } from '../auth/SessionProvider';
@@ -9,6 +10,7 @@ import {
 } from './orderCalculations';
 
 export function useOrderDraft(tableId: number, customerId?: string) {
+  const { t } = useTranslation();
   const { restaurant, dispatch } = useRestaurant();
   const { session } = useSession();
   const table = restaurant.tables.find(item => item.id === tableId);
@@ -33,11 +35,11 @@ export function useOrderDraft(tableId: number, customerId?: string) {
       return false;
     }
     if (!name.trim()) {
-      setError('Add the customer’s name before confirming.');
+      setError(t('orders.addTheCustomerSNameBeforeConfirming'));
       return false;
     }
     if (!countOrderItems(items)) {
-      setError('Add at least one dish before confirming.');
+      setError(t('orders.addAtLeastOneDishBeforeConfirming'));
       return false;
     }
     dispatch({

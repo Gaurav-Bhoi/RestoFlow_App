@@ -1,9 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Restaurant } from '../../features/restaurant/types';
+import { storage } from './storage';
+import { STORAGE_KEYS } from './storageKeys';
 
-const RESTAURANT_STORAGE_KEY = 'restoflow.restaurant.v1';
+export const RESTAURANT_STORAGE_KEY = STORAGE_KEYS.RESTAURANT;
 export async function loadRestaurant(): Promise<Restaurant | null> {
-  const stored = await AsyncStorage.getItem(RESTAURANT_STORAGE_KEY);
+  const cached = storage.getString(RESTAURANT_STORAGE_KEY);
+  const stored = cached ?? (await AsyncStorage.getItem(RESTAURANT_STORAGE_KEY));
   if (!stored) {
     return null;
   }
@@ -16,7 +19,13 @@ export async function loadRestaurant(): Promise<Restaurant | null> {
   ) {
     throw new Error('Invalid saved restaurant');
   }
+  if (cached === undefined) {
+    // Migrate once, then remove the stale copy only after a successful write.
+    storage.setString(RESTAURANT_STORAGE_KEY, stored);
+    await AsyncStorage.removeItem(RESTAURANT_STORAGE_KEY);
+  }
   return restaurant;
 }
-export const saveRestaurant = (restaurant: Restaurant) =>
-  AsyncStorage.setItem(RESTAURANT_STORAGE_KEY, JSON.stringify(restaurant));
+export function saveRestaurant(restaurant: Restaurant) {
+  storage.setObject(RESTAURANT_STORAGE_KEY, restaurant);
+}

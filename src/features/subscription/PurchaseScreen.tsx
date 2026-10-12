@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { RootScreenProps } from '../../app/navigationTypes';
@@ -13,6 +14,7 @@ import { useSubscription } from './useSubscription';
 import { PlanCard } from './PlanCard';
 
 export function PurchaseScreen({ navigation }: RootScreenProps<'Purchase'>) {
+  const { t } = useTranslation();
   const { activatePremium } = useSubscription();
   const handlePurchase = () => {
     activatePremium();
@@ -22,13 +24,13 @@ export function PurchaseScreen({ navigation }: RootScreenProps<'Purchase'>) {
     <Screen
       header={
         <AppHeader
-          title="Keep the good flow"
-          subtitle="Your restaurant workspace awaits."
+          title={t('subscription.keepTheGoodFlow')}
+          subtitle={t('subscription.yourRestaurantWorkspaceAwaits')}
         />
       }
       footer={
         <AppButton icon="arrow" iconPosition="after" onPress={handlePurchase}>
-          Continue to purchase
+          {t('subscription.continueToPurchase')}
         </AppButton>
       }
     >
@@ -36,12 +38,13 @@ export function PurchaseScreen({ navigation }: RootScreenProps<'Purchase'>) {
       <View style={styles.info}>
         <Icon name="info" size={18} color={colors.terracotta} />
         <AppText style={styles.infoText}>
-          Price and payment details come from your subscription provider. No
-          payment will be collected in this prototype.
+          {t(
+            'subscription.priceAndPaymentDetailsComeFromYourSubscriptionProvider',
+          )}
         </AppText>
       </View>
       <Notice icon="shield">
-        Your tables, team, and orders remain ready to continue.
+        {t('subscription.yourTablesTeamAndOrdersRemainReadyToContinue')}
       </Notice>
     </Screen>
   );
@@ -49,16 +52,17 @@ export function PurchaseScreen({ navigation }: RootScreenProps<'Purchase'>) {
 export function PurchaseSuccessScreen({
   navigation,
 }: RootScreenProps<'PurchaseSuccess'>) {
+  const { t } = useTranslation();
   return (
-    <Screen header={<AppHeader title="Your subscription" />}>
+    <Screen header={<AppHeader title={t('subscription.yourSubscription')} />}>
       <SuccessState
-        title="Back in full flow."
-        description={
-          'Your demo subscription is active.\nYour restaurant is ready for service.'
-        }
+        title={t('subscription.backInFullFlow')}
+        description={t(
+          'subscription.yourDemoSubscriptionIsActiveYourRestaurantIsReady',
+        )}
       >
         <AppButton style={styles.button} onPress={() => navigation.popToTop()}>
-          Continue to dashboard
+          {t('subscription.continueToDashboard')}
         </AppButton>
       </SuccessState>
     </Screen>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import type { RootScreenProps } from '../../app/navigationTypes';
@@ -12,29 +13,32 @@ export function PrintSuccessScreen({
   route,
   navigation,
 }: RootScreenProps<'PrintSuccess'>) {
+  const { t } = useTranslation();
   const bill = useCustomerBill(route.params.tableId, route.params.customerId);
   const handleFinishVisit = () => {
     bill.finishVisit();
     navigation.popToTop();
   };
   return (
-    <Screen header={<AppHeader title="Receipt sent" />}>
+    <Screen header={<AppHeader title={t('billing.receiptSent')} />}>
       <SuccessState
-        title="Ready for the next guest."
-        description="The print service was opened. Confirm the receipt printed before finishing this visit."
+        title={t('billing.readyForTheNextGuest')}
+        description={t(
+          'billing.thePrintServiceWasOpenedConfirmTheReceiptPrinted',
+        )}
       >
         <AppButton onPress={handleFinishVisit} style={styles.button}>
-          Finish customer visit
+          {t('billing.finishCustomerVisit')}
         </AppButton>
         <AppButton
           variant="secondary"
           onPress={() => navigation.replace('Receipt', route.params)}
           style={styles.reprint}
         >
-          Reprint receipt
+          {t('billing.reprintReceipt')}
         </AppButton>
         <AppText muted variant="small" style={styles.note}>
-          Other guests at this table stay active.
+          {t('billing.otherGuestsAtThisTableStayActive')}
         </AppText>
       </SuccessState>
     </Screen>

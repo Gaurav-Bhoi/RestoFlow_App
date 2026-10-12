@@ -1,89 +1,62 @@
+import groovy.json.JsonSlurper
+
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
-/**
- * This is the configuration block to customize your React Native Android app.
- * By default you don't need to apply any configuration, just uncomment the lines you need.
- */
+def environmentMatrix = new JsonSlurper().parse(file('../../config/environments.json'))
+project.ext.envConfigFiles = environmentMatrix.collectEntries { name, mapping ->
+    [(name): mapping.envFile]
+}
+project.ext.defaultEnvFile = '.env.development'
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+
+// Per-flavor overrides make IDE builds and multi-variant builds deterministic.
+def mobileValues = { String name ->
+    def values = new Properties()
+    file("../../${environmentMatrix[name].envFile}").withInputStream { values.load(it) }
+    if (values.getProperty('APP_ENV') != name) {
+        throw new GradleException("Native flavor and APP_ENV do not match")
+    }
+    return values
+}
+def nativeLocalValues = new Properties()
+def nativeLocalFile = file('../../.env.stallion.local')
+if (nativeLocalFile.exists()) nativeLocalFile.withInputStream { nativeLocalValues.load(it) }
+def nativeValue = { String name, String key ->
+    def prefix = name == 'development' ? 'STALLION_DEV' : 'STALLION_PROD'
+    System.getenv("${prefix}_${key}") ?: nativeLocalValues.getProperty("${prefix}_${key}", '')
+}
+def quoted = { String value -> '"' + value.replace('\\', '\\\\').replace('"', '\\"') + '"' }
+def publicKey = { String name ->
+    def path = nativeValue(name, 'PUBLIC_KEY_PATH')
+    if (!path) return ''
+    def key = file("../../${path}").text.trim()
+    if (key.contains('PRIVATE KEY')) throw new GradleException('Only a public key belongs in native resources')
+    return key.replace('-----BEGIN PUBLIC KEY-----', '').replace('-----END PUBLIC KEY-----', '').replaceAll('\\s', '')
+}
+
 react {
-    /* Folders */
-    //   The root of your project, i.e. where "package.json" lives. Default is '../..'
-    // root = file("../../")
-    //   The folder where the react-native NPM package is. Default is ../../node_modules/react-native
-    // reactNativeDir = file("../../node_modules/react-native")
-    //   The folder where the react-native Codegen package is. Default is ../../node_modules/@react-native/codegen
-    // codegenDir = file("../../node_modules/@react-native/codegen")
-    //   The cli.js file which is the React Native CLI entrypoint. Default is ../../node_modules/react-native/cli.js
-    // cliFile = file("../../node_modules/react-native/cli.js")
-
-    /* Variants */
-    //   The list of variants to that are debuggable. For those we're going to
-    //   skip the bundling of the JS bundle and the assets. Default is "debug", "debugOptimized".
-    //   If you add flavors like lite, prod, etc. you'll have to list your debuggableVariants.
-    // debuggableVariants = ["liteDebug", "liteDebugOptimized", "prodDebug", "prodDebugOptimized"]
-
-    /* Bundling */
-    //   A list containing the node command and its flags. Default is just 'node'.
-    // nodeExecutableAndArgs = ["node"]
-    //
-    //   The command to run when bundling. By default is 'bundle'
-    // bundleCommand = "ram-bundle"
-    //
-    //   The path to the CLI configuration file. Default is empty.
-    // bundleConfig = file(../rn-cli.config.js)
-    //
-    //   The name of the generated asset file containing your JS bundle
-    // bundleAssetName = "MyApplication.android.bundle"
-    //
-    //   The entry file for bundle generation. Default is 'index.android.js' or 'index.js'
-    // entryFile = file("../js/MyApplication.android.js")
-    //
-    //   A list of extra flags to pass to the 'bundle' commands.
-    //   See https://github.com/react-native-community/cli/blob/main/docs/commands.md#bundle
-    // extraPackagerArgs = []
-
-    /* Hermes Commands */
-    //   The hermes compiler command to run. By default it is 'hermesc'
-    // hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"
-    //
-    //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
-    // hermesFlags = ["-O", "-output-source-map"]
-
-    /* Autolinking */
+    debuggableVariants = ["developmentDebug", "productionDebug", "developmentDebugOptimized", "productionDebugOptimized"]
     autolinkLibrariesWithApp()
 }
 
-/**
- * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
- */
-def enableProguardInReleaseBuilds = false
-
-/**
- * The preferred build flavor of JavaScriptCore (JSC)
- *
- * For example, to use the international variant, you can use:
- * `def jscFlavor = io.github.react-native-community:jsc-android-intl:2026004.+`
- *
- * The international variant includes ICU i18n library and necessary data
- * allowing to use e.g. `Date.toLocaleString` and `String.localeCompare` that
- * give correct results when using with locales other than en-US. Note that
- * this variant is about 6MiB larger per architecture than default.
- */
-def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
+def hasProductionSigning = ['RESTOFLOW_PROD_KEYSTORE', 'RESTOFLOW_PROD_STORE_PASSWORD',
+    'RESTOFLOW_PROD_KEY_ALIAS', 'RESTOFLOW_PROD_KEY_PASSWORD'].every { System.getenv(it) }
 
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
-
     namespace "com.restoflow"
+    buildFeatures { buildConfig true }
     defaultConfig {
         applicationId "com.restoflow"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        resValue "string", "build_config_package", "com.restoflow"
     }
     signingConfigs {
         debug {
@@ -92,28 +65,75 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        production {
+            if (hasProductionSigning) {
+                storeFile file(System.getenv('RESTOFLOW_PROD_KEYSTORE'))
+                storePassword System.getenv('RESTOFLOW_PROD_STORE_PASSWORD')
+                keyAlias System.getenv('RESTOFLOW_PROD_KEY_ALIAS')
+                keyPassword System.getenv('RESTOFLOW_PROD_KEY_PASSWORD')
+            }
+        }
     }
-    buildTypes {
-        debug {
+    flavorDimensions += "environment"
+    productFlavors {
+        development {
+            dimension "environment"
+            applicationIdSuffix ".dev"
             signingConfig signingConfigs.debug
         }
+        production {
+            dimension "environment"
+            signingConfig signingConfigs.production
+        }
+    }
+    productFlavors.all { flavor ->
+        def name = flavor.name
+        mobileValues(name).each { key, value ->
+            buildConfigField 'String', key, quoted(value)
+            resValue 'string', key, quoted(value)
+        }
+        buildConfigField 'String', 'NATIVE_APP_ENV', quoted(name)
+        def compatibilityHash = providers.exec {
+            workingDir rootProject.projectDir.parentFile
+            commandLine 'node', 'scripts/native-fingerprint.mjs', name, 'android'
+        }.standardOutput.asText.get().trim()
+        resValue 'string', 'NativeCompatibilityHash', compatibilityHash
+        resValue 'string', 'StallionProjectId', environmentMatrix[name].stallionProjectId
+        resValue 'string', 'StallionAppToken', nativeValue(name, 'APP_TOKEN')
+        resValue 'string', 'StallionPublicSigningKey', publicKey(name)
+    }
+    buildTypes {
+        debug { signingConfig signingConfigs.debug }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
-            minifyEnabled enableProguardInReleaseBuilds
+            minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
 }
 
-dependencies {
-    // The version of react-native is set by the React Native Gradle Plugin
-    implementation("com.facebook.react:react-android")
-
-    if (hermesEnabled.toBoolean()) {
-        implementation("com.facebook.react:hermes-android")
-    } else {
-        implementation jscFlavor
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def name = variant.productFlavors.find { it.first == 'environment' }.second
+        def release = variant.buildType == 'release'
+        def capitalized = variant.name.capitalize()
+        def validation = tasks.register("validate${capitalized}Environment", Exec) {
+            workingDir rootProject.projectDir.parentFile
+            commandLine(['node', 'scripts/validate-environment.mjs', name] + (release ? ['--release'] : []))
+            doFirst {
+                if (release && name == 'production' && !hasProductionSigning) {
+                    throw new GradleException('Production release signing requires RESTOFLOW_PROD_* signing variables')
+                }
+            }
+        }
+        tasks.configureEach { task ->
+            if (task.name == "pre${capitalized}Build" || task.name == "createBundle${capitalized}JsAndAssets") {
+                task.dependsOn(validation)
+            }
+        }
     }
+}
+
+dependencies {
+    implementation("com.facebook.react:react-android")
+    implementation("com.facebook.react:hermes-android")
 }

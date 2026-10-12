@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+import i18n from '../../localization/i18n';
 import React, {
   createContext,
   useContext,
@@ -23,6 +25,7 @@ interface RestaurantContextValue {
 }
 const RestaurantContext = createContext<RestaurantContextValue | null>(null);
 export function RestaurantProvider({ children }: React.PropsWithChildren) {
+  const { t } = useTranslation();
   const [restaurant, dispatch] = useReducer(
     restaurantReducer,
     undefined,
@@ -40,9 +43,7 @@ export function RestaurantProvider({ children }: React.PropsWithChildren) {
         }
       })
       .catch(() =>
-        showFeedback(
-          'Saved data could not be loaded. Showing the demo restaurant.',
-        ),
+        showFeedback(i18n.t('common.savedDataCouldNotBeLoadedShowingTheDemo')),
       )
       .finally(() => {
         if (isMounted) {
@@ -62,7 +63,7 @@ export function RestaurantProvider({ children }: React.PropsWithChildren) {
       .then(() => saveRestaurant(restaurant))
       .catch(() =>
         showFeedback(
-          'Changes are available for this session but could not be saved.',
+          i18n.t('common.changesAreAvailableForThisSessionButCouldNot'),
         ),
       );
   }, [restaurant, isLoaded, showFeedback]);
@@ -71,7 +72,7 @@ export function RestaurantProvider({ children }: React.PropsWithChildren) {
       <View style={styles.loading}>
         <ActivityIndicator
           color={colors.forest}
-          accessibilityLabel="Loading restaurant"
+          accessibilityLabel={t('common.loadingRestaurant')}
         />
       </View>
     );

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useFeedback } from '../../app/FeedbackProvider';
 import { useSession } from '../auth/SessionProvider';
@@ -5,6 +6,7 @@ import { useRestaurant } from '../restaurant/RestaurantProvider';
 
 export type TableFilter = 'All tables' | 'Available' | 'Occupied';
 export function useTables() {
+  const { t } = useTranslation();
   const { restaurant, dispatch } = useRestaurant();
   const { session } = useSession();
   const showFeedback = useFeedback();
@@ -32,7 +34,9 @@ export function useTables() {
     }
     dispatch({ type: 'addTable' });
     setFilter('All tables');
-    showFeedback(`Table ${restaurant.nextTableId} added`);
+    showFeedback(
+      t('dashboard.tableValueAdded', { value0: restaurant.nextTableId }),
+    );
   }
   function removeTable() {
     if (!canManage || !tableToRemove) {
@@ -44,7 +48,7 @@ export function useTables() {
     }
     dispatch({ type: 'removeTable', tableId: tableToRemove });
     setTableToRemove(null);
-    showFeedback('Table removed');
+    showFeedback(t('dashboard.tableRemoved'));
   }
   return {
     restaurant,

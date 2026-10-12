@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useCallback } from 'react';
 import type { Session } from '../restaurant/types';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { signedIn, signedOut } from '../../store/slices/sessionSlice';
 
 interface SessionContextValue {
   session: Session | null;
@@ -8,11 +10,15 @@ interface SessionContextValue {
 }
 const SessionContext = createContext<SessionContextValue | null>(null);
 export function SessionProvider({ children }: React.PropsWithChildren) {
-  const [session, setSession] = useState<Session | null>(null);
+  const session = useAppSelector(state => state.session.current);
+  const dispatch = useAppDispatch();
+  const signIn = useCallback(
+    (value: Session) => dispatch(signedIn(value)),
+    [dispatch],
+  );
+  const signOut = useCallback(() => dispatch(signedOut()), [dispatch]);
   return (
-    <SessionContext.Provider
-      value={{ session, signIn: setSession, signOut: () => setSession(null) }}
-    >
+    <SessionContext.Provider value={{ session, signIn, signOut }}>
       {children}
     </SessionContext.Provider>
   );

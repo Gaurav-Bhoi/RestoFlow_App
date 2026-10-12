@@ -5,7 +5,6 @@ export function createDemoRestaurant(): Restaurant {
     name: 'Saffron Kitchen',
     owner: 'Gaurav',
     phone: '9876543210',
-    language: 'English',
     isPremium: false,
     trialStartedAt: '2026-10-02T00:00:00+05:30',
     trialEndsAt: '2026-10-17T23:59:59+05:30',

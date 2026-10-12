@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { RootScreenProps } from '../../app/navigationTypes';
@@ -13,26 +14,27 @@ import { colors } from '../../theme/tokens';
 import { useWaiters } from './useWaiters';
 
 export function WaitersScreen({ navigation }: RootScreenProps<'Waiters'>) {
+  const { t } = useTranslation();
   const { waiters } = useWaiters();
   return (
     <Screen
       header={
         <AppHeader
-          title="Your waiter team"
-          subtitle="Good service starts with good people."
+          title={t('employees.yourWaiterTeam')}
+          subtitle={t('employees.goodServiceStartsWithGoodPeople')}
           onBack={navigation.goBack}
         />
       }
       footer={
         <AppButton icon="plus" onPress={() => navigation.navigate('AddWaiter')}>
-          Add waiter
+          {t('employees.addWaiter')}
         </AppButton>
       }
     >
       {waiters.length ? (
         <>
           <AppText variant="section" style={styles.heading}>
-            {waiters.length} team members
+            {t('employees.valueTeamMembers', { value0: waiters.length })}
           </AppText>
           {waiters.map(waiter => (
             <View key={waiter.phone} style={styles.waiter}>
@@ -43,19 +45,21 @@ export function WaitersScreen({ navigation }: RootScreenProps<'Waiters'>) {
                   +91 {waiter.phone}
                 </AppText>
               </View>
-              <Badge>Waiter</Badge>
+              <Badge>{t('employees.waiter')}</Badge>
             </View>
           ))}
           <View style={styles.notice}>
             <Notice icon="shield">
-              Waiters use their mobile number to join your restaurant’s floor.
+              {t('employees.waitersUseTheirMobileNumberToJoinYourRestaurant')}
             </Notice>
           </View>
         </>
       ) : (
         <EmptyState
-          title="Build your floor team"
-          description="Add your first waiter. Their mobile number will connect them to your restaurant."
+          title={t('employees.buildYourFloorTeam')}
+          description={t(
+            'employees.addYourFirstWaiterTheirMobileNumberWillConnect',
+          )}
           icon="people"
         />
       )}

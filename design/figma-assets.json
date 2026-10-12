@@ -1,0 +1,105 @@
+{
+  "fileKey": "HHJohW6ijJ9rSb2ND7f6tM",
+  "exportedOn": "2026-10-11",
+  "assets": [
+    {
+      "name": "cutlery-light",
+      "path": "assets/figma/cutlery-light.svg",
+      "nodeId": "1:12",
+      "width": "22",
+      "height": "22",
+      "viewBox": "0 0 22 22",
+      "sha256": "7facee5830809ca1b37b34131e9aa783b719b132a4daf3c62d70531e5cb09ab4"
+    },
+    {
+      "name": "welcome",
+      "path": "assets/figma/welcome.svg",
+      "nodeId": "1:12",
+      "width": "300",
+      "height": "213",
+      "viewBox": "0 0 300 213",
+      "sha256": "5ccaedf5e19d6aff7ffa0a89b68045b722073ba237e24df260901fb095575ddf"
+    },
+    {
+      "name": "arrow-light",
+      "path": "assets/figma/arrow-light.svg",
+      "nodeId": "1:12",
+      "width": "19",
+      "height": "19",
+      "viewBox": "0 0 19 19",
+      "sha256": "e558f33a3a880545d8e89605a7024f45a8f2313b3fcff219e9fd4602a4262a3b"
+    },
+    {
+      "name": "back",
+      "path": "assets/figma/back.svg",
+      "nodeId": "1:234",
+      "width": "22",
+      "height": "22",
+      "viewBox": "0 0 22 22",
+      "sha256": "5a7a2d6f730949b26945bad3f4e7c5a41853c05e06ce04732d04021df262edb8"
+    },
+    {
+      "name": "camera",
+      "path": "assets/figma/camera.svg",
+      "nodeId": "1:234",
+      "width": "22",
+      "height": "22",
+      "viewBox": "0 0 22 22",
+      "sha256": "6d87fe3da80a989e45d1791bd51d321b113fae626c5b8d89994acd409f0f73a9"
+    },
+    {
+      "name": "leaf",
+      "path": "assets/figma/leaf.svg",
+      "nodeId": "1:234",
+      "width": "18",
+      "height": "18",
+      "viewBox": "0 0 18 18",
+      "sha256": "aa09c97d7e44cd29988dc3052b6ea5c622de1779eb48e00df204e24ea5b4896e"
+    },
+    {
+      "name": "cutlery",
+      "path": "assets/figma/cutlery.svg",
+      "nodeId": "1:307",
+      "width": "22",
+      "height": "22",
+      "viewBox": "0 0 22 22",
+      "sha256": "4d25f0f5bb726211924180de5b527d1f6b59991fdba7a1c18dd7b6bbfa0a7128"
+    },
+    {
+      "name": "table",
+      "path": "assets/figma/table.svg",
+      "nodeId": "1:307",
+      "width": "48",
+      "height": "48",
+      "viewBox": "0 0 48 48",
+      "sha256": "3c67a3e0a2367c451fe8414e3c7b1d26d475153a659c38cad6e27775944d7e22"
+    },
+    {
+      "name": "grid-light",
+      "path": "assets/figma/grid-light.svg",
+      "nodeId": "1:307",
+      "width": "20",
+      "height": "20",
+      "viewBox": "0 0 20 20",
+      "sha256": "46f20faabe283a8d291edd0b51a0839f113ab8259670cef095f731fbf58b6f88"
+    },
+    {
+      "name": "menu-muted",
+      "path": "assets/figma/menu-muted.svg",
+      "nodeId": "1:307",
+      "width": "20",
+      "height": "20",
+      "viewBox": "0 0 20 20",
+      "sha256": "4ac304e7ac8e227794f5cc8e9502f487875179058ffb8f222420adbb180f5150"
+    },
+    {
+      "name": "settings-muted",
+      "path": "assets/figma/settings-muted.svg",
+      "nodeId": "1:307",
+      "width": "20",
+      "height": "20",
+      "viewBox": "0 0 20 20",
+      "sha256": "cf34ee0209ccff4d681d2821e55e39e1cf53a364df5d6c328ea8c04c1b47719b"
+    }
+  ]
+}

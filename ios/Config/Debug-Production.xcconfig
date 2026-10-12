@@ -1,0 +1,8 @@
+#include? "../Pods/Target Support Files/Pods-RestoFlow/Pods-RestoFlow.debug-production.xcconfig"
+#include? "Stallion.local.xcconfig"
+ENVFILE = $(SRCROOT)/../.env.production
+APP_ENVIRONMENT = production
+APP_DISPLAY_NAME = RestoFlow
+STALLION_PROJECT_ID = 6aca880b9f76d8bbbc714eef
+STALLION_APP_TOKEN = $(STALLION_PROD_APP_TOKEN)
+STALLION_PUBLIC_KEY = $(STALLION_PROD_PUBLIC_KEY)

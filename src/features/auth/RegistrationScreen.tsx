@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import React, { useRef, useState } from 'react';
+import {
+  Keyboard,
+  StyleSheet,
+  View,
+  type TextInputInstance,
+} from 'react-native';
 import type { RootScreenProps } from '../../app/navigationTypes';
 import { useFeedback } from '../../app/FeedbackProvider';
 import { AppHeader } from '../../components/AppHeader';
@@ -10,7 +16,7 @@ import { Notice } from '../../components/Notice';
 import { PhotoPicker } from '../../components/PhotoPicker';
 import { Screen } from '../../components/Screen';
 import { useProfilePhoto } from '../../hooks/useProfilePhoto';
-import { colors, layout } from '../../theme/tokens';
+import { colors, contentWidths } from '../../theme/tokens';
 import { useAuth } from './useAuth';
 import { normalizePhone } from './validation';
 
@@ -18,6 +24,7 @@ export function RegistrationScreen({
   route,
   navigation,
 }: RootScreenProps<'Registration'>) {
+  const { t } = useTranslation();
   const [restaurantName, setRestaurantName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [phone, setPhone] = useState(route.params.phone);
@@ -25,59 +32,79 @@ export function RegistrationScreen({
   const { photo, selectPhoto } = useProfilePhoto();
   const { register } = useAuth();
   const showFeedback = useFeedback();
+  const ownerInput = useRef<TextInputInstance>(null);
+  const phoneInput = useRef<TextInputInstance>(null);
   const handleRegister = () => {
     try {
       register(restaurantName, ownerName, phone, photo);
-      showFeedback('Your restaurant is ready. Add your first table.');
+      Keyboard.dismiss();
+      showFeedback(t('auth.yourRestaurantIsReadyAddYourFirstTable'));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Please try again.');
+      setError(
+        cause instanceof Error ? cause.message : t('auth.pleaseTryAgain'),
+      );
     }
   };
   return (
     <Screen
+      contentMaxWidth={contentWidths.form}
       header={
         <AppHeader
-          title="Welcome aboard"
-          subtitle="A few details, then you’re ready."
+          maxWidth={contentWidths.form}
+          title={t('auth.welcomeAboard')}
+          subtitle={t('auth.aFewDetailsThenYouReReady')}
           onBack={navigation.goBack}
         />
       }
       footer={
-        <View style={layout.row}>
+        <View style={styles.actions}>
           <AppButton
             variant="secondary"
             onPress={navigation.goBack}
             style={styles.cancel}
           >
-            Cancel
+            {t('auth.cancel')}
           </AppButton>
           <AppButton onPress={handleRegister} style={styles.submit}>
-            Create account
+            {t('auth.createAccount')}
           </AppButton>
         </View>
       }
     >
       <PhotoPicker photo={photo} onPress={selectPhoto} />
       <AppInput
-        label="Restaurant name"
+        label={t('auth.restaurantName')}
         value={restaurantName}
         onChangeText={setRestaurantName}
-        placeholder="e.g. Saffron Kitchen"
+        autoCapitalize="words"
+        returnKeyType="next"
+        submitBehavior="submit"
+        onSubmitEditing={() => ownerInput.current?.focus()}
+        placeholder={t('auth.eGSaffronKitchen')}
       />
       <AppInput
-        label="Your name"
+        ref={ownerInput}
+        label={t('auth.yourName')}
         value={ownerName}
         onChangeText={setOwnerName}
-        placeholder="Restaurant owner"
+        autoCapitalize="words"
+        autoComplete="name"
+        returnKeyType="next"
+        submitBehavior="submit"
+        onSubmitEditing={() => phoneInput.current?.focus()}
+        placeholder={t('auth.restaurantOwner')}
       />
       <AppInput
-        label="Mobile number"
+        ref={phoneInput}
+        label={t('auth.mobileNumber')}
         isPhone
         value={phone}
         onChangeText={value => setPhone(normalizePhone(value))}
+        returnKeyType="done"
+        onSubmitEditing={handleRegister}
       />
-      <Notice icon="leaf">
-        Your first 15 days are on us. Start with your tables and menu.
+      <Notice assetIcon="leaf">
+        {t('auth.yourFirst15DaysAreOnUsStartWith')}
       </Notice>
       {!!error && (
         <AppText accessibilityRole="alert" style={styles.error}>
@@ -88,6 +115,7 @@ export function RegistrationScreen({
   );
 }
 const styles = StyleSheet.create({
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   cancel: { width: 115 },
   submit: { flex: 1 },
   error: { fontSize: 12, color: colors.error, marginTop: 12 },

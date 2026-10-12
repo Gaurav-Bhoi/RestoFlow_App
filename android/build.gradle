@@ -22,6 +22,15 @@ apply plugin: "com.facebook.react.rootproject"
 
 // RNPrint's Android package pins SDK 31. Align it with this app's native toolchain.
 subprojects { library ->
+    // Stallion 2.4.2 predates the AGP namespace requirement.
+    if (library.name == "react-native-stallion") {
+        library.afterEvaluate {
+            library.android {
+                namespace "com.stallion"
+                buildFeatures { buildConfig true }
+            }
+        }
+    }
     if (library.name == "react-native-print") {
         library.afterEvaluate {
             library.android {

@@ -1,5 +1,4 @@
 export type UserRole = 'owner' | 'waiter';
-export type Language = 'English' | 'Hindi' | 'Marathi';
 export type DishId = 'paneer' | 'dal' | 'roti' | 'rice' | 'naan' | 'coke';
 export type MenuCategory = 'All' | 'Starters' | 'Mains' | 'Breads' | 'Drinks';
 export type OrderItems = Partial<Record<DishId, number>>;
@@ -36,7 +35,6 @@ export interface Restaurant {
   owner: string;
   phone: string;
   photo?: string;
-  language: Language;
   isPremium: boolean;
   trialStartedAt: string;
   trialEndsAt: string;

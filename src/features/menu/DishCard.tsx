@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
@@ -7,6 +8,7 @@ import type { Dish } from '../restaurant/types';
 import { DishIllustration } from './DishIllustration';
 
 export function DishCard({ dish }: { dish: Dish }) {
+  const { t } = useTranslation();
   return (
     <View style={styles.card}>
       <View style={styles.food}>
@@ -20,12 +22,12 @@ export function DishCard({ dish }: { dish: Dish }) {
         <AppText style={styles.price}>{formatCurrency(dish.price)}</AppText>
         {dish.id === 'coke' ? (
           <AppText variant="helper" muted>
-            Drink
+            {t('menu.drink')}
           </AppText>
         ) : (
           <View
             accessible
-            accessibilityLabel="Vegetarian"
+            accessibilityLabel={t('menu.vegetarian')}
             style={styles.vegetarian}
           >
             <View style={styles.dot} />

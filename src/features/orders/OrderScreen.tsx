@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
@@ -23,6 +24,7 @@ import { OrderDishRow } from './OrderDishRow';
 import { useOrderDraft } from './useOrderDraft';
 
 export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
+  const { t } = useTranslation();
   const draft = useOrderDraft(route.params.tableId, route.params.customerId);
   const showFeedback = useFeedback();
   const [pendingAction, setPendingAction] = useState<NavigationAction | null>(
@@ -43,7 +45,9 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
   }, [canLeave, navigation, pendingAction]);
   function handleConfirm() {
     if (draft.saveOrder()) {
-      showFeedback(`Order saved for ${draft.name.trim()}`);
+      showFeedback(
+        t('orders.orderSavedForValue', { value0: draft.name.trim() }),
+      );
       setCanLeave(true);
     }
   }
@@ -52,10 +56,10 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
     return (
       <Screen>
         <EmptyState
-          title="Order unavailable"
-          description="This customer or table is no longer active."
+          title={t('orders.orderUnavailable')}
+          description={t('orders.thisCustomerOrTableIsNoLongerActive')}
           action={{
-            label: 'Back to floor',
+            label: t('orders.backToFloor'),
             onPress: () => navigation.popToTop(),
           }}
         />
@@ -67,8 +71,12 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
       <Screen
         header={
           <AppHeader
-            title={draft.isEditing ? 'Edit order' : 'New customer'}
-            subtitle={`Table ${route.params.tableId} · Waiter`}
+            title={
+              draft.isEditing ? t('orders.editOrder') : t('orders.newCustomer')
+            }
+            subtitle={t('orders.tableValueWaiter', {
+              value0: route.params.tableId,
+            })}
             onBack={navigation.goBack}
           />
         }
@@ -76,7 +84,9 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
           <>
             <View style={[layout.row, styles.total]}>
               <AppText variant="small">
-                {draft.itemCount} items · Customer order
+                {t('orders.valueItemsCustomerOrder', {
+                  value0: draft.itemCount,
+                })}
               </AppText>
               <AppText style={styles.amount}>
                 {formatCurrency(draft.total)}
@@ -88,26 +98,26 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
               icon="check"
               iconPosition="after"
             >
-              Confirm order
+              {t('orders.confirmOrder')}
             </AppButton>
           </>
         }
       >
         <AppInput
-          label="Customer name"
+          label={t('orders.customerName')}
           value={draft.name}
           onChangeText={draft.setName}
-          placeholder="Name on the order"
+          placeholder={t('orders.nameOnTheOrder')}
           error={draft.error}
         />
         <View style={[layout.section, styles.section]}>
-          <AppText variant="section">What can we get you?</AppText>
-          <Badge>{draft.itemCount} items</Badge>
+          <AppText variant="section">{t('orders.whatCanWeGetYou')}</AppText>
+          <Badge>{t('orders.valueItems', { value0: draft.itemCount })}</Badge>
         </View>
         <SearchInput
           value={draft.search}
           onChangeText={draft.setSearch}
-          placeholder="Find a dish"
+          placeholder={t('orders.findADish')}
         />
         {dishes.map(dish => (
           <OrderDishRow
@@ -119,11 +129,13 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
         ))}
         {!dishes.length && (
           <AppText muted style={styles.empty}>
-            No dishes found.
+            {t('orders.noDishesFound')}
           </AppText>
         )}
         <View style={styles.summary}>
-          <AppText style={styles.summaryTitle}>Order summary</AppText>
+          <AppText style={styles.summaryTitle}>
+            {t('orders.orderSummary')}
+          </AppText>
           {draft.itemCount ? (
             orderLines(draft.items).map(line => (
               <View key={line.dish.id} style={[layout.row, styles.summaryLine]}>
@@ -137,17 +149,19 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
             ))
           ) : (
             <AppText muted variant="small">
-              Add dishes to start this order.
+              {t('orders.addDishesToStartThisOrder')}
             </AppText>
           )}
         </View>
       </Screen>
       <ConfirmationSheet
         visible={!!pendingAction && !canLeave}
-        title="Leave this order?"
-        description="Your unsaved changes will be discarded. Confirm the order to save it for this customer."
-        confirmLabel="Keep editing"
-        cancelLabel="Discard changes"
+        title={t('orders.leaveThisOrder')}
+        description={t(
+          'orders.yourUnsavedChangesWillBeDiscardedConfirmTheOrder',
+        )}
+        confirmLabel={t('orders.keepEditing')}
+        cancelLabel={t('orders.discardChanges')}
         onConfirm={() => setPendingAction(null)}
         onCancel={() => setCanLeave(true)}
         onDismiss={() => setPendingAction(null)}

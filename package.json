@@ -3,11 +3,30 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android --active-arch-only",
-    "ios": "react-native run-ios",
+    "android": "npm run android:dev",
+    "ios": "npm run ios:dev",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "i18n:configure": "node scripts/configure-i18n.mjs",
+    "typecheck": "tsc --noEmit",
+    "android:dev": "react-native run-android --mode developmentDebug --appId com.restoflow.dev --active-arch-only",
+    "ios:dev": "react-native run-ios --scheme RestoFlowDev --mode Debug-Development",
+    "android:dev:release": "react-native run-android --mode developmentRelease --appId com.restoflow.dev --no-packager",
+    "ios:dev:release": "react-native run-ios --scheme RestoFlowDev --mode Release-Development --no-packager",
+    "ota:dev:android": "node scripts/stallion-publish.mjs --env=development --platform=android",
+    "ota:dev:ios": "node scripts/stallion-publish.mjs --env=development --platform=ios",
+    "android:prod": "react-native run-android --mode productionDebug --appId com.restoflow --active-arch-only",
+    "ios:prod": "react-native run-ios --scheme RestoFlowProd --mode Debug-Production",
+    "android:prod:release": "react-native run-android --mode productionRelease --appId com.restoflow --no-packager",
+    "ios:prod:release": "react-native run-ios --scheme RestoFlowProd --mode Release-Production --no-packager",
+    "ota:prod:android": "node scripts/stallion-publish.mjs --env=production --platform=android",
+    "ota:prod:ios": "node scripts/stallion-publish.mjs --env=production --platform=ios",
+    "native:configure": "node scripts/configure-native.mjs",
+    "env:check": "node scripts/validate-environment.mjs",
+    "native:record": "node scripts/native-baseline.mjs",
+    "ota:publish": "node scripts/stallion-publish.mjs",
+    "test:infrastructure": "node --test --test-isolation=none scripts/__tests__/*.test.mjs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^3.1.1",
@@ -15,13 +34,23 @@
     "@react-navigation/bottom-tabs": "^7.20.0",
     "@react-navigation/native": "^7.5.0",
     "@react-navigation/native-stack": "^7.20.0",
+    "@reduxjs/toolkit": "2.13.0",
+    "axios": "1.20.0",
+    "i18next": "^26.4.3",
     "react": "19.2.3",
+    "react-i18next": "^17.0.16",
     "react-native": "0.87.1",
+    "react-native-bootsplash": "7.3.4",
+    "react-native-config": "1.7.2",
     "react-native-image-picker": "^8.2.1",
+    "react-native-mmkv": "4.3.2",
+    "react-native-nitro-modules": "0.37.1",
     "react-native-print": "^0.11.0",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.28.0",
-    "react-native-svg": "^15.15.5"
+    "react-native-stallion": "2.4.2",
+    "react-native-svg": "^15.15.5",
+    "react-redux": "9.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -43,9 +72,15 @@
     "prettier": "2.8.8",
     "react-native-svg-transformer": "^1.5.3",
     "react-test-renderer": "19.2.3",
+    "stallion-cli": "2.5.1",
     "typescript": "^6.0.3"
   },
   "engines": {
     "node": ">= 22.11.0"
+  },
+  "overrides": {
+    "stallion-cli": {
+      "figlet": "1.11.3"
+    }
   }
 }

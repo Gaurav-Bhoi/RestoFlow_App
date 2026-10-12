@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
@@ -15,13 +16,17 @@ export function PlanCard({
   progress: number;
   isPurchase?: boolean;
 }) {
-  const title = isPremium || isPurchase ? 'Premium plan' : 'A great start.';
-  let description = '15 days to make yourself at home.';
+  const { t } = useTranslation();
+  const title =
+    isPremium || isPurchase
+      ? t('subscription.premiumPlan')
+      : t('subscription.aGreatStart');
+  let description = t('subscription.15DaysToMakeYourselfAtHome');
   if (isPremium) {
-    description = 'Your restaurant, in full flow.';
+    description = t('subscription.yourRestaurantInFullFlow');
   }
   if (isPurchase) {
-    description = 'Everything you need for a calmer service.';
+    description = t('subscription.everythingYouNeedForACalmerService');
   }
   return (
     <View style={styles.plan}>
@@ -31,7 +36,10 @@ export function PlanCard({
         </View>
         {!isPurchase && (
           <AppText style={styles.badge}>
-            • {daysRemaining || isPremium ? 'Active' : 'Expired'}
+            •{' '}
+            {daysRemaining || isPremium
+              ? t('subscription.active')
+              : t('subscription.expired')}
           </AppText>
         )}
       </View>
@@ -55,7 +63,7 @@ export function PlanCard({
       )}
       {!isPurchase && isPremium && (
         <AppText style={styles.premiumDetails}>
-          Ordering · Billing · Your floor team
+          {t('subscription.orderingBillingYourFloorTeam')}
         </AppText>
       )}
       {!isPurchase && !isPremium && (
@@ -65,9 +73,11 @@ export function PlanCard({
           </View>
           <View style={[layout.row, styles.remaining]}>
             <AppText style={styles.remainingLabel}>
-              {daysRemaining} days remaining
+              {t('subscription.valueDaysRemaining', { value0: daysRemaining })}
             </AppText>
-            <AppText style={styles.remainingLabel}>15-day free trial</AppText>
+            <AppText style={styles.remainingLabel}>
+              {t('subscription.15DayFreeTrial')}
+            </AppText>
           </View>
         </>
       )}

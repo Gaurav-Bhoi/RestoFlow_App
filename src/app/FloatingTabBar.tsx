@@ -4,9 +4,10 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '../components/AppText';
 import { Icon, type IconName } from '../components/Icon';
-import { colors, fonts } from '../theme/tokens';
-import { useRestaurant } from '../features/restaurant/RestaurantProvider';
-import { useTranslations } from '../features/settings/translations';
+import { colors, navigationLayout } from '../theme/tokens';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+import { FigmaAsset } from '../components/FigmaAsset';
+import { useTranslation } from 'react-i18next';
 
 const tabIcons: Record<string, IconName> = {
   Dashboard: 'grid',
@@ -15,79 +16,101 @@ const tabIcons: Record<string, IconName> = {
 };
 export function FloatingTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const labels = useTranslations();
-  const { restaurant } = useRestaurant();
+  const { t } = useTranslation();
+  const { frameWidth } = useResponsiveLayout();
   return (
-    <View style={[styles.bar, { bottom: Math.max(insets.bottom, 18) + 5 }]}>
-      {state.routes.map((route, index) => {
-        const isSelected = state.index === index;
-        const label = labels[route.name as keyof typeof labels];
-        function handlePress() {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
-          if (!isSelected && !event.defaultPrevented) {
-            navigation.navigate(route.name);
+    <View
+      style={[
+        styles.position,
+        {
+          bottom: insets.bottom + navigationLayout.bottomGap,
+          left: insets.left,
+          right: insets.right,
+        },
+      ]}
+      pointerEvents="box-none"
+    >
+      <View
+        style={[styles.bar, { width: frameWidth - navigationLayout.inset * 2 }]}
+      >
+        {state.routes.map((route, index) => {
+          const isSelected = state.index === index;
+          const label = t(`navigation.${route.name.toLowerCase()}`);
+          function handlePress() {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!isSelected && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
           }
-        }
-        return (
-          <Pressable
-            accessibilityRole="tab"
-            accessibilityState={{ selected: isSelected }}
-            accessibilityLabel={label}
-            key={route.key}
-            onPress={handlePress}
-            style={[styles.tab, isSelected ? styles.active : styles.inactive]}
-          >
-            <Icon
-              name={tabIcons[route.name]}
-              size={20}
-              color={isSelected ? colors.white : colors.muted}
-            />
-            <AppText
-              style={[
-                styles.label,
-                isSelected && styles.activeLabel,
-                restaurant.language !== 'English' && styles.script,
-              ]}
+          return (
+            <Pressable
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityLabel={label}
+              key={route.key}
+              onPress={handlePress}
+              onLongPress={() =>
+                navigation.emit({ type: 'tabLongPress', target: route.key })
+              }
+              style={[styles.tab, isSelected ? styles.active : styles.inactive]}
             >
-              {label}
-            </AppText>
-          </Pressable>
-        );
-      })}
+              {state.index === 0 ? (
+                <FigmaAsset
+                  name={
+                    index === 0
+                      ? 'grid-light'
+                      : index === 1
+                      ? 'menu-muted'
+                      : 'settings-muted'
+                  }
+                />
+              ) : (
+                <Icon
+                  name={tabIcons[route.name]}
+                  size={20}
+                  color={isSelected ? colors.white : colors.muted}
+                />
+              )}
+              <AppText
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                maxFontSizeMultiplier={1.3}
+                style={[styles.label, isSelected && styles.activeLabel]}
+              >
+                {label}
+              </AppText>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
 const styles = StyleSheet.create({
+  position: { position: 'absolute', alignItems: 'center' },
   bar: {
-    position: 'absolute',
-    left: 18,
-    right: 18,
-    height: 66,
+    height: navigationLayout.height,
     borderRadius: 33,
     padding: 5,
     flexDirection: 'row',
     gap: 3,
     backgroundColor: colors.white,
-    shadowColor: colors.forest,
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
+    boxShadow: '0px 6px 12px rgba(23, 63, 53, 0.06)',
   },
   tab: {
     flex: 1,
-    borderRadius: 29,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 3,
     paddingHorizontal: 7,
   },
   active: {
-    flex: 1.5,
+    flex: 10 / 7,
     flexDirection: 'row',
     gap: 6,
     backgroundColor: colors.forest,
@@ -95,10 +118,8 @@ const styles = StyleSheet.create({
   inactive: { flexDirection: 'column' },
   label: {
     fontSize: 9,
-    fontWeight: '700',
     color: colors.muted,
-    lineHeight: 14,
+    lineHeight: 13.5,
   },
-  activeLabel: { fontSize: 11, color: colors.white },
-  script: { fontFamily: fonts.script },
+  activeLabel: { fontSize: 11, lineHeight: 16.5, color: colors.white },
 });

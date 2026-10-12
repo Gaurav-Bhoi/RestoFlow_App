@@ -1,5 +1,5 @@
 import { countOrderItems } from '../orders/orderCalculations';
-import type { CustomerOrder, Language, Restaurant, Waiter } from './types';
+import type { CustomerOrder, Restaurant, Waiter } from './types';
 
 export type RestaurantAction =
   | { type: 'replace'; restaurant: Restaurant }
@@ -8,7 +8,6 @@ export type RestaurantAction =
   | { type: 'saveOrder'; tableId: number; order: CustomerOrder }
   | { type: 'finishVisit'; tableId: number; customerId: string }
   | { type: 'addWaiter'; waiter: Waiter }
-  | { type: 'setLanguage'; language: Language }
   | { type: 'activatePremium' };
 
 export function restaurantReducer(
@@ -79,8 +78,6 @@ export function restaurantReducer(
       }
       return { ...restaurant, waiters: [...restaurant.waiters, action.waiter] };
     }
-    case 'setLanguage':
-      return { ...restaurant, language: action.language };
     case 'activatePremium':
       return { ...restaurant, isPremium: true };
   }

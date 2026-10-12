@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Screen } from '../../components/Screen';
@@ -7,23 +8,22 @@ import { FilterChips } from '../../components/FilterChips';
 import { AppText } from '../../components/AppText';
 import { Icon } from '../../components/Icon';
 import { colors } from '../../theme/tokens';
-import { useTranslations } from '../settings/translations';
 import type { MenuCategory } from '../restaurant/types';
 import { categories, filterMenu } from './menuData';
 import { DishCard } from './DishCard';
 
 export function MenuScreen() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<MenuCategory>('All');
-  const labels = useTranslations();
   const dishes = filterMenu(search, category);
   return (
     <Screen
       hasTabs
       header={
         <AppHeader
-          title={labels.Menu}
-          subtitle="Made for every appetite."
+          title={t('navigation.menu')}
+          subtitle={t('menu.madeForEveryAppetite')}
           right={
             <View style={styles.leaf}>
               <Icon name="leaf" color={colors.terracotta} />
@@ -35,10 +35,13 @@ export function MenuScreen() {
       <SearchInput
         value={search}
         onChangeText={setSearch}
-        placeholder="Search the menu"
+        placeholder={t('menu.searchTheMenu')}
       />
       <FilterChips
-        options={categories.map(value => ({ value, label: value }))}
+        options={categories.map(value => ({
+          value,
+          label: t(`menu.${value.toLowerCase()}`),
+        }))}
         selected={category}
         onSelect={setCategory}
       />
@@ -49,7 +52,7 @@ export function MenuScreen() {
       </View>
       {!dishes.length && (
         <AppText muted style={styles.empty}>
-          No dishes found.{'\n'}Try another name or category.
+          {t('menu.noDishesFoundTryAnotherNameOrCategory')}
         </AppText>
       )}
     </Screen>

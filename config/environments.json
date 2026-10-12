@@ -1,0 +1,20 @@
+{
+  "development": {
+    "envFile": ".env.development",
+    "androidApplicationId": "com.restoflow.dev",
+    "iosBundleId": "org.reactjs.native.example.RestoFlow.dev",
+    "displayName": "RestoFlow Dev",
+    "iosScheme": "RestoFlowDev",
+    "stallionProject": "restoflow-dev",
+    "stallionProjectId": "6aca897a03fc44c9897cf2b5"
+  },
+  "production": {
+    "envFile": ".env.production",
+    "androidApplicationId": "com.restoflow",
+    "iosBundleId": "org.reactjs.native.example.RestoFlow",
+    "displayName": "RestoFlow",
+    "iosScheme": "RestoFlowProd",
+    "stallionProject": "restoflow",
+    "stallionProjectId": "6aca880b9f76d8bbbc714eef"
+  }
+}

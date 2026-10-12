@@ -66,6 +66,15 @@ yarn-error.log
 # testing
 /coverage
 
+# Native runtime tokens, OTA publishing credentials, and private signing material
+.env.stallion.local
+ios/Config/Stallion.local.xcconfig
+stallion/secrets/
+stallion-artifacts/
+.native-baselines/
+*.pem
+!stallion/public/*.pem
+
 # Yarn
 .yarn/*
 !.yarn/patches

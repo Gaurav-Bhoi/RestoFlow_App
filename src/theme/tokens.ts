@@ -1,4 +1,4 @@
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, type TextStyle } from 'react-native';
 import design from '../../design/design_tokens.json';
 
 export const colors = {
@@ -26,6 +26,26 @@ export const fonts = {
   heading: Platform.select({ ios: 'System', default: 'sans-serif' }),
   script: 'NotoSansDevanagari-Regular',
 };
+// Read from the text layers in Figma, rather than the older prototype's weights.
+// SF Pro is the iOS system font; Android uses its native sans-serif fallback.
+export const typography = {
+  body: { fontSize: 14, lineHeight: 21 },
+  heading: { fontSize: 25, lineHeight: 35 },
+  section: { fontSize: 21, lineHeight: 29.4 },
+  small: { fontSize: 12, lineHeight: 18 },
+  helper: { fontSize: 11, lineHeight: 16.5 },
+  label: { fontSize: 12, lineHeight: 18 },
+  button: { fontSize: 14, lineHeight: 21 },
+  brand: { fontSize: 27, lineHeight: 40.5 },
+  welcomeFirst: { fontSize: 29.1, lineHeight: 40.74 },
+  display: { fontSize: 32, lineHeight: 44.8 },
+  caption: { fontSize: 10, lineHeight: 17 },
+} satisfies Record<string, TextStyle>;
+
+export const breakpoints = { phoneSmall: 350, tablet: 600, tabletLarge: 900 };
+export const contentWidths = { screen: 600, form: 520 };
+export const navigationLayout = { height: 66, inset: 18, bottomGap: 4 };
+export const controlSizes = { button: 50, input: 54, touch: 44 };
 export const layout = StyleSheet.create({
   row: {
     flexDirection: 'row',

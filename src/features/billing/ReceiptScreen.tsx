@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { RootScreenProps } from '../../app/navigationTypes';
@@ -15,6 +16,7 @@ export function ReceiptScreen({
   route,
   navigation,
 }: RootScreenProps<'Receipt'>) {
+  const { t } = useTranslation();
   const bill = useCustomerBill(route.params.tableId, route.params.customerId);
   const handlePrint = async () => {
     if (await bill.printReceipt()) {
@@ -25,8 +27,8 @@ export function ReceiptScreen({
     return (
       <Screen>
         <EmptyState
-          title="Visit completed"
-          description="This order is no longer active."
+          title={t('billing.visitCompleted')}
+          description={t('billing.thisOrderIsNoLongerActive')}
         />
       </Screen>
     );
@@ -35,8 +37,8 @@ export function ReceiptScreen({
     <Screen
       header={
         <AppHeader
-          title="Ready to print"
-          subtitle="Receipt preview"
+          title={t('billing.readyToPrint')}
+          subtitle={t('billing.receiptPreview')}
           onBack={navigation.goBack}
         />
       }
@@ -47,7 +49,7 @@ export function ReceiptScreen({
             onPress={navigation.goBack}
             style={styles.cancel}
           >
-            Cancel
+            {t('billing.cancel')}
           </AppButton>
           <AppButton
             icon="print"
@@ -55,7 +57,7 @@ export function ReceiptScreen({
             onPress={handlePrint}
             style={styles.print}
           >
-            {bill.isPrinting ? 'Opening…' : 'Print bill'}
+            {bill.isPrinting ? t('billing.opening') : t('billing.printBill')}
           </AppButton>
         </View>
       }
@@ -66,7 +68,11 @@ export function ReceiptScreen({
             {bill.restaurant.name}
           </AppText>
           <AppText muted variant="helper">
-            Table {route.params.tableId} · {bill.order.name}
+            {t('billing.tableValueValue', {
+              lng: 'en',
+              value0: route.params.tableId,
+              value1: bill.order.name,
+            })}
           </AppText>
           <AppText muted variant="helper">
             {formatDate(bill.issuedAt)} ·{' '}
@@ -78,7 +84,7 @@ export function ReceiptScreen({
         </View>
         <BillBreakdown items={bill.order.items} />
         <AppText muted style={styles.thanks}>
-          Thank you for dining with us.{'\n'}We hope to see you again.
+          {t('billing.thankYouForDiningWithUsWeHopeTo', { lng: 'en' })}
         </AppText>
         <View style={styles.perforations}>
           {Array.from({ length: 32 }, (_, index) => (
@@ -87,7 +93,7 @@ export function ReceiptScreen({
         </View>
       </View>
       <AppText muted variant="small" style={styles.caption}>
-        Prints through your device’s print service.
+        {t('billing.printsThroughYourDeviceSPrintService')}
       </AppText>
     </Screen>
   );

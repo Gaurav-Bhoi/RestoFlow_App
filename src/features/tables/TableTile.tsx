@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
@@ -14,16 +15,18 @@ export function TableTile({
   onPress: () => void;
   onRemove?: () => void;
 }) {
+  const { t } = useTranslation();
   const isOccupied = table.customers.length > 0;
   return (
     <View style={styles.wrapper}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Table ${table.id}, ${
+        accessibilityLabel={t(
           isOccupied
-            ? `${table.customers.length} customers, occupied`
-            : 'available'
-        }`}
+            ? 'dashboard.accessibleTableOccupied'
+            : 'dashboard.accessibleTableAvailable',
+          { table: table.id, count: table.customers.length },
+        )}
         onPress={onPress}
         style={({ pressed }) => [
           styles.tile,
@@ -37,21 +40,23 @@ export function TableTile({
           <View style={[styles.chair, isOccupied && styles.occupiedChair]} />
         </View>
         <AppText style={[styles.name, isOccupied && styles.light]}>
-          Table {table.id}
+          {t('dashboard.tableValue', { value0: table.id })}
         </AppText>
         <AppText style={[styles.description, isOccupied && styles.lightMuted]}>
           {isOccupied
-            ? `${table.customers.length} customers`
-            : 'Ready for guests'}
+            ? t('dashboard.valueCustomers', { value0: table.customers.length })
+            : t('dashboard.readyForGuests')}
         </AppText>
         <AppText style={[styles.status, isOccupied && styles.light]}>
-          • {isOccupied ? 'Occupied' : 'Available'}
+          • {isOccupied ? t('dashboard.occupied') : t('dashboard.available')}
         </AppText>
       </Pressable>
       {onRemove && (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Remove Table ${table.id}`}
+          accessibilityLabel={t('dashboard.removeTableValue', {
+            value0: table.id,
+          })}
           onPress={onRemove}
           style={styles.remove}
         >

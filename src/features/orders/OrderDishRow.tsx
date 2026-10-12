@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
@@ -16,6 +17,7 @@ export function OrderDishRow({
   quantity: number;
   onChange: (change: number) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <View style={styles.row}>
       <View style={styles.food}>
@@ -32,7 +34,9 @@ export function OrderDishRow({
           <Pressable
             onPress={() => onChange(-1)}
             accessibilityRole="button"
-            accessibilityLabel={`Remove one ${dish.name}`}
+            accessibilityLabel={t('orders.removeOneValue', {
+              value0: dish.name,
+            })}
             style={styles.quantityButton}
           >
             <Icon name="minus" size={16} />
@@ -43,7 +47,7 @@ export function OrderDishRow({
           <Pressable
             onPress={() => onChange(1)}
             accessibilityRole="button"
-            accessibilityLabel={`Add one ${dish.name}`}
+            accessibilityLabel={t('orders.addOneValue', { value0: dish.name })}
             style={styles.quantityButton}
           >
             <Icon name="plus" size={16} />
@@ -53,11 +57,11 @@ export function OrderDishRow({
         <Pressable
           onPress={() => onChange(1)}
           accessibilityRole="button"
-          accessibilityLabel={`Add ${dish.name}`}
+          accessibilityLabel={t('orders.addValue', { value0: dish.name })}
           style={styles.add}
         >
           <Icon name="plus" size={14} />
-          <AppText style={styles.addLabel}>Add</AppText>
+          <AppText style={styles.addLabel}>{t('orders.add')}</AppText>
         </Pressable>
       )}
     </View>

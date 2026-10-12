@@ -8,6 +8,12 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
+project 'RestoFlow',
+  'Debug-Development' => :debug,
+  'Release-Development' => :release,
+  'Debug-Production' => :debug,
+  'Release-Production' => :release
+
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
@@ -30,5 +36,31 @@ target 'RestoFlow' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    installer.pods_project.targets.each do |pod_target|
+      pod_target.build_configurations.each do |build_config|
+        environment = build_config.name.end_with?('-Development') ? 'development' : 'production'
+        build_config.build_settings['ENVFILE'] = "$(PODS_ROOT)/../../.env.#{environment}"
+      end
+      next unless pod_target.name == 'react-native-config'
+      # Validate in the dependency's codegen phase before it can fall back to .env.
+      pod_target.shell_script_build_phases.each do |phase|
+        next unless phase.name.include?('Config codegen')
+        phase.shell_script = <<~SCRIPT
+          set -e
+          if [ -f /tmp/envfile ]; then echo "Obsolete /tmp/envfile overrides native configuration" >&2; exit 1; fi
+          case "$CONFIGURATION" in
+            Debug-Development) app_environment=development; release_flag= ;;
+            Release-Development) app_environment=development; release_flag=--release ;;
+            Debug-Production) app_environment=production; release_flag= ;;
+            Release-Production) app_environment=production; release_flag=--release ;;
+            *) echo "Unsupported environment configuration" >&2; exit 1 ;;
+          esac
+          "${NODE_BINARY:-node}" "$PODS_ROOT/../../scripts/validate-environment.mjs" "$app_environment" $release_flag
+          "${PODS_TARGET_SRCROOT}/ios/ReactNativeConfig/BuildDotenvConfig.rb" "$PODS_ROOT/../.." "${PODS_TARGET_SRCROOT}/ios/ReactNativeConfig"
+        SCRIPT
+        phase.show_env_vars_in_log = '0'
+      end
+    end
   end
 end

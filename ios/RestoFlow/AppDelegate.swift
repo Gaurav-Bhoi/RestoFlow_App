@@ -2,6 +2,9 @@ import UIKit
 import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
+import RNBootSplash
+import react_native_stallion
+import react_native_config
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,6 +17,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+    guard let environment = Bundle.main.object(forInfoDictionaryKey: "AppEnvironment") as? String,
+          ["development", "production"].contains(environment) else {
+      preconditionFailure("Native application environment is missing or invalid")
+    }
+    precondition(environment == RNCConfig.env(for: "APP_ENV"), "Native application environment mismatch")
+    let development = environment == "development"
+    let expectedId = development ? "org.reactjs.native.example.RestoFlow.dev" : "org.reactjs.native.example.RestoFlow"
+    let expectedProject = development ? "6aca897a03fc44c9897cf2b5" : "6aca880b9f76d8bbbc714eef"
+    precondition(Bundle.main.bundleIdentifier == expectedId, "Native application identity mismatch")
+    precondition(Bundle.main.object(forInfoDictionaryKey: "StallionProjectId") as? String == expectedProject, "Stallion project mismatch")
     let delegate = ReactNativeDelegate()
     let factory = RCTReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
@@ -34,6 +47,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 
 class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
+  override func customize(_ rootView: RCTRootView) {
+    super.customize(rootView)
+    RNBootSplash.initWithStoryboard("BootSplash", rootView: rootView)
+  }
+
   override func sourceURL(for bridge: RCTBridge) -> URL? {
     self.bundleURL()
   }
@@ -42,7 +60,7 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 #if DEBUG
     RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
 #else
-    Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+    StallionModule.getBundleURL()
 #endif
   }
 }

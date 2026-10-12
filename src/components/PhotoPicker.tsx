@@ -1,8 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { colors } from '../theme/tokens';
 import { Avatar } from './Avatar';
-import { Icon } from './Icon';
+import { FigmaAsset } from './FigmaAsset';
 import { AppText } from './AppText';
 
 export function PhotoPicker({
@@ -12,10 +13,11 @@ export function PhotoPicker({
   photo?: string;
   onPress: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Add optional profile photo"
+      accessibilityLabel={t('common.addOptionalProfilePhoto')}
       onPress={onPress}
       style={styles.picker}
     >
@@ -23,12 +25,17 @@ export function PhotoPicker({
         <Avatar name="Profile" photo={photo} size={80} />
       ) : (
         <View style={styles.placeholder}>
-          <Icon name="camera" size={24} />
+          <FigmaAsset name="camera" />
         </View>
       )}
-      <AppText style={styles.label}>
-        Add photo <AppText muted>· optional</AppText>
-      </AppText>
+      <View style={styles.labelRow}>
+        <AppText variant="label" style={styles.label}>
+          {t('common.addPhoto')}{' '}
+          <AppText variant="label" muted>
+            {t('common.optional')}
+          </AppText>
+        </AppText>
+      </View>
     </Pressable>
   );
 }
@@ -44,11 +51,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  label: {
-    color: colors.forest,
-    fontWeight: '700',
-    fontSize: 12,
-    minHeight: 44,
-    textAlignVertical: 'center',
-  },
+  labelRow: { minHeight: 44, justifyContent: 'center' },
+  label: { color: colors.forest },
 });

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useFeedback } from '../../app/FeedbackProvider';
 import { useRestaurant } from '../restaurant/RestaurantProvider';
@@ -5,6 +6,7 @@ import { useSession } from '../auth/SessionProvider';
 import { printCustomerReceipt } from './receiptPrinting';
 
 export function useCustomerBill(tableId: number, customerId: string) {
+  const { t } = useTranslation();
   const { restaurant, dispatch } = useRestaurant();
   const { session } = useSession();
   const showFeedback = useFeedback();
@@ -22,7 +24,9 @@ export function useCustomerBill(tableId: number, customerId: string) {
       await printCustomerReceipt(restaurant.name, tableId, order, issuedAt);
       return true;
     } catch {
-      showFeedback('Printing was cancelled or unavailable. You can try again.');
+      showFeedback(
+        t('billing.printingWasCancelledOrUnavailableYouCanTryAgain'),
+      );
       return false;
     } finally {
       setIsPrinting(false);
@@ -33,7 +37,7 @@ export function useCustomerBill(tableId: number, customerId: string) {
       return;
     }
     dispatch({ type: 'finishVisit', tableId, customerId });
-    showFeedback('Customer visit completed');
+    showFeedback(t('billing.customerVisitCompleted'));
   }
   return { restaurant, order, issuedAt, isPrinting, printReceipt, finishVisit };
 }

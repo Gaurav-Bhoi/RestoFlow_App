@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { RootScreenProps } from '../../app/navigationTypes';
@@ -16,6 +17,7 @@ export function CustomersScreen({
   navigation,
   route,
 }: RootScreenProps<'Customers'>) {
+  const { t } = useTranslation();
   const { restaurant } = useRestaurant();
   const { session } = useSession();
   const table = restaurant.tables.find(
@@ -26,10 +28,10 @@ export function CustomersScreen({
     return (
       <Screen>
         <EmptyState
-          title="Table unavailable"
-          description="This table is no longer on your floor."
+          title={t('orders.tableUnavailable')}
+          description={t('orders.thisTableIsNoLongerOnYourFloor')}
           action={{
-            label: 'Back to floor',
+            label: t('orders.backToFloor'),
             onPress: () => navigation.popToTop(),
           }}
         />
@@ -40,12 +42,10 @@ export function CustomersScreen({
     <Screen
       header={
         <AppHeader
-          title={`Table ${table.id}`}
-          subtitle={`${table.customers.length} guests · ${
-            isOwner
-              ? 'Select a customer to bill'
-              : 'Each guest has a separate order'
-          }`}
+          title={t('orders.tableValue', { value0: table.id })}
+          subtitle={t(isOwner ? 'orders.guestsOwner' : 'orders.guestsWaiter', {
+            count: table.customers.length,
+          })}
           onBack={navigation.goBack}
         />
       }
@@ -59,7 +59,7 @@ export function CustomersScreen({
               : () => navigation.navigate('Order', { tableId: table.id })
           }
         >
-          {isOwner ? 'Back to floor' : 'Add customer'}
+          {isOwner ? t('orders.backToFloor') : t('orders.addCustomer')}
         </AppButton>
       }
     >
@@ -67,9 +67,11 @@ export function CustomersScreen({
         <>
           <View style={[layout.section, styles.section]}>
             <AppText variant="section">
-              {isOwner ? 'Who’s checking out?' : 'Your guests'}
+              {isOwner ? t('orders.whoSCheckingOut') : t('orders.yourGuests')}
             </AppText>
-            <Badge warm={isOwner}>{isOwner ? 'Billing' : 'Occupied'}</Badge>
+            <Badge warm={isOwner}>
+              {isOwner ? t('orders.billing') : t('orders.occupied')}
+            </Badge>
           </View>
           <View style={layout.stack}>
             {table.customers.map(order => (
@@ -89,11 +91,11 @@ export function CustomersScreen({
         </>
       ) : (
         <EmptyState
-          title="Ready for your guests"
+          title={t('orders.readyForYourGuests')}
           description={
             isOwner
-              ? 'Your waiter can add customers and take their orders here.'
-              : 'Start a new customer order. Their dishes and bill stay separate.'
+              ? t('orders.yourWaiterCanAddCustomersAndTakeTheirOrders')
+              : t('orders.startANewCustomerOrderTheirDishesAndBill')
           }
           icon="people"
         />
