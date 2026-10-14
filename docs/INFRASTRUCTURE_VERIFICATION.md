@@ -2,6 +2,14 @@
 
 Verified on 11 October 2026. User-directed mock setup remains active; this is not a claim of verified production OTA operation.
 
+## Android standalone demo release — 12 October 2026
+
+`yarn android:dev:release` now succeeds with `MOCK_API=true`: the APK builds for all four configured architectures, passes release lint, installs on the Android 16 emulator, and opens the welcome screen. The APK contains `assets/index.android.bundle` and is not debuggable. Mock builds skip both the Stallion JavaScript import and native package initialization; the final app process logs show React Native startup with no Stallion requests or fatal errors.
+
+Fixed validation running on a shared CMake/preBuild dependency from the production flavor by moving it to flavor-specific BuildConfig and bundle tasks. Development mock releases explicitly allow demo configuration; service releases, production releases and OTA publishing retain their existing requirements. The development network security domains now specify `includeSubdomains="false"`, resolving three fatal release lint errors.
+
+Verification passed: seven infrastructure tests, seven targeted app tests (including release/mock OTA initialization), TypeScript, changed-source ESLint checks and `git diff --check`. The APK is `android/app/build/outputs/apk/development/release/app-development-release.apk`. Real service/OTA acceptance and iOS release compilation remain pending as described below.
+
 ## Results
 
 | Check                                     | Result | Evidence / remaining work                                                                  |

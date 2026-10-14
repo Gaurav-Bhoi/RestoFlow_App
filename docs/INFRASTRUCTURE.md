@@ -1,6 +1,6 @@
 # RestoFlow application infrastructure
 
-This checkout has exactly two application environments. The current setup is deliberately mocked, as requested: both files have `MOCK_API=true`, backend requests are blocked, native Stallion tokens are unset, and release builds/OTA uploads refuse incomplete configuration. Existing restaurant demo screens, local authentication, navigation and localization remain available.
+This checkout has exactly two application environments. Both files currently have `MOCK_API=true`, backend requests are blocked, and native Stallion tokens are unset. Android development releases support standalone demos using the embedded JavaScript bundle with Stallion OTA disabled. Production releases, iOS releases, real-service development releases and OTA uploads refuse incomplete service configuration. Existing restaurant demo screens, local authentication, navigation and localization remain available.
 
 ## Project inspection
 
@@ -91,6 +91,8 @@ npm run test:infrastructure
 
 CLI 20.2.0 uses `--mode` and iOS `--scheme`; these scripts use the installed CLI's supported flags. Android task discovery confirmed developmentDebug, developmentRelease, productionDebug and productionRelease, plus the RN template's developmentDebugOptimized/productionDebugOptimized variants. All Debug variants use Metro; Release variants load embedded or Stallion-managed bundles.
 
+With `MOCK_API=true`, `yarn android:dev:release` builds and installs a standalone demo without Metro, backend access or Stallion OTA. No Stallion token is required for this demo. To build without a connected device, run `./gradlew app:assembleDevelopmentRelease` from `android/`. The APK is written to `android/app/build/outputs/apk/development/release/app-development-release.apk`. Android validation attaches to each flavor's BuildConfig and JavaScript bundle tasks because AGP can share native CMake/preBuild tasks between flavors.
+
 For iOS archives after configuring the real environment and signing team:
 
 ```sh
@@ -125,7 +127,7 @@ Requests reject absolute URLs and baseURL overrides before transport. Successful
 
 BootSplash uses the existing cutlery asset and paper background. Android initializes BootSplash before ReactActivity's onCreate; iOS customizes the root view with the generated storyboard. Startup restores local localization, initializes Redux's signed-out demo session and restores restaurant data before mounting navigation. Network language discovery runs afterward. Navigation onReady hides BootSplash; storage failures recover to demo data, localization failures recover to English, and splash transition failures retry without animation. No duration timer controls the splash.
 
-Stallion uses flavor-specific Android resources and build-setting substitutions in one iOS Info.plist. Android getDefaultReactHost supplies Stallion's JS path only for release; Swift uses StallionModule.getBundleURL outside DEBUG. The release root uses withStallion. JavaScript never chooses Stallion credentials/projects. Mock/Metro development does not initialize the OTA HOC.
+Stallion uses flavor-specific Android resources and build-setting substitutions in one iOS Info.plist. Android getDefaultReactHost supplies Stallion's JS path only for non-mock releases; Swift uses StallionModule.getBundleURL outside DEBUG. The non-mock release root uses withStallion. JavaScript never chooses Stallion credentials/projects. Mock/Metro development does not initialize the OTA HOC.
 
 ## OTA upload and release workflow
 

@@ -70,6 +70,10 @@ configuration and verification. The production API origin remains a placeholder 
 
 Axios, Redux Toolkit, native environment configuration, MMKV, BootSplash and Stallion are integrated. DEV and PROD use separate Android flavors, iOS schemes, application identities and native Stallion project IDs. Existing local demo authentication is preserved.
 
-Use `npm run android:dev` / `npm run android:prod`, or on macOS `npm run ios:dev` / `npm run ios:prod`. Their `:release` commands require real environment configuration; mock releases and unconfigured OTA uploads fail explicitly.
+Use `npm run android:dev` / `npm run android:prod`, or on macOS `npm run ios:dev` / `npm run ios:prod`.
+
+`yarn android:dev:release` builds and installs a standalone demo with the current `MOCK_API=true` configuration. It bundles JavaScript into the APK, runs without Metro, and disables backend requests and Stallion OTA. To build the APK without installing it, run `./gradlew app:assembleDevelopmentRelease` from `android/`; the output is `android/app/build/outputs/apk/development/release/app-development-release.apk`.
+
+Production releases, iOS releases, development releases with `MOCK_API=false`, and OTA uploads require real environment configuration.
 
 See [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md) for exact versions, setup, native identities, signing, OTA publishing, rollout and rollback. [docs/INFRASTRUCTURE_VERIFICATION.md](docs/INFRASTRUCTURE_VERIFICATION.md) records completed checks, remaining checks, and the implementation file list.

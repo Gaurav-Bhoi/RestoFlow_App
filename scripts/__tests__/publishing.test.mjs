@@ -118,16 +118,33 @@ test('missing/invalid env, platform, notes, and duplicate selectors fail', () =>
   );
   assert.throws(() => parseValues('APP_ENV=development\nAPP_ENV=production'));
 });
-test('mocks allow Debug validation but block release and conflicting ENVFILE', () => {
-  const run = (extra = [], env = {}) =>
-    spawnSync(
+test('mocks allow development demo releases but block service releases and conflicting ENVFILE', () => {
+  const run = (extra = [], env = {}) => {
+    const result = spawnSync(
       process.execPath,
       ['scripts/validate-environment.mjs', 'development', ...extra],
       { cwd: root, env: { ...process.env, ...env }, encoding: 'utf8' },
     );
+    assert.ifError(result.error);
+    return result;
+  };
   assert.equal(run().status, 0);
   assert.equal(run(['--release']).status, 1);
+  assert.equal(run(['--release', '--allow-mock-release']).status, 0);
   assert.equal(run([], { ENVFILE: '.env.production' }).status, 1);
+  const production = spawnSync(
+    process.execPath,
+    [
+      'scripts/validate-environment.mjs',
+      'production',
+      '--release',
+      '--allow-mock-release',
+    ],
+    { cwd: root, env: process.env, encoding: 'utf8' },
+  );
+  assert.ifError(production.error);
+  assert.equal(production.status, 1);
+  assert.match(production.stderr, /Release builds require MOCK_API=false/);
 });
 test('all iOS configurations and schemes map to their own native environment', () => {
   const project = readFileSync(

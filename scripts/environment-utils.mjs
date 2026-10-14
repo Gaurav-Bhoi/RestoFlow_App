@@ -64,7 +64,7 @@ export function nativeValues(environment) {
 
 export function validateBuildEnvironment(
   environment,
-  { release = false } = {},
+  { release = false, allowMockRelease = false } = {},
 ) {
   const mapping = getEnvironment(environment);
   const file = resolve(root, mapping.envFile);
@@ -116,6 +116,10 @@ export function validateBuildEnvironment(
     }
   }
   if (release) {
+    // Standalone development demos use the embedded bundle and no OTA services.
+    // Publishing and baseline recording keep the default strict release checks.
+    if (mock && environment === 'development' && allowMockRelease)
+      return values;
     if (mock)
       throw new Error(
         'Release builds require MOCK_API=false and a real API origin',

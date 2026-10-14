@@ -7,6 +7,7 @@ import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.stallion.Stallion
+import com.stallion.StallionPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -15,10 +16,11 @@ class MainApplication : Application(), ReactApplication {
       context = applicationContext,
       packageList =
         PackageList(this).packages.apply {
+          if (BuildConfig.MOCK_API == "true") removeAll { it is StallionPackage }
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // add(MyReactNativePackage())
         },
-      jsBundleFilePath = if (BuildConfig.DEBUG) null else Stallion.getJSBundleFile(applicationContext),
+      jsBundleFilePath = if (BuildConfig.DEBUG || BuildConfig.MOCK_API == "true") null else Stallion.getJSBundleFile(applicationContext),
       useDevSupport = BuildConfig.DEBUG,
     )
   }

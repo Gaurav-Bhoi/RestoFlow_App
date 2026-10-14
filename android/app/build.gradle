@@ -118,7 +118,9 @@ androidComponents {
         def capitalized = variant.name.capitalize()
         def validation = tasks.register("validate${capitalized}Environment", Exec) {
             workingDir rootProject.projectDir.parentFile
-            commandLine(['node', 'scripts/validate-environment.mjs', name] + (release ? ['--release'] : []))
+            commandLine(['node', 'scripts/validate-environment.mjs', name] +
+                (release ? ['--release'] : []) +
+                (release && name == 'development' ? ['--allow-mock-release'] : []))
             doFirst {
                 if (release && name == 'production' && !hasProductionSigning) {
                     throw new GradleException('Production release signing requires RESTOFLOW_PROD_* signing variables')
@@ -126,7 +128,9 @@ androidComponents {
             }
         }
         tasks.configureEach { task ->
-            if (task.name == "pre${capitalized}Build" || task.name == "createBundle${capitalized}JsAndAssets") {
+            // AGP shares CMake tasks across flavors and can use another flavor's
+            // preBuild. Validate on flavor-specific tasks instead.
+            if (task.name == "generate${capitalized}BuildConfig" || task.name == "createBundle${capitalized}JsAndAssets") {
                 task.dependsOn(validation)
             }
         }

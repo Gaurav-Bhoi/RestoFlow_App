@@ -8,7 +8,10 @@ import {
 try {
   const environment = process.argv[2];
   const release = process.argv.includes('--release');
-  const values = validateBuildEnvironment(environment, { release });
+  const values = validateBuildEnvironment(environment, {
+    release,
+    allowMockRelease: process.argv.includes('--allow-mock-release'),
+  });
   if (process.argv.includes('--ios')) {
     if (existsSync('/tmp/envfile'))
       throw new Error(

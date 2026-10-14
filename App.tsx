@@ -7,8 +7,8 @@ import { AppNavigator } from './src/app/AppNavigator';
 import { RestaurantProvider } from './src/features/restaurant/RestaurantProvider';
 import { SessionProvider } from './src/features/auth/SessionProvider';
 import { Provider } from 'react-redux';
-import { withStallion } from 'react-native-stallion';
 import { store } from './src/store';
+import { ENV } from './src/config/env';
 
 function App() {
   return (
@@ -29,5 +29,7 @@ function App() {
   );
 }
 
-// Metro development stays local. Release builds use the SDK root integration.
-export default __DEV__ ? App : withStallion(App);
+// Importing the SDK initializes its native module, so load it only for OTA builds.
+export default __DEV__ || ENV.MOCK_API
+  ? App
+  : require('react-native-stallion').withStallion(App);
