@@ -16,7 +16,7 @@ export function TableTile({
   onRemove?: () => void;
 }) {
   const { t } = useTranslation();
-  const isOccupied = table.customers.length > 0;
+  const isOccupied = table.occupied;
   return (
     <View style={styles.wrapper}>
       <Pressable
@@ -25,7 +25,7 @@ export function TableTile({
           isOccupied
             ? 'dashboard.accessibleTableOccupied'
             : 'dashboard.accessibleTableAvailable',
-          { table: table.id, count: table.customers.length },
+          { table: table.number, count: table.guestCount },
         )}
         onPress={onPress}
         style={({ pressed }) => [
@@ -40,11 +40,11 @@ export function TableTile({
           <View style={[styles.chair, isOccupied && styles.occupiedChair]} />
         </View>
         <AppText style={[styles.name, isOccupied && styles.light]}>
-          {t('dashboard.tableValue', { value0: table.id })}
+          {t('dashboard.tableValue', { value0: table.number })}
         </AppText>
         <AppText style={[styles.description, isOccupied && styles.lightMuted]}>
           {isOccupied
-            ? t('dashboard.valueCustomers', { value0: table.customers.length })
+            ? t('dashboard.valueCustomers', { value0: table.guestCount })
             : t('dashboard.readyForGuests')}
         </AppText>
         <AppText style={[styles.status, isOccupied && styles.light]}>
@@ -55,7 +55,7 @@ export function TableTile({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('dashboard.removeTableValue', {
-            value0: table.id,
+            value0: table.number,
           })}
           onPress={onRemove}
           style={styles.remove}

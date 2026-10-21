@@ -6,16 +6,14 @@ jest.mock('react-native-stallion', () => {
 });
 
 test.each([
-  [false, true, false],
-  [false, false, true],
-  [true, false, false],
-])('debug=%s mock=%s initializes OTA=%s', (debug, mock, expectedOta) => {
+  [false, true],
+  [true, false],
+])('debug=%s initializes OTA=%s', (debug, expectedOta) => {
   const originalDebug = __DEV__;
   const wrapped = () => null;
   const wrap = mockWithStallion;
   wrap.mockClear().mockReturnValue(wrapped);
   mockLoadStallion.mockClear();
-  jest.doMock('../src/config/env', () => ({ ENV: { MOCK_API: mock } }));
   try {
     Object.assign(globalThis, { __DEV__: debug });
     jest.isolateModules(() => {
@@ -32,6 +30,5 @@ test.each([
     });
   } finally {
     Object.assign(globalThis, { __DEV__: originalDebug });
-    jest.dontMock('../src/config/env');
   }
 });

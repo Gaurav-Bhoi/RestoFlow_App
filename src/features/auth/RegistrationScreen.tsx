@@ -19,6 +19,8 @@ import { useProfilePhoto } from '../../hooks/useProfilePhoto';
 import { colors, contentWidths } from '../../theme/tokens';
 import { useAuth } from './useAuth';
 import { normalizePhone } from './validation';
+import { normalizeApiError } from '../../api/errors';
+import { OtpFields, type PendingOtp } from './OtpFields';
 
 export function RegistrationScreen({
   route,
@@ -30,19 +32,56 @@ export function RegistrationScreen({
   const [phone, setPhone] = useState(route.params.phone);
   const [error, setError] = useState('');
   const { photo, selectPhoto } = useProfilePhoto();
-  const { register } = useAuth();
+  const { register, requestRegistration, verifyRegistration } = useAuth();
+  const [challenge, setChallenge] = useState<PendingOtp>();
+  const [otp, setOtp] = useState('');
+  const [token, setToken] = useState('');
+  const [busy, setBusy] = useState(false);
   const showFeedback = useFeedback();
   const ownerInput = useRef<TextInputInstance>(null);
   const phoneInput = useRef<TextInputInstance>(null);
-  const handleRegister = () => {
+  const requestCode = async () => {
+    const requested = await requestRegistration(phone);
+    setChallenge({ ...requested, requestedAt: Date.now() });
+    setOtp('');
+    setToken('');
+  };
+  const handleRegister = async () => {
+    if (busy) return;
+    setBusy(true);
+    setError('');
     try {
-      register(restaurantName, ownerName, phone, photo);
+      if (restaurantName.trim().length < 2 || ownerName.trim().length < 2)
+        throw new Error('Enter your name and restaurant name.');
+      if (!challenge) {
+        await requestCode();
+        return;
+      }
+      if (!token && !/^\d{6}$/.test(otp))
+        throw new Error('Enter the six-digit verification code.');
+      const onboardingToken =
+        token ||
+        (await verifyRegistration(challenge.challengeId, otp)).onboardingToken;
+      setToken(onboardingToken);
+      await register(onboardingToken, restaurantName, ownerName, photo);
       Keyboard.dismiss();
       showFeedback(t('auth.yourRestaurantIsReadyAddYourFirstTable'));
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : t('auth.pleaseTryAgain'),
-      );
+      setError(normalizeApiError(cause).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const resend = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await requestCode();
+      setError('');
+    } catch (cause) {
+      setError(normalizeApiError(cause).message);
+    } finally {
+      setBusy(false);
     }
   };
   return (
@@ -65,13 +104,17 @@ export function RegistrationScreen({
           >
             {t('auth.cancel')}
           </AppButton>
-          <AppButton onPress={handleRegister} style={styles.submit}>
-            {t('auth.createAccount')}
+          <AppButton
+            onPress={handleRegister}
+            loading={busy}
+            style={styles.submit}
+          >
+            {challenge ? t('api.verifyCreate') : t('api.sendCode')}
           </AppButton>
         </View>
       }
     >
-      <PhotoPicker photo={photo} onPress={selectPhoto} />
+      <PhotoPicker photo={photo?.uri} onPress={selectPhoto} />
       <AppInput
         label={t('auth.restaurantName')}
         value={restaurantName}
@@ -98,14 +141,26 @@ export function RegistrationScreen({
         ref={phoneInput}
         label={t('auth.mobileNumber')}
         isPhone
+        editable={!busy}
         value={phone}
-        onChangeText={value => setPhone(normalizePhone(value))}
+        onChangeText={value => {
+          setPhone(normalizePhone(value));
+          setChallenge(undefined);
+          setToken('');
+        }}
         returnKeyType="done"
         onSubmitEditing={handleRegister}
       />
-      <Notice assetIcon="leaf">
-        {t('auth.yourFirst15DaysAreOnUsStartWith')}
-      </Notice>
+      {challenge && (
+        <OtpFields
+          challenge={challenge}
+          value={otp}
+          onChange={setOtp}
+          onResend={resend}
+          busy={busy}
+        />
+      )}
+      <Notice assetIcon="leaf">{t('api.trialNotice')}</Notice>
       {!!error && (
         <AppText accessibilityRole="alert" style={styles.error}>
           {error}

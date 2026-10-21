@@ -1,6 +1,12 @@
 # RestoFlow application infrastructure
 
-This checkout has exactly two application environments. Both files currently have `MOCK_API=true`, backend requests are blocked, and native Stallion tokens are unset. Android development releases support standalone demos using the embedded JavaScript bundle with Stallion OTA disabled. Production releases, iOS releases, real-service development releases and OTA uploads refuse incomplete service configuration. Existing restaurant demo screens, local authentication, navigation and localization remain available.
+This checkout uses real backend OTP authentication and server restaurant data.
+See [API_INTEGRATION.md](API_INTEGRATION.md) for the current implementation,
+exact DEV/PROD Worker origins, secure credential storage, and backend deployment
+prerequisites. All mock runtime paths and the development mock release bypass
+have been removed. The historical setup notes below describe the original
+infrastructure; current API and authentication behavior is defined by the
+integration guide.
 
 ## Project inspection
 
@@ -18,11 +24,11 @@ This checkout has exactly two application environments. Both files currently hav
 | Navigation                         | React Navigation 7, native stack and bottom tabs                                        |
 | Existing state                     | Restaurant context/reducer and local session context                                    |
 | Existing API                       | Hono translation API only, originally using fetch                                       |
-| Existing authentication            | Phone-based local demo; no access token, refresh endpoint, or secure credential storage |
+| Existing authentication            | Backend OTP; rotating access/refresh tokens in native secure storage |
 | Existing persistence               | AsyncStorage for restaurant data and localization                                       |
 | Previous splash / OTA              | Template launch screen / none; no CodePush                                              |
 
-No React Native upgrade was needed. Existing AsyncStorage and restaurant state are retained where they have separate responsibilities. Redux now owns the shared demo session; restaurant business logic stays in its existing provider.
+No React Native upgrade was needed. Existing AsyncStorage and restaurant state are retained where they have separate responsibilities. Redux owns account details; RestaurantProvider loads server state.
 
 ## Exact installed versions
 
@@ -91,7 +97,9 @@ npm run test:infrastructure
 
 CLI 20.2.0 uses `--mode` and iOS `--scheme`; these scripts use the installed CLI's supported flags. Android task discovery confirmed developmentDebug, developmentRelease, productionDebug and productionRelease, plus the RN template's developmentDebugOptimized/productionDebugOptimized variants. All Debug variants use Metro; Release variants load embedded or Stallion-managed bundles.
 
-With `MOCK_API=true`, `yarn android:dev:release` builds and installs a standalone demo without Metro, backend access or Stallion OTA. No Stallion token is required for this demo. To build without a connected device, run `./gradlew app:assembleDevelopmentRelease` from `android/`. The APK is written to `android/app/build/outputs/apk/development/release/app-development-release.apk`. Android validation attaches to each flavor's BuildConfig and JavaScript bundle tasks because AGP can share native CMake/preBuild tasks between flavors.
+Development release builds use the DEV Worker origin and require real Stallion
+configuration. They embed JavaScript for operation without Metro. The former
+mock release bypass is removed.
 
 For iOS archives after configuring the real environment and signing team:
 
@@ -106,7 +114,7 @@ xcodebuild -workspace ios/RestoFlow.xcworkspace -scheme RestoFlowProd \
 
 ## Configure the real services later
 
-1. Set the correct API origin in each env file and set `MOCK_API=false` for that environment. Keep PROD logging false. `npm run i18n:configure` remains available to update the same native env files using RESTOFLOW_DEV_API_URL/RESTOFLOW_PROD_API_URL.
+1. Use the pinned API origins in each env file. Keep PROD logging false. `npm run i18n:configure` remains available to update the same native env files using RESTOFLOW_DEV_API_URL/RESTOFLOW_PROD_API_URL.
 2. Copy `.env.stallion.local.example` to ignored `.env.stallion.local`. Add each project's actual App Token and real console bucket upload path. The tokens were not supplied and are currently unconfigured. Do not substitute App Tokens for dedicated CLI/CI tokens.
 3. Run `npm run native:configure` to generate the ignored iOS native-only settings. Android reads the ignored local file or the corresponding process variables at build time. Tokens never enter mobile env files or package scripts.
 4. Configure bundle signing before any production release. Use different RSA keys per environment. Run the installed CLI's `generate-key-pair` command in isolated temporary working directories and move only the public PEM to `stallion/public/development.pem` or `stallion/public/production.pem`. Keep private keys in ignored `stallion/secrets/` or the CI secret store. Set the corresponding PUBLIC_KEY_PATH and PRIVATE_KEY entries in the local template. Production native builds require the public key; production uploads require the matching private key. The build embeds the SPKI base64 public body accepted by SDK 2.4.2's native verifiers, avoiding plist newline escaping.
@@ -117,17 +125,28 @@ Bundled mobile config is extractable. Never put backend secrets, private keys or
 
 ## Application services
 
-`src/api/client.ts` creates one primary Axios instance with the native base URL, a 15-second timeout, JSON headers, centralized optional Bearer injection and normalized errors. The current demo has no backend credentials; the token reader returns null until real auth explicitly registers a Keychain/Keystore reader. No refresh endpoint, retry queue or token persistence was invented. A 401 is returned once. The translation endpoints retain their existing 270-second timeout for language generation and now use this client. Tests inject a transport into the independent translation contract tests.
+`src/api/client.ts` uses the pinned native Worker origin, a 15-second timeout,
+secure Bearer credentials, and normalized backend errors. Concurrent 401s share
+one real `/auth/refresh` request and retry once; revoked sessions sign out.
+Translation generation retains its separate timeout. See the API integration
+guide for current account and restaurant flows.
 
-Requests reject absolute URLs and baseURL overrides before transport. Successful and failed HTTP responses require `X-RestoFlow-Environment` to match the binary. Logging is restricted to the HTTP method in DEV debug mode; URLs, bodies, query strings, response payloads, headers and credentials are never logged. AbortController signals are supported directly. The real backend must maintain the environment header and avoid redirects to another origin; real server ownership/isolation cannot be verified with mock URLs.
+Requests reject absolute URLs and baseURL overrides before transport. Successful and failed HTTP responses require `X-RestoFlow-Environment` to match the binary. Logging is restricted to the HTTP method in DEV debug mode; URLs, bodies, query strings, response payloads, headers and credentials are never logged. AbortController signals are supported directly. The real backend must maintain the environment header and avoid redirects to another origin; real server ownership/isolation requires deployed-backend acceptance tests.
 
 `src/store` exports configureStore, RootState, AppDispatch and typed hooks. The session slice owns sign-in/sign-out; SessionProvider preserves the existing screen API. Redux Provider wraps existing providers. Local input/modals remain local, restaurant logic remains in its existing provider, and the entire Redux store is not persisted. No server cache library existed, so none was added.
 
-`src/services/storage/mmkv.ts` lazily creates one synchronous v4 MMKV instance named `restoflow.<native environment>`. The typed wrapper supports strings, booleans, numbers, JSON objects, contains/remove/clear. Restaurant data migrates from AsyncStorage; the old copy is deleted only after a successful MMKV write. Localization's existing async cache remains in AsyncStorage, scoped by native environment and API origin. No credentials or hardcoded encryption key are stored in MMKV. Highly sensitive session credentials must use Keychain/Keystore when backend authentication is implemented.
+`src/services/storage/mmkv.ts` remains available for non-sensitive preferences.
+Restaurant data is read from the backend and no longer migrated into device
+storage. Localization uses AsyncStorage scoped to native environment and API
+origin. Session tokens use native secure Keychain/Keystore.
 
-BootSplash uses the existing cutlery asset and paper background. Android initializes BootSplash before ReactActivity's onCreate; iOS customizes the root view with the generated storyboard. Startup restores local localization, initializes Redux's signed-out demo session and restores restaurant data before mounting navigation. Network language discovery runs afterward. Navigation onReady hides BootSplash; storage failures recover to demo data, localization failures recover to English, and splash transition failures retry without animation. No duration timer controls the splash.
+BootSplash uses the existing cutlery asset and paper background. Startup restores
+localization and secure credentials, then reads the current server profile and
+restaurant. Network or configuration failures display retry states; restaurant
+and identity data is never replaced with fabricated defaults. Localization can
+recover to bundled English. Splash transition failures retry without animation.
 
-Stallion uses flavor-specific Android resources and build-setting substitutions in one iOS Info.plist. Android getDefaultReactHost supplies Stallion's JS path only for non-mock releases; Swift uses StallionModule.getBundleURL outside DEBUG. The non-mock release root uses withStallion. JavaScript never chooses Stallion credentials/projects. Mock/Metro development does not initialize the OTA HOC.
+Stallion uses flavor-specific Android resources and build-setting substitutions in one iOS Info.plist. Android getDefaultReactHost supplies Stallion's JS path for release builds; Swift uses StallionModule.getBundleURL outside DEBUG. The release root uses withStallion. JavaScript never chooses Stallion credentials/projects. Metro development does not initialize the OTA HOC.
 
 ## OTA upload and release workflow
 
@@ -166,7 +185,7 @@ After DEV upload, promote in **restoflow-dev**, target the installed native vers
 
 Before PROD upload, confirm API origin, native identities, project ID and signing key in the actual PROD binary. Promote in **restoflow**, target its exact native version and use internal verification followed by an appropriate rollout such as 5% → 20% → 50% → 100%. Monitor adoption/crashes before increasing. Normal releases are non-mandatory.
 
-Mandatory real isolation acceptance: with DEV installed, publish/promote a distinct PROD test release and confirm DEV does not download it; publish DEV and confirm DEV receives it. Verify the inverse with an internal PROD binary. Dashboard/project isolation and actual devices must be checked. These tests are deferred in this mocked setup; no live upload/promotion was performed.
+Mandatory real isolation acceptance: with DEV installed, publish/promote a distinct PROD test release and confirm DEV does not download it; publish DEV and confirm DEV receives it. Verify the inverse with an internal PROD binary. Dashboard/project isolation and actual devices must be checked. Device OTA acceptance remains separate; no live upload/promotion was performed.
 
 ### Recovery
 

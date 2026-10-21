@@ -118,9 +118,7 @@ export function DashboardScreen({
                     navigation.navigate('Customers', { tableId: table.id })
                   }
                   onRemove={
-                    tables.canManage &&
-                    tables.isEditing &&
-                    !table.customers.length
+                    tables.canManage && tables.isEditing && !table.occupied
                       ? () => tables.setTableToRemove(table.id)
                       : undefined
                   }
@@ -135,6 +133,7 @@ export function DashboardScreen({
             {tables.canManage && (
               <AppButton
                 onPress={tables.addTable}
+                loading={tables.busy}
                 icon="plus"
                 variant="secondary"
                 style={styles.add}

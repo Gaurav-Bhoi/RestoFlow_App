@@ -1,80 +1,51 @@
 import { useTranslation } from 'react-i18next';
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useState } from 'react';
 import type { RootScreenProps } from '../../app/navigationTypes';
 import { Screen } from '../../components/Screen';
 import { AppHeader } from '../../components/AppHeader';
-import { AppText } from '../../components/AppText';
 import { AppButton } from '../../components/AppButton';
-import { Icon } from '../../components/Icon';
+import { AppText } from '../../components/AppText';
 import { Notice } from '../../components/Notice';
-import { SuccessState } from '../../components/SuccessState';
-import { colors } from '../../theme/tokens';
 import { useSubscription } from './useSubscription';
-import { PlanCard } from './PlanCard';
-
+import { useSession } from '../auth/SessionProvider';
+import { normalizeApiError } from '../../api/errors';
 export function PurchaseScreen({ navigation }: RootScreenProps<'Purchase'>) {
   const { t } = useTranslation();
-  const { activatePremium } = useSubscription();
-  const handlePurchase = () => {
-    activatePremium();
-    navigation.replace('PurchaseSuccess');
+  const { checkActivation } = useSubscription();
+  const { signOut } = useSession();
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const check = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (await checkActivation()) navigation.popToTop();
+      else setMessage(t('api.activationPending'));
+    } catch (error) {
+      setMessage(normalizeApiError(error).message);
+    } finally {
+      setBusy(false);
+    }
   };
   return (
     <Screen
       header={
         <AppHeader
-          title={t('subscription.keepTheGoodFlow')}
-          subtitle={t('subscription.yourRestaurantWorkspaceAwaits')}
+          title={t('api.subscriptionAccess')}
+          onBack={navigation.goBack}
         />
       }
       footer={
-        <AppButton icon="arrow" iconPosition="after" onPress={handlePurchase}>
-          {t('subscription.continueToPurchase')}
+        <AppButton onPress={check} loading={busy}>
+          {t('api.checkActivation')}
         </AppButton>
       }
     >
-      <PlanCard isPremium daysRemaining={0} progress={1} isPurchase />
-      <View style={styles.info}>
-        <Icon name="info" size={18} color={colors.terracotta} />
-        <AppText style={styles.infoText}>
-          {t(
-            'subscription.priceAndPaymentDetailsComeFromYourSubscriptionProvider',
-          )}
-        </AppText>
-      </View>
-      <Notice icon="shield">
-        {t('subscription.yourTablesTeamAndOrdersRemainReadyToContinue')}
-      </Notice>
+      <Notice icon="shield">{t('api.contactAdministrator')}</Notice>
+      {!!message && <AppText accessibilityRole="alert">{message}</AppText>}
+      <AppButton variant="secondary" onPress={signOut}>
+        {t('api.signOut')}
+      </AppButton>
     </Screen>
   );
 }
-export function PurchaseSuccessScreen({
-  navigation,
-}: RootScreenProps<'PurchaseSuccess'>) {
-  const { t } = useTranslation();
-  return (
-    <Screen header={<AppHeader title={t('subscription.yourSubscription')} />}>
-      <SuccessState
-        title={t('subscription.backInFullFlow')}
-        description={t(
-          'subscription.yourDemoSubscriptionIsActiveYourRestaurantIsReady',
-        )}
-      >
-        <AppButton style={styles.button} onPress={() => navigation.popToTop()}>
-          {t('subscription.continueToDashboard')}
-        </AppButton>
-      </SuccessState>
-    </Screen>
-  );
-}
-const styles = StyleSheet.create({
-  info: {
-    flexDirection: 'row',
-    gap: 10,
-    marginVertical: 24,
-    paddingHorizontal: 3,
-  },
-  infoText: { flex: 1, color: colors.muted, fontSize: 12, lineHeight: 21 },
-  button: { alignSelf: 'stretch' },
-});

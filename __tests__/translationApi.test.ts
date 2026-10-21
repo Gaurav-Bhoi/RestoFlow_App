@@ -36,7 +36,7 @@ test('downloads only known language bundles through our Hono origin', async () =
     async () => response(bundle, { etag: '"bundle"' }),
   );
   const api = createTranslationApi(
-    'https://dev-api.example.test',
+    'https://restoflow-backend-dev.gauravbhoiofficial.workers.dev',
     'development',
     fetcher,
   );
@@ -46,7 +46,7 @@ test('downloads only known language bundles through our Hono origin', async () =
     cacheable: true,
   });
   expect(fetcher.mock.calls[0][0]).toBe(
-    'https://dev-api.example.test/api/v1/i18n/bundle/hi',
+    'https://restoflow-backend-dev.gauravbhoiofficial.workers.dev/api/v1/i18n/bundle/hi',
   );
 });
 test('rejects a PROD response in a DEV build before registering resources', async () => {
@@ -55,7 +55,7 @@ test('rejects a PROD response in a DEV build before registering resources', asyn
   );
   await expect(
     createTranslationApi(
-      'https://dev-api.example.test',
+      'https://restoflow-backend-dev.gauravbhoiofficial.workers.dev',
       'development',
       fetcher,
     ).getBundle('hi'),
@@ -66,7 +66,7 @@ test('revalidates a bundle with its ETag and handles 304', async () => {
     async () => response(null, { status: 304 }),
   );
   const api = createTranslationApi(
-    'https://dev-api.example.test',
+    'https://restoflow-backend-dev.gauravbhoiofficial.workers.dev',
     'development',
     fetcher,
   );
@@ -86,7 +86,7 @@ test.each([
       async () => response(bundle, { cacheControl }),
     );
     const result = await createTranslationApi(
-      'https://dev-api.example.test',
+      'https://restoflow-backend-dev.gauravbhoiofficial.workers.dev',
       'development',
       fetcher,
     ).getBundle('hi');
@@ -111,7 +111,7 @@ test('validates discovery metadata from the API', async () => {
       }),
   );
   const api = createTranslationApi(
-    'https://dev-api.example.test',
+    'https://restoflow-backend-dev.gauravbhoiofficial.workers.dev',
     'development',
     fetcher,
   );
@@ -131,7 +131,7 @@ test('rejects invalid codes without making an HTTP call', async () => {
   );
   await expect(
     createTranslationApi(
-      'https://dev-api.example.test',
+      'https://restoflow-backend-dev.gauravbhoiofficial.workers.dev',
       'development',
       fetcher,
     ).getBundle('../evil'),
@@ -152,19 +152,17 @@ test('never allows external insecure API origins in production', async () => {
   expect(fetcher).not.toHaveBeenCalled();
 });
 
-test('local development calls Wrangler HTTP rather than the translation port', async () => {
-  const fetcher = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>(
-    async () => response(bundle),
-  );
-  await createTranslationApi(
+test('development rejects loopback and Preview origins before fetching', async () => {
+  const fetcher = jest.fn();
+  for (const origin of [
     'http://127.0.0.1:8787',
-    'development',
-    fetcher,
-  ).getBundle('hi');
-  expect(fetcher.mock.calls[0][0]).toBe(
-    'http://127.0.0.1:8787/api/v1/i18n/bundle/hi',
-  );
-  expect(String(fetcher.mock.calls[0][0])).not.toContain(':5000');
+    'https://preview-restoflow-backend-dev.gauravbhoiofficial.workers.dev',
+  ]) {
+    await expect(
+      createTranslationApi(origin, 'development', fetcher).getBundle('hi'),
+    ).rejects.toThrow();
+  }
+  expect(fetcher).not.toHaveBeenCalled();
 });
 
 test('rejects non-HTTP protocols even on a development loopback host', async () => {
@@ -177,7 +175,7 @@ test('rejects non-HTTP protocols even on a development loopback host', async () 
       'development',
       fetcher,
     ).getBundle('hi'),
-  ).rejects.toThrow('Invalid API configuration');
+  ).rejects.toThrow();
   expect(fetcher).not.toHaveBeenCalled();
 });
 
@@ -191,7 +189,7 @@ test('stale bundles remain non-cacheable even if an intermediary sends public ca
       }),
   );
   const result = await createTranslationApi(
-    'https://dev-api.example.test',
+    'https://restoflow-backend-dev.gauravbhoiofficial.workers.dev',
     'development',
     fetcher,
   ).getBundle('hi');

@@ -5,14 +5,14 @@ import { AppText } from '../../components/AppText';
 import { colors, layout } from '../../theme/tokens';
 import { formatCurrency } from '../../utils/currency';
 import type { Dish } from '../restaurant/types';
-import { DishIllustration } from './DishIllustration';
+import { DishImage } from './DishImage';
 
 export function DishCard({ dish }: { dish: Dish }) {
   const { t } = useTranslation();
   return (
     <View style={styles.card}>
       <View style={styles.food}>
-        <DishIllustration id={dish.id} />
+        <DishImage uri={dish.imageUrl} />
       </View>
       <AppText style={styles.title}>{dish.name}</AppText>
       <AppText muted style={styles.description}>
@@ -20,9 +20,9 @@ export function DishCard({ dish }: { dish: Dish }) {
       </AppText>
       <View style={layout.row}>
         <AppText style={styles.price}>{formatCurrency(dish.price)}</AppText>
-        {dish.id === 'coke' ? (
+        {dish.foodType === 'NON_VEG' ? (
           <AppText variant="helper" muted>
-            {t('menu.drink')}
+            {t('api.nonVegetarian')}
           </AppText>
         ) : (
           <View

@@ -1,60 +1,64 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useFeedback } from '../../app/FeedbackProvider';
 import { useSession } from '../auth/SessionProvider';
 import { useRestaurant } from '../restaurant/RestaurantProvider';
-
+import { restaurantApi } from '../../api/restoflow';
+import { normalizeApiError } from '../../api/errors';
 export type TableFilter = 'All tables' | 'Available' | 'Occupied';
 export function useTables() {
   const { t } = useTranslation();
-  const { restaurant, dispatch } = useRestaurant();
+  const { restaurant, refresh } = useRestaurant();
   const { session } = useSession();
   const showFeedback = useFeedback();
   const [filter, setFilter] = useState<TableFilter>('All tables');
   const [isEditing, setIsEditing] = useState(false);
-  const [tableToRemove, setTableToRemove] = useState<number | null>(null);
+  const [tableToRemove, setTableToRemove] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const pending = useRef(false);
   const canManage = session?.role === 'owner';
-  const occupiedCount = restaurant.tables.filter(
-    table => table.customers.length > 0,
-  ).length;
-  const guestCount = restaurant.tables.reduce(
-    (total, table) => total + table.customers.length,
-    0,
-  );
   const visibleTables = restaurant.tables.filter(
     table =>
       filter === 'All tables' ||
-      (filter === 'Occupied'
-        ? table.customers.length > 0
-        : table.customers.length === 0),
+      (filter === 'Occupied' ? table.occupied : !table.occupied),
   );
-  function addTable() {
-    if (!canManage) {
-      return;
+  async function mutate(operation: () => Promise<void>) {
+    if (!canManage || pending.current) return;
+    pending.current = true;
+    setBusy(true);
+    try {
+      await operation();
+      await refresh();
+    } catch (error) {
+      showFeedback(normalizeApiError(error).message);
+    } finally {
+      pending.current = false;
+      setBusy(false);
     }
-    dispatch({ type: 'addTable' });
-    setFilter('All tables');
-    showFeedback(
-      t('dashboard.tableValueAdded', { value0: restaurant.nextTableId }),
-    );
   }
-  function removeTable() {
-    if (!canManage || !tableToRemove) {
-      return;
-    }
-    const table = restaurant.tables.find(item => item.id === tableToRemove);
-    if (!table || table.customers.length > 0) {
-      return;
-    }
-    dispatch({ type: 'removeTable', tableId: tableToRemove });
-    setTableToRemove(null);
-    showFeedback(t('dashboard.tableRemoved'));
+  async function addTable() {
+    await mutate(async () => {
+      const value = await restaurantApi.createTable(restaurant.id);
+      setFilter('All tables');
+      showFeedback(
+        t('dashboard.tableValueAdded', { value0: value.tableNumber }),
+      );
+    });
+  }
+  async function removeTable() {
+    if (!tableToRemove) return;
+    await mutate(async () => {
+      await restaurantApi.deleteTable(restaurant.id, tableToRemove);
+      setTableToRemove(null);
+      showFeedback(t('dashboard.tableRemoved'));
+    });
   }
   return {
     restaurant,
     canManage,
-    occupiedCount,
-    guestCount,
+    busy,
+    occupiedCount: restaurant.dashboard?.occupiedTables ?? 0,
+    guestCount: restaurant.dashboard?.guestCount ?? 0,
     visibleTables,
     filter,
     setFilter,

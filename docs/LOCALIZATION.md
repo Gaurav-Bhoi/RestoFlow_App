@@ -29,9 +29,14 @@ RESTOFLOW_DEV_API_URL="$DEV_HONO_ORIGIN" \
 RESTOFLOW_PROD_API_URL="$PROD_HONO_ORIGIN" npm run i18n:configure
 ```
 
-API origins now live in `.env.development` and `.env.production`, accessed through `src/config/env.ts`. Native flavor/configuration selects the environment, including DEV release builds; `__DEV__` never selects the backend. The setup above updates those env files and preserves omitted values. Empty origins are rejected. Both environments currently use `MOCK_API=true`, which prevents backend requests; set it to `false` after configuring the selected service and rebuild.
-
-For local DEV use `http://10.0.2.2:8787` on an Android emulator or `http://127.0.0.1:8787` on iOS Simulator. For a connected Android device use `adb reverse tcp:8787 tcp:8787` with the loopback origin. Only the Hono port 8787 belongs in mobile configuration; translation port 5000 remains server-side. PROD retains a clear placeholder until supplied. DEV and PROD must have different origins. Cache namespaces use native environment plus API origin.
+API origins live in `.env.development` and `.env.production` and are pinned in
+`config/environments.json`. Development uses
+`https://restoflow-backend-dev.gauravbhoiofficial.workers.dev`; production uses
+`https://restoflow-backend.gauravbhoiofficial.workers.dev`. Runtime and build
+validation reject local origins, the other environment, and Preview URLs.
+Native configuration selects the environment, including release bundles.
+There is no mock mode or development fallback. Cache namespaces use native
+environment plus API origin. Translation port 5000 remains server-side.
 
 Never add a translation server URL or secret to this repository. Cached languages
 start offline, missing keys fall back to English, and RTL changes request a normal

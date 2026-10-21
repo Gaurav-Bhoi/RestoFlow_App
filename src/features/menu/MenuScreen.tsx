@@ -9,14 +9,17 @@ import { AppText } from '../../components/AppText';
 import { Icon } from '../../components/Icon';
 import { colors } from '../../theme/tokens';
 import type { MenuCategory } from '../restaurant/types';
-import { categories, filterMenu } from './menuData';
+import { menuCategories, filterMenu } from './menuData';
+import { useRestaurant } from '../restaurant/RestaurantProvider';
 import { DishCard } from './DishCard';
 
 export function MenuScreen() {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<MenuCategory>('All');
-  const dishes = filterMenu(search, category);
+  const { restaurant } = useRestaurant();
+  const categories = menuCategories(restaurant.menu);
+  const dishes = filterMenu(restaurant.menu, search, category);
   return (
     <Screen
       hasTabs
@@ -40,7 +43,7 @@ export function MenuScreen() {
       <FilterChips
         options={categories.map(value => ({
           value,
-          label: t(`menu.${value.toLowerCase()}`),
+          label: value === 'All' ? t('menu.all') : value,
         }))}
         selected={category}
         onSelect={setCategory}

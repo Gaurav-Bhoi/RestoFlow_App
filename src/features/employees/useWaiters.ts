@@ -1,35 +1,39 @@
-import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRestaurant } from '../restaurant/RestaurantProvider';
 import { useSession } from '../auth/SessionProvider';
-import { isValidPhone, normalizePhone } from '../auth/validation';
-
+import { restaurantApi } from '../../api/restoflow';
+import { normalizeApiError } from '../../api/errors';
+import { toE164Phone } from '../auth/validation';
+import type { ProfilePhoto } from '../restaurant/types';
 export function useWaiters() {
-  const { t } = useTranslation();
-  const { restaurant, dispatch } = useRestaurant();
+  const { restaurant, refresh } = useRestaurant();
   const { session } = useSession();
   const [error, setError] = useState('');
-  function addWaiter(name: string, phoneInput: string, photo?: string) {
-    if (session?.role !== 'owner') {
+  const [busy, setBusy] = useState(false);
+  const pending = useRef(false);
+  async function addWaiter(name: string, phone: string, photo?: ProfilePhoto) {
+    if (session?.role !== 'owner' || pending.current) return false;
+    pending.current = true;
+    setBusy(true);
+    setError('');
+    try {
+      if (name.trim().length < 2)
+        throw new Error('Enter the waiter’s full name.');
+      await restaurantApi.createWaiter(
+        restaurant.id,
+        name.trim(),
+        toE164Phone(phone),
+        photo,
+      );
+      await refresh().catch(() => undefined);
+      return true;
+    } catch (cause) {
+      setError(normalizeApiError(cause).message);
       return false;
+    } finally {
+      pending.current = false;
+      setBusy(false);
     }
-    const phone = normalizePhone(phoneInput);
-    if (!name.trim() || !isValidPhone(phone)) {
-      setError(t('employees.addANameAndValidMobileNumber'));
-      return false;
-    }
-    if (
-      phone === restaurant.phone ||
-      restaurant.waiters.some(waiter => waiter.phone === phone)
-    ) {
-      setError(t('employees.thisMobileNumberAlreadyBelongsToAnAccount'));
-      return false;
-    }
-    dispatch({
-      type: 'addWaiter',
-      waiter: { name: name.trim(), phone, photo },
-    });
-    return true;
   }
-  return { waiters: restaurant.waiters, error, addWaiter };
+  return { waiters: restaurant.waiters, error, busy, addWaiter };
 }

@@ -1,59 +1,189 @@
-import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRestaurant } from '../restaurant/RestaurantProvider';
 import { useSession } from '../auth/SessionProvider';
-import type { DishId } from '../restaurant/types';
+import { restaurantApi } from '../../api/restoflow';
+import { normalizeApiError } from '../../api/errors';
+import type { ApiOrder } from '../../api/types';
+import type { OrderItems } from '../restaurant/types';
 import {
-  calculateOrderTotal,
-  countOrderItems,
   changeQuantity,
+  countOrderItems,
+  paiseMoney,
+  pricePaise,
 } from './orderCalculations';
-
-export function useOrderDraft(tableId: number, customerId?: string) {
-  const { t } = useTranslation();
-  const { restaurant, dispatch } = useRestaurant();
+interface DraftLine {
+  key: string;
+  dishId: string | null;
+  itemId?: string;
+  name: string;
+  unitPrice: string;
+  imageUrl?: string;
+}
+export function useOrderDraft(tableId: string, customerId?: string) {
+  const { restaurant, refresh } = useRestaurant();
   const { session } = useSession();
-  const table = restaurant.tables.find(item => item.id === tableId);
-  const existingOrder = table?.customers.find(order => order.id === customerId);
-  const [initialOrder] = useState(() => ({
-    name: existingOrder?.name ?? '',
-    items: { ...existingOrder?.items },
-  }));
-  const [name, setName] = useState(initialOrder.name);
-  const [items, setItems] = useState(initialOrder.items);
+  const table = restaurant.tables.find(value => value.id === tableId);
+  const [original, setOriginal] = useState<ApiOrder | null>(null);
+  const [name, setName] = useState('');
+  const [items, setItems] = useState<OrderItems>({});
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(!!customerId);
+  const [busy, setBusy] = useState(false);
+  const pending = useRef(false);
+  const initial = useRef({ name: '', items: {} as OrderItems });
+  const load = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!customerId) return;
+      setLoading(true);
+      setOriginal(null);
+      try {
+        const order = await restaurantApi.getOrder(
+          restaurant.id,
+          customerId,
+          signal,
+        );
+        if (signal?.aborted) return;
+        if (order.tableId !== tableId || order.closedAt)
+          throw new Error('This customer order is no longer active.');
+        const quantities = Object.fromEntries(
+          order.items.map(item => [item.id, item.quantity]),
+        );
+        initial.current = { name: order.customerName ?? '', items: quantities };
+        setOriginal(order);
+        setName(order.customerName ?? '');
+        setItems(quantities);
+        setError('');
+      } catch (cause) {
+        if (!signal?.aborted) setError(normalizeApiError(cause).message);
+      } finally {
+        if (!signal?.aborted) setLoading(false);
+      }
+    },
+    [customerId, restaurant.id, tableId],
+  );
+  useEffect(() => {
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
+  const lines = useMemo<DraftLine[]>(() => {
+    const snapshots = (original?.items ?? []).map(item => ({
+      key: item.id,
+      itemId: item.id,
+      dishId: item.dishId,
+      name: item.name,
+      unitPrice: item.unitPrice,
+      imageUrl: restaurant.menu.find(dish => dish.id === item.dishId)?.imageUrl,
+    }));
+    const existingIds = new Set(snapshots.map(item => item.dishId));
+    return [
+      ...snapshots,
+      ...restaurant.menu
+        .filter(dish => dish.available && !existingIds.has(dish.id))
+        .map(dish => ({
+          key: dish.id,
+          dishId: dish.id,
+          name: dish.name,
+          unitPrice: dish.price.toFixed(2),
+          imageUrl: dish.imageUrl,
+        })),
+    ];
+  }, [original, restaurant.menu]);
+  const selectedLines = lines
+    .filter(line => (items[line.key] ?? 0) > 0)
+    .map(line => ({
+      ...line,
+      quantity: items[line.key],
+      lineTotal: paiseMoney(
+        pricePaise(line.unitPrice) * BigInt(items[line.key]),
+      ),
+    }));
+  const total = paiseMoney(
+    selectedLines.reduce(
+      (sum, line) => sum + pricePaise(line.unitPrice) * BigInt(line.quantity),
+      0n,
+    ),
+  );
   const isDirty =
-    name !== initialOrder.name ||
-    JSON.stringify(items) !== JSON.stringify(initialOrder.items);
-  function updateQuantity(id: DishId, change: number) {
-    setItems(currentItems => changeQuantity(currentItems, id, change));
-    setError('');
-  }
-  function saveOrder() {
-    if (session?.role !== 'waiter' || !table) {
-      return false;
+    name !== initial.current.name ||
+    JSON.stringify(items) !== JSON.stringify(initial.current.items);
+  function updateQuantity(id: string, change: number) {
+    if (!busy) {
+      setItems(current => changeQuantity(current, id, change));
+      setError('');
     }
+  }
+  async function saveOrder() {
+    if (session?.role !== 'waiter' || !table || pending.current || loading)
+      return false;
     if (!name.trim()) {
-      setError(t('orders.addTheCustomerSNameBeforeConfirming'));
+      setError('Add the customer’s name before confirming.');
       return false;
     }
     if (!countOrderItems(items)) {
-      setError(t('orders.addAtLeastOneDishBeforeConfirming'));
+      setError('Add at least one dish before confirming.');
       return false;
     }
-    dispatch({
-      type: 'saveOrder',
-      tableId,
-      order: {
-        id:
-          existingOrder?.id ??
-          `guest-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        name: name.trim(),
-        items: { ...items },
-      },
-    });
-    return true;
+    if (selectedLines.length > 100) {
+      setError('Orders can contain at most 100 items.');
+      return false;
+    }
+    pending.current = true;
+    setBusy(true);
+    setError('');
+    try {
+      if (original) {
+        if (name.trim() !== original.customerName)
+          await restaurantApi.renameOrder(
+            restaurant.id,
+            original.id,
+            name.trim(),
+          );
+        for (const item of original.items) {
+          const quantity = items[item.id] ?? 0;
+          if (quantity === 0)
+            await restaurantApi.removeItem(restaurant.id, original.id, item.id);
+          else if (quantity !== item.quantity)
+            await restaurantApi.updateItem(
+              restaurant.id,
+              original.id,
+              item.id,
+              quantity,
+            );
+        }
+        for (const line of selectedLines.filter(
+          value => !value.itemId && value.dishId,
+        ))
+          await restaurantApi.addItem(
+            restaurant.id,
+            original.id,
+            line.dishId!,
+            line.quantity,
+          );
+      } else {
+        await restaurantApi.createOrder(
+          restaurant.id,
+          tableId,
+          name.trim(),
+          selectedLines.map(line => ({
+            dishId: line.dishId!,
+            quantity: line.quantity,
+          })),
+        );
+      }
+      // The mutation is confirmed by the server even if the floor reload fails.
+      await refresh().catch(() => undefined);
+      return true;
+    } catch (cause) {
+      const message = normalizeApiError(cause).message;
+      if (original) await load();
+      setError(message);
+      return false;
+    } finally {
+      pending.current = false;
+      setBusy(false);
+    }
   }
   return {
     name,
@@ -63,10 +193,19 @@ export function useOrderDraft(tableId: number, customerId?: string) {
     setSearch,
     error,
     isDirty,
-    isEditing: !!existingOrder,
-    isAvailable: !!table && (!customerId || !!existingOrder),
+    isEditing: !!customerId,
+    isAvailable: !!table && (!customerId || original?.id === customerId),
+    loading,
+    busy,
+    retry: load,
+    tableNumber: table?.number,
+    lines,
+    selectedLines,
+    visibleLines: lines.filter(line =>
+      line.name.toLowerCase().includes(search.trim().toLowerCase()),
+    ),
     itemCount: countOrderItems(items),
-    total: calculateOrderTotal(items),
+    total,
     updateQuantity,
     saveOrder,
   };

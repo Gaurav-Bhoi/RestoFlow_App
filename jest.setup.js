@@ -16,9 +16,8 @@ jest.mock('@react-native-async-storage/async-storage', () => {
 });
 jest.mock('react-native-config', () => ({
   APP_ENV: 'development',
-  API_BASE_URL: 'http://10.0.2.2:8787',
+  API_BASE_URL: 'https://restoflow-backend-dev.gauravbhoiofficial.workers.dev',
   ENABLE_API_LOGS: 'false',
-  MOCK_API: 'true',
 }));
 jest.mock('react-native-mmkv', () => {
   const values = new Map();
@@ -45,7 +44,8 @@ jest.mock('react-native-stallion', () => ({
   withStallion: component => component,
 }));
 
-beforeEach(() => {
+beforeEach(async () => {
+  await require('./src/services/auth/credentials').clearCredentials();
   require('./src/services/storage/storage').storage.clear();
   const { store } = require('./src/store');
   const { signedOut } = require('./src/store/slices/sessionSlice');
@@ -57,3 +57,13 @@ jest.mock('react-native-print', () => ({
 jest.mock('react-native-image-picker', () => ({
   launchImageLibrary: jest.fn(async () => ({ didCancel: true })),
 }));
+
+jest.mock('react-native-keychain', () => {
+  const values = new Map();
+  return {
+    ACCESSIBLE: { WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'WhenUnlockedThisDeviceOnly' },
+    getGenericPassword: jest.fn(async ({ service }) => values.get(service) ?? false),
+    setGenericPassword: jest.fn(async (username, password, { service }) => { values.set(service, { username, password }); return { service }; }),
+    resetGenericPassword: jest.fn(async ({ service }) => { values.delete(service); return true; }),
+  };
+});

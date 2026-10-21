@@ -17,7 +17,7 @@ export function SubscriptionScreen({
 }: RootScreenProps<'Subscription'>) {
   const { t } = useTranslation();
   const { restaurant } = useRestaurant();
-  const { daysRemaining, isExpired, progress } = useSubscription();
+  const { daysRemaining, isExpired, progress, trialDays } = useSubscription();
   const details = [
     {
       label: t('subscription.planStatus'),
@@ -50,6 +50,7 @@ export function SubscriptionScreen({
         isPremium={restaurant.isPremium}
         daysRemaining={daysRemaining}
         progress={progress}
+        trialDays={trialDays}
       />
       <View style={styles.details}>
         {details.map(detail => (

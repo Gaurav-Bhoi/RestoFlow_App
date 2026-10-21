@@ -1,32 +1,136 @@
-import React, { createContext, useContext, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import React, {
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import type { Session } from '../restaurant/types';
+import type { AuthResult } from '../../api/types';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { signedIn, signedOut } from '../../store/slices/sessionSlice';
-
+import {
+  clearCredentials,
+  getCredentials,
+  saveTokens,
+} from '../../services/auth/credentials';
+import { authApi, profileSession } from '../../api/restoflow';
+import { registerSessionExpiredHandler } from '../../api/client';
+import { normalizeApiError } from '../../api/errors';
+import { EmptyState } from '../../components/EmptyState';
+import { AppButton } from '../../components/AppButton';
+import { hideStartupSplash } from '../../app/bootstrap';
+import { useFeedback } from '../../app/FeedbackProvider';
 interface SessionContextValue {
   session: Session | null;
-  signIn: (session: Session) => void;
-  signOut: () => void;
+  signIn: (result: AuthResult) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 const SessionContext = createContext<SessionContextValue | null>(null);
 export function SessionProvider({ children }: React.PropsWithChildren) {
+  const { t } = useTranslation();
   const session = useAppSelector(state => state.session.current);
   const dispatch = useAppDispatch();
-  const signIn = useCallback(
-    (value: Session) => dispatch(signedIn(value)),
+  const showFeedback = useFeedback();
+  const [loading, setLoading] = useState(true);
+  const [restoreError, setRestoreError] = useState('');
+  const [attempt, setAttempt] = useState(0);
+  const revision = useRef(0);
+  useEffect(
+    () =>
+      registerSessionExpiredHandler(() => {
+        revision.current += 1;
+        dispatch(signedOut());
+      }),
     [dispatch],
   );
-  const signOut = useCallback(() => dispatch(signedOut()), [dispatch]);
+  const signIn = useCallback(
+    async (result: AuthResult) => {
+      const value = profileSession(result);
+      const expected = ++revision.current;
+      await saveTokens(result);
+      if (revision.current !== expected) return;
+      dispatch(signedIn(value));
+      setRestoreError('');
+    },
+    [dispatch],
+  );
+  const signOut = useCallback(async () => {
+    revision.current += 1;
+    try {
+      if (await getCredentials()) await authApi.logout();
+    } catch (error) {
+      showFeedback(normalizeApiError(error).message);
+    } finally {
+      try {
+        await clearCredentials();
+      } catch {
+        showFeedback(t('api.clearSessionFailed'));
+      }
+      dispatch(signedOut());
+      setRestoreError('');
+    }
+  }, [dispatch, showFeedback, t]);
+  useEffect(() => {
+    const controller = new AbortController();
+    const expectedRevision = revision.current;
+    setLoading(true);
+    setRestoreError('');
+    (async () => {
+      const credentials = await getCredentials();
+      if (!credentials) return;
+      const profile = await authApi.me(controller.signal);
+      if (!controller.signal.aborted && expectedRevision === revision.current)
+        dispatch(signedIn(profileSession(profile)));
+    })()
+      .catch(error => {
+        if (!controller.signal.aborted && expectedRevision === revision.current)
+          setRestoreError(normalizeApiError(error).message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+          hideStartupSplash();
+        }
+      });
+    return () => controller.abort();
+  }, [attempt, dispatch]);
   return (
     <SessionContext.Provider value={{ session, signIn, signOut }}>
-      {children}
+      {loading ? (
+        <View style={styles.loading}>
+          <ActivityIndicator accessibilityLabel={t('api.restoringSession')} />
+        </View>
+      ) : restoreError ? (
+        <View style={styles.error}>
+          <EmptyState
+            title={t('api.restoreFailed')}
+            description={restoreError}
+            action={{
+              label: t('api.retry'),
+              onPress: () => setAttempt(value => value + 1),
+            }}
+          />
+          <AppButton variant="secondary" onPress={signOut}>
+            {t('api.signOut')}
+          </AppButton>
+        </View>
+      ) : (
+        children
+      )}
     </SessionContext.Provider>
   );
 }
 export function useSession() {
   const context = useContext(SessionContext);
-  if (!context) {
-    throw new Error('useSession requires SessionProvider');
-  }
+  if (!context) throw new Error('useSession requires SessionProvider');
   return context;
 }
+
+const styles = StyleSheet.create({
+  loading: { flex: 1, justifyContent: 'center' },
+  error: { flex: 1, justifyContent: 'center', padding: 24 },
+});

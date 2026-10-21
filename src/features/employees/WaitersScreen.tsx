@@ -42,7 +42,7 @@ export function WaitersScreen({ navigation }: RootScreenProps<'Waiters'>) {
               <View style={styles.details}>
                 <AppText style={styles.name}>{waiter.name}</AppText>
                 <AppText muted variant="small">
-                  +91 {waiter.phone}
+                  {waiter.phone}
                 </AppText>
               </View>
               <Badge>{t('employees.waiter')}</Badge>

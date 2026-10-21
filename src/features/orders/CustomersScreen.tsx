@@ -42,7 +42,7 @@ export function CustomersScreen({
     <Screen
       header={
         <AppHeader
-          title={t('orders.tableValue', { value0: table.id })}
+          title={t('orders.tableValue', { value0: table.number })}
           subtitle={t(isOwner ? 'orders.guestsOwner' : 'orders.guestsWaiter', {
             count: table.customers.length,
           })}

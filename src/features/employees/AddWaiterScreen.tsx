@@ -20,10 +20,10 @@ export function AddWaiterScreen({ navigation }: RootScreenProps<'AddWaiter'>) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const { photo, selectPhoto } = useProfilePhoto();
-  const { error, addWaiter } = useWaiters();
+  const { error, busy, addWaiter } = useWaiters();
   const showFeedback = useFeedback();
-  const handleAddWaiter = () => {
-    if (addWaiter(name, phone, photo)) {
+  const handleAddWaiter = async () => {
+    if (await addWaiter(name, phone, photo)) {
       navigation.goBack();
       showFeedback(
         t('employees.valueAddedToYourTeam', { value0: name.trim() }),
@@ -48,13 +48,17 @@ export function AddWaiterScreen({ navigation }: RootScreenProps<'AddWaiter'>) {
           >
             {t('employees.cancel')}
           </AppButton>
-          <AppButton onPress={handleAddWaiter} style={styles.submit}>
+          <AppButton
+            loading={busy}
+            onPress={handleAddWaiter}
+            style={styles.submit}
+          >
             {t('employees.addWaiter')}
           </AppButton>
         </View>
       }
     >
-      <PhotoPicker photo={photo} onPress={selectPhoto} />
+      <PhotoPicker photo={photo?.uri} onPress={selectPhoto} />
       <AppInput
         label={t('employees.waiterName')}
         value={name}

@@ -11,25 +11,61 @@ import { useResponsiveLayout } from '../../hooks/useResponsiveLayout';
 import type { RootScreenProps } from '../../app/navigationTypes';
 import { normalizePhone } from './validation';
 import { useAuth } from './useAuth';
+import { normalizeApiError } from '../../api/errors';
+import { OtpFields, type PendingOtp } from './OtpFields';
 
 export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
   const { t } = useTranslation();
-  const [phone, setPhone] = useState('9876543210');
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { checkPhone, login, requestLogin } = useAuth();
+  const [challenge, setChallenge] = useState<PendingOtp>();
+  const [otp, setOtp] = useState('');
+  const [busy, setBusy] = useState(false);
   const { contentWidth } = useResponsiveLayout(contentWidths.form);
   const artWidth = Math.min(320, contentWidth - 26);
   const [headline, ...headlineRest] = t('auth.serviceMadeSimple').split('\n');
-  const handleContinue = () => {
+  const requestCode = async () => {
+    const requested = await requestLogin(phone);
+    setChallenge({ ...requested, requestedAt: Date.now() });
+    setOtp('');
+  };
+  const handleContinue = async () => {
+    if (busy) return;
+    setBusy(true);
     setError('');
     try {
-      if (!login(phone)) {
-        navigation.navigate('Registration', { phone: normalizePhone(phone) });
+      if (challenge) {
+        if (!/^\d{6}$/.test(otp))
+          throw new Error('Enter the six-digit verification code.');
+        await login(challenge.challengeId, otp);
+      } else {
+        const { registered } = await checkPhone(phone);
+        if (registered) await requestCode();
+        else
+          navigation.navigate('Registration', { phone: normalizePhone(phone) });
       }
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : t('auth.pleaseTryAgain'),
-      );
+      const failure = normalizeApiError(cause);
+      if (failure.code === 'ACCOUNT_NOT_FOUND') {
+        setChallenge(undefined);
+        setOtp('');
+      }
+      setError(failure.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const resend = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await requestCode();
+      setError('');
+    } catch (cause) {
+      setError(normalizeApiError(cause).message);
+    } finally {
+      setBusy(false);
     }
   };
   return (
@@ -59,9 +95,12 @@ export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
       <AppInput
         label={t('auth.yourMobileNumber')}
         isPhone
+        editable={!busy}
         value={phone}
         onChangeText={value => {
           setPhone(normalizePhone(value));
+          setChallenge(undefined);
+          setOtp('');
           setError('');
         }}
         placeholder={t('auth.enter10DigitNumber')}
@@ -70,6 +109,15 @@ export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
         returnKeyType="done"
         onSubmitEditing={handleContinue}
       />
+      {challenge && (
+        <OtpFields
+          challenge={challenge}
+          value={otp}
+          onChange={setOtp}
+          onResend={resend}
+          busy={busy}
+        />
+      )}
       <View style={styles.errorSpace}>
         {!!error && (
           <AppText
@@ -86,8 +134,9 @@ export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
         assetIcon="arrow-light"
         iconPosition="after"
         onPress={handleContinue}
+        loading={busy}
       >
-        {t('auth.continue')}
+        {challenge ? t('api.verifySignIn') : t('auth.continue')}
       </AppButton>
       <AppText variant="caption" muted style={styles.fine}>
         {t('auth.yourNumberConnectsYouToYourRestaurantNoPasswords')}

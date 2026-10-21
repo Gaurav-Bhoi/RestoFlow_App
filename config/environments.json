@@ -6,7 +6,8 @@
     "displayName": "RestoFlow Dev",
     "iosScheme": "RestoFlowDev",
     "stallionProject": "restoflow-dev",
-    "stallionProjectId": "6aca897a03fc44c9897cf2b5"
+    "stallionProjectId": "6aca897a03fc44c9897cf2b5",
+    "apiOrigin": "https://restoflow-backend-dev.gauravbhoiofficial.workers.dev"
   },
   "production": {
     "envFile": ".env.production",
@@ -15,6 +16,7 @@
     "displayName": "RestoFlow",
     "iosScheme": "RestoFlowProd",
     "stallionProject": "restoflow",
-    "stallionProjectId": "6aca880b9f76d8bbbc714eef"
+    "stallionProjectId": "6aca880b9f76d8bbbc714eef",
+    "apiOrigin": "https://restoflow-backend.gauravbhoiofficial.workers.dev"
   }
 }

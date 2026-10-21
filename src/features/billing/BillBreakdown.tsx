@@ -4,12 +4,11 @@ import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
 import { colors, layout } from '../../theme/tokens';
 import { formatCurrency } from '../../utils/currency';
-import type { OrderItems } from '../restaurant/types';
-import { calculateOrderTotal, orderLines } from '../orders/orderCalculations';
+import type { ApiBill } from '../../api/types';
 
-export function BillBreakdown({ items }: { items: OrderItems }) {
+export function BillBreakdown({ bill }: { bill: ApiBill }) {
   const { t } = useTranslation('translation', { lng: 'en' });
-  const total = calculateOrderTotal(items);
+  const total = bill.total;
   return (
     <>
       <View style={styles.columns}>
@@ -26,14 +25,16 @@ export function BillBreakdown({ items }: { items: OrderItems }) {
           {t('billing.amount')}
         </AppText>
       </View>
-      {orderLines(items).map(line => (
-        <View style={styles.billRow} key={line.dish.id}>
-          <AppText style={styles.item}>{line.dish.name}</AppText>
+      {bill.items.map((line, index) => (
+        <View style={styles.billRow} key={index}>
+          <AppText style={styles.item}>{line.name}</AppText>
           <AppText style={styles.quantity}>{line.quantity}</AppText>
           <AppText style={styles.price}>
-            {formatCurrency(line.dish.price)}
+            {formatCurrency(line.unitPrice)}
           </AppText>
-          <AppText style={styles.amount}>{formatCurrency(line.amount)}</AppText>
+          <AppText style={styles.amount}>
+            {formatCurrency(line.lineTotal)}
+          </AppText>
         </View>
       ))}
       <View style={styles.totals}>
@@ -42,15 +43,7 @@ export function BillBreakdown({ items }: { items: OrderItems }) {
             {t('billing.subtotal')}
           </AppText>
           <AppText muted variant="small">
-            {formatCurrency(total)}
-          </AppText>
-        </View>
-        <View style={[layout.row, styles.tax]}>
-          <AppText muted variant="small">
-            {t('billing.taxesCharges')}
-          </AppText>
-          <AppText muted variant="small">
-            ₹0
+            {formatCurrency(bill.subtotal)}
           </AppText>
         </View>
         <View style={[layout.row, styles.grand]}>

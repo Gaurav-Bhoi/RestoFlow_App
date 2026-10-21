@@ -18,8 +18,6 @@ import { Screen } from '../../components/Screen';
 import { SearchInput } from '../../components/SearchInput';
 import { colors, layout } from '../../theme/tokens';
 import { formatCurrency } from '../../utils/currency';
-import { filterMenu } from '../menu/menuData';
-import { orderLines } from './orderCalculations';
 import { OrderDishRow } from './OrderDishRow';
 import { useOrderDraft } from './useOrderDraft';
 
@@ -43,15 +41,36 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
       }
     }
   }, [canLeave, navigation, pendingAction]);
-  function handleConfirm() {
-    if (draft.saveOrder()) {
+  async function handleConfirm() {
+    if (await draft.saveOrder()) {
       showFeedback(
         t('orders.orderSavedForValue', { value0: draft.name.trim() }),
       );
       setCanLeave(true);
     }
   }
-  const dishes = filterMenu(draft.search);
+  const dishes = draft.visibleLines;
+  if (draft.loading)
+    return (
+      <Screen>
+        <AppText>{t('api.loadingOrder')}</AppText>
+      </Screen>
+    );
+  if (draft.error && !draft.isAvailable)
+    return (
+      <Screen>
+        <EmptyState
+          title={t('api.loadOrderFailed')}
+          description={draft.error}
+          action={{
+            label: t('api.retry'),
+            onPress: () => {
+              draft.retry();
+            },
+          }}
+        />
+      </Screen>
+    );
   if (!draft.isAvailable) {
     return (
       <Screen>
@@ -75,7 +94,7 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
               draft.isEditing ? t('orders.editOrder') : t('orders.newCustomer')
             }
             subtitle={t('orders.tableValueWaiter', {
-              value0: route.params.tableId,
+              value0: draft.tableNumber,
             })}
             onBack={navigation.goBack}
           />
@@ -94,6 +113,7 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
             </View>
             <AppButton
               disabled={!draft.itemCount}
+              loading={draft.busy}
               onPress={handleConfirm}
               icon="check"
               iconPosition="after"
@@ -121,10 +141,10 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
         />
         {dishes.map(dish => (
           <OrderDishRow
-            key={dish.id}
+            key={dish.key}
             dish={dish}
-            quantity={draft.items[dish.id] ?? 0}
-            onChange={change => draft.updateQuantity(dish.id, change)}
+            quantity={draft.items[dish.key] ?? 0}
+            onChange={change => draft.updateQuantity(dish.key, change)}
           />
         ))}
         {!dishes.length && (
@@ -137,13 +157,13 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
             {t('orders.orderSummary')}
           </AppText>
           {draft.itemCount ? (
-            orderLines(draft.items).map(line => (
-              <View key={line.dish.id} style={[layout.row, styles.summaryLine]}>
+            draft.selectedLines.map(line => (
+              <View key={line.key} style={[layout.row, styles.summaryLine]}>
                 <AppText muted variant="small">
-                  {line.dish.name} × {line.quantity}
+                  {line.name} × {line.quantity}
                 </AppText>
                 <AppText muted variant="small">
-                  {formatCurrency(line.amount)}
+                  {formatCurrency(line.lineTotal)}
                 </AppText>
               </View>
             ))

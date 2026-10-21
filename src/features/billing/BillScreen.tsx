@@ -11,14 +11,34 @@ import { Icon } from '../../components/Icon';
 import { Notice } from '../../components/Notice';
 import { colors, layout } from '../../theme/tokens';
 import { formatDate } from '../../utils/date';
-import { countOrderItems } from '../orders/orderCalculations';
 import { useCustomerBill } from './useCustomerBill';
 import { BillBreakdown } from './BillBreakdown';
 
 export function BillScreen({ navigation, route }: RootScreenProps<'Bill'>) {
   const { t } = useTranslation();
   const bill = useCustomerBill(route.params.tableId, route.params.customerId);
-  if (!bill.order) {
+  if (bill.loading)
+    return (
+      <Screen>
+        <AppText>{t('api.loadingBill')}</AppText>
+      </Screen>
+    );
+  if (bill.error)
+    return (
+      <Screen>
+        <EmptyState
+          title={t('api.loadBillFailed')}
+          description={bill.error}
+          action={{
+            label: t('api.retry'),
+            onPress: () => {
+              bill.retry();
+            },
+          }}
+        />
+      </Screen>
+    );
+  if (!bill.order || !bill.bill) {
     return (
       <Screen>
         <EmptyState
@@ -60,8 +80,11 @@ export function BillScreen({ navigation, route }: RootScreenProps<'Bill'>) {
         <AppText style={styles.name}>{bill.order.name}</AppText>
         <AppText style={styles.details}>
           {t('billing.tableValueValueItems', {
-            value0: route.params.tableId,
-            value1: countOrderItems(bill.order.items),
+            value0: bill.tableNumber,
+            value1: bill.order.items.reduce(
+              (count, item) => count + item.quantity,
+              0,
+            ),
           })}
         </AppText>
         <View style={[layout.row, styles.dateRow]}>
@@ -74,7 +97,7 @@ export function BillScreen({ navigation, route }: RootScreenProps<'Bill'>) {
           </AppText>
         </View>
       </View>
-      <BillBreakdown items={bill.order.items} />
+      <BillBreakdown bill={bill.bill} />
       <View style={styles.notice}>
         <Notice>
           {t('billing.thisBillIncludesOnlyValueSOrder', {

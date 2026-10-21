@@ -15,19 +15,26 @@ export function PrintSuccessScreen({
 }: RootScreenProps<'PrintSuccess'>) {
   const { t } = useTranslation();
   const bill = useCustomerBill(route.params.tableId, route.params.customerId);
-  const handleFinishVisit = () => {
-    bill.finishVisit();
-    navigation.popToTop();
+  const handleFinishVisit = async () => {
+    if (await bill.finishVisit()) navigation.popToTop();
   };
   return (
     <Screen header={<AppHeader title={t('billing.receiptSent')} />}>
+      {!!bill.error && (
+        <AppText accessibilityRole="alert">{bill.error}</AppText>
+      )}
       <SuccessState
         title={t('billing.readyForTheNextGuest')}
         description={t(
           'billing.thePrintServiceWasOpenedConfirmTheReceiptPrinted',
         )}
       >
-        <AppButton onPress={handleFinishVisit} style={styles.button}>
+        <AppButton
+          loading={bill.isFinishing}
+          disabled={bill.loading || !!bill.error}
+          onPress={handleFinishVisit}
+          style={styles.button}
+        >
           {t('billing.finishCustomerVisit')}
         </AppButton>
         <AppButton

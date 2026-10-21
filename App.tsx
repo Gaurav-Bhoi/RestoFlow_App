@@ -8,7 +8,6 @@ import { RestaurantProvider } from './src/features/restaurant/RestaurantProvider
 import { SessionProvider } from './src/features/auth/SessionProvider';
 import { Provider } from 'react-redux';
 import { store } from './src/store';
-import { ENV } from './src/config/env';
 
 function App() {
   return (
@@ -17,11 +16,11 @@ function App() {
         <StatusBar barStyle="dark-content" />
         <LocalizationProvider>
           <FeedbackProvider>
-            <RestaurantProvider>
-              <SessionProvider>
+            <SessionProvider>
+              <RestaurantProvider>
                 <AppNavigator />
-              </SessionProvider>
-            </RestaurantProvider>
+              </RestaurantProvider>
+            </SessionProvider>
           </FeedbackProvider>
         </LocalizationProvider>
       </SafeAreaProvider>
@@ -30,6 +29,6 @@ function App() {
 }
 
 // Importing the SDK initializes its native module, so load it only for OTA builds.
-export default __DEV__ || ENV.MOCK_API
+export default __DEV__
   ? App
   : require('react-native-stallion').withStallion(App);

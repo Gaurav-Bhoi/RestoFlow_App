@@ -1,34 +1,54 @@
 import { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 import { trialDaysRemaining } from '../../utils/date';
-import { useRestaurant } from '../restaurant/RestaurantProvider';
+import { useRestaurantState } from '../restaurant/RestaurantProvider';
 import { useSession } from '../auth/SessionProvider';
-
+import { restaurantApi } from '../../api/restoflow';
 export function useSubscription() {
-  const { restaurant, dispatch } = useRestaurant();
+  const { restaurant, refresh } = useRestaurantState();
   const { session } = useSession();
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
-    const refresh = () => setNow(new Date());
-    const interval = setInterval(refresh, 60_000);
-    const subscription = AppState.addEventListener('change', state => {
-      if (state === 'active') {
-        refresh();
-      }
+    const update = () => setNow(new Date());
+    const timer = setInterval(update, 60_000);
+    const listener = AppState.addEventListener('change', state => {
+      if (state === 'active') update();
     });
     return () => {
-      clearInterval(interval);
-      subscription.remove();
+      clearInterval(timer);
+      listener.remove();
     };
   }, []);
-  const daysRemaining = trialDaysRemaining(restaurant.trialEndsAt, now);
+  const subscription = restaurant?.subscription;
+  const daysRemaining = subscription
+    ? trialDaysRemaining(subscription.trialEndsAt, now)
+    : 0;
   const isExpired =
-    !restaurant.isPremium && new Date(restaurant.trialEndsAt) <= now;
-  const progress = Math.min(1, daysRemaining / 15);
-  function activatePremium() {
-    if (session?.role === 'owner') {
-      dispatch({ type: 'activatePremium' });
-    }
+    !!subscription &&
+    (subscription.state === 'FREE_TRIAL_EXPIRED' ||
+      (subscription.plan !== 'LIFETIME' &&
+        new Date(subscription.trialEndsAt) <= now));
+  const duration = subscription
+    ? Math.max(
+        1,
+        Math.ceil(
+          (Date.parse(subscription.trialEndsAt) -
+            Date.parse(subscription.trialStartedAt)) /
+            86400000,
+        ),
+      )
+    : 30;
+  async function checkActivation() {
+    if (!session) return false;
+    const current = await restaurantApi.subscription(session.restaurantId);
+    await refresh();
+    return current.isActive;
   }
-  return { daysRemaining, isExpired, progress, activatePremium };
+  return {
+    daysRemaining,
+    trialDays: duration,
+    isExpired,
+    progress: Math.min(1, daysRemaining / duration),
+    checkActivation,
+  };
 }

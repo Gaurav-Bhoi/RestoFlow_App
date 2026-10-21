@@ -64,7 +64,7 @@ export function nativeValues(environment) {
 
 export function validateBuildEnvironment(
   environment,
-  { release = false, allowMockRelease = false } = {},
+  { release = false } = {},
 ) {
   const mapping = getEnvironment(environment);
   const file = resolve(root, mapping.envFile);
@@ -72,7 +72,7 @@ export function validateBuildEnvironment(
     throw new Error('ENVFILE conflicts with the native build environment');
   }
   const values = parseValues(readFileSync(file, 'utf8'));
-  const allowed = ['APP_ENV', 'API_BASE_URL', 'ENABLE_API_LOGS', 'MOCK_API'];
+  const allowed = ['APP_ENV', 'API_BASE_URL', 'ENABLE_API_LOGS'];
   if (Object.keys(values).some(key => !allowed.includes(key))) {
     throw new Error(
       'Mobile env files may contain only approved public configuration',
@@ -81,49 +81,25 @@ export function validateBuildEnvironment(
   if (values.APP_ENV !== environment)
     throw new Error('Native and APP_ENV mismatch');
   if (!values.API_BASE_URL) throw new Error('API_BASE_URL is missing');
-  if (!['true', 'false'].includes(values.MOCK_API))
-    throw new Error('Invalid MOCK_API');
   if (!['true', 'false'].includes(values.ENABLE_API_LOGS))
     throw new Error('Invalid ENABLE_API_LOGS');
   if (environment === 'production' && values.ENABLE_API_LOGS !== 'false') {
     throw new Error('Production API logs must be disabled');
   }
-  const mock = values.MOCK_API === 'true';
-  if (!(mock && values.API_BASE_URL === '<PRODUCTION_BACKEND_URL>')) {
-    const url = new URL(values.API_BASE_URL);
-    const local =
-      environment === 'development' &&
-      ['localhost', '127.0.0.1', '10.0.2.2', '[::1]'].includes(url.hostname);
-    if (
-      (url.protocol !== 'https:' && !(local && url.protocol === 'http:')) ||
-      url.username ||
-      url.password ||
-      url.search ||
-      url.hash ||
-      url.pathname !== '/'
-    ) {
-      throw new Error('API_BASE_URL must be a valid API origin');
-    }
-    const other = environment === 'development' ? 'production' : 'development';
-    const counterpart = parseValues(
-      readFileSync(resolve(root, environments[other].envFile), 'utf8'),
+  const url = new URL(values.API_BASE_URL);
+  if (
+    url.origin !== mapping.apiOrigin ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    url.pathname !== '/'
+  ) {
+    throw new Error(
+      'API_BASE_URL must match the configured Worker origin for this environment',
     );
-    if (
-      values.API_BASE_URL.replace(/\/$/, '') ===
-      counterpart.API_BASE_URL?.replace(/\/$/, '')
-    ) {
-      throw new Error('DEV and PROD API origins must be different');
-    }
   }
   if (release) {
-    // Standalone development demos use the embedded bundle and no OTA services.
-    // Publishing and baseline recording keep the default strict release checks.
-    if (mock && environment === 'development' && allowMockRelease)
-      return values;
-    if (mock)
-      throw new Error(
-        'Release builds require MOCK_API=false and a real API origin',
-      );
     const native = nativeValues(environment);
     if (!isAppToken(native.appToken))
       throw new Error(

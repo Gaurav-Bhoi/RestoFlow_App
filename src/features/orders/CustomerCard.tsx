@@ -8,11 +8,6 @@ import { Icon } from '../../components/Icon';
 import { colors, layout } from '../../theme/tokens';
 import { formatCurrency } from '../../utils/currency';
 import type { CustomerOrder } from '../restaurant/types';
-import {
-  orderLines,
-  countOrderItems,
-  calculateOrderTotal,
-} from './orderCalculations';
 
 export function CustomerCard({
   order,
@@ -24,7 +19,7 @@ export function CustomerCard({
   onPress: () => void;
 }) {
   const { t } = useTranslation();
-  const lines = orderLines(order.items);
+  const lines = order.items;
   return (
     <Pressable
       onPress={onPress}
@@ -41,10 +36,7 @@ export function CustomerCard({
           <View style={styles.name}>
             <AppText style={styles.title}>{order.name}</AppText>
             <AppText muted style={styles.count}>
-              {t('orders.valueDishesValueItems', {
-                value0: lines.length,
-                value1: countOrderItems(order.items),
-              })}
+              {t('orders.valueItems', { value0: order.itemCount })}
             </AppText>
           </View>
         </View>
@@ -54,17 +46,15 @@ export function CustomerCard({
       </View>
       <View style={styles.dishes}>
         {lines.map(line => (
-          <AppText muted style={styles.line} key={line.dish.id}>
-            {line.dish.name} × {line.quantity}
+          <AppText muted style={styles.line} key={line.id}>
+            {line.name} × {line.quantity}
           </AppText>
         ))}
       </View>
       <View style={styles.bottom}>
         <AppText style={styles.totalLabel}>
           {isOwner ? t('orders.customerTotal') : t('orders.orderTotal')}{' '}
-          <AppText style={styles.total}>
-            {formatCurrency(calculateOrderTotal(order.items))}
-          </AppText>
+          <AppText style={styles.total}>{formatCurrency(order.total)}</AppText>
         </AppText>
         <View style={styles.arrow}>
           <Icon name={isOwner ? 'arrow' : 'edit'} size={15} />

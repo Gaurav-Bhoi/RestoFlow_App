@@ -119,8 +119,7 @@ androidComponents {
         def validation = tasks.register("validate${capitalized}Environment", Exec) {
             workingDir rootProject.projectDir.parentFile
             commandLine(['node', 'scripts/validate-environment.mjs', name] +
-                (release ? ['--release'] : []) +
-                (release && name == 'development' ? ['--allow-mock-release'] : []))
+                (release ? ['--release'] : []))
             doFirst {
                 if (release && name == 'production' && !hasProductionSigning) {
                     throw new GradleException('Production release signing requires RESTOFLOW_PROD_* signing variables')

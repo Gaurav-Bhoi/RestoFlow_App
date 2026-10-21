@@ -6,19 +6,13 @@ import { storage } from '../src/services/storage/storage';
 import { createAppStore } from '../src/store';
 import { signedIn, signedOut } from '../src/store/slices/sessionSlice';
 import { hideStartupSplash, initializeApplication } from '../src/app/bootstrap';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  loadRestaurant,
-  RESTAURANT_STORAGE_KEY,
-} from '../src/services/storage/restaurantStorage';
-import { createDemoRestaurant } from '../src/features/restaurant/demoData';
+import { DEV_ORIGIN, PROD_ORIGIN } from './support/apiFixtures';
 import { apiClient } from '../src/api/client';
 
 const development = {
   APP_ENV: 'development',
-  API_BASE_URL: 'http://10.0.2.2:8787',
+  API_BASE_URL: DEV_ORIGIN,
   ENABLE_API_LOGS: 'true',
-  MOCK_API: 'false',
 };
 test('native environment selects DEV even when JavaScript is a release bundle', () => {
   expect(validateEnvironment(development).APP_ENV).toBe('development');
@@ -26,7 +20,7 @@ test('native environment selects DEV even when JavaScript is a release bundle', 
     validateEnvironment({
       ...development,
       APP_ENV: 'production',
-      API_BASE_URL: 'https://api.example.test',
+      API_BASE_URL: PROD_ORIGIN,
       ENABLE_API_LOGS: 'false',
     }).IS_PRODUCTION,
   ).toBe(true);
@@ -38,25 +32,36 @@ test.each([
   { API_BASE_URL: 'http://api.example.test' },
   { API_BASE_URL: 'https://user:password@api.example.test' },
   { API_BASE_URL: 'https://api.example.test/private?token=x' },
-  { APP_ENV: 'production', API_BASE_URL: 'https://api.example.test' },
+  { APP_ENV: 'production', API_BASE_URL: PROD_ORIGIN },
 ])('rejects unsafe environment configuration %p', override => {
   expect(() => validateEnvironment({ ...development, ...override })).toThrow();
 });
-test('mock production placeholder is explicitly allowed and real mode rejects it', () => {
-  const config = {
-    APP_ENV: 'production',
-    API_BASE_URL: '<PRODUCTION_BACKEND_URL>',
-    ENABLE_API_LOGS: 'false',
-    MOCK_API: 'true',
-  };
-  expect(validateEnvironment(config).MOCK_API).toBe(true);
-  expect(() => validateEnvironment({ ...config, MOCK_API: 'false' })).toThrow();
+test.each([
+  ['production', DEV_ORIGIN],
+  ['development', PROD_ORIGIN],
+  ['production', '<PRODUCTION_BACKEND_URL>'],
+  ['development', 'http://10.0.2.2:8787'],
+  [
+    'production',
+    'https://preview-restoflow-backend.gauravbhoiofficial.workers.dev',
+  ],
+])('rejects unapproved origin for %s: %s', (environment, origin) => {
+  expect(() =>
+    validateEnvironment({
+      APP_ENV: environment,
+      API_BASE_URL: origin,
+      ENABLE_API_LOGS: 'false',
+    }),
+  ).toThrow();
 });
 test('Redux initializes signed out and updates only shared session state', () => {
   const store = createAppStore();
   expect(store.getState().session.current).toBeNull();
   const session = {
     role: 'owner' as const,
+    userId: 'user',
+    restaurantId: 'restaurant',
+    restaurants: [],
     phone: '9876543210',
     name: 'Owner',
   };
@@ -81,16 +86,6 @@ test('MMKV wrapper handles typed values, corrupt JSON, removal, and scoped clear
   expect(storage.contains('string')).toBe(false);
   storage.clear();
   expect(storage.contains('object')).toBe(false);
-});
-test('legacy restaurant data migrates before the AsyncStorage copy is removed', async () => {
-  const restaurant = createDemoRestaurant();
-  await AsyncStorage.setItem(
-    RESTAURANT_STORAGE_KEY,
-    JSON.stringify(restaurant),
-  );
-  expect(await loadRestaurant()).toEqual(restaurant);
-  expect(storage.getObject(RESTAURANT_STORAGE_KEY)).toEqual(restaurant);
-  expect(await AsyncStorage.getItem(RESTAURANT_STORAGE_KEY)).toBeNull();
 });
 test.each([400, 401, 403, 404, 409, 422, 429, 500, 503])(
   'normalizes HTTP %s without exposing Axios internals',
@@ -148,10 +143,14 @@ test('even a failed recovery cannot block application readiness', async () => {
   await expect(initializeApplication(fail, fail)).resolves.toBeUndefined();
 });
 
-test('mock mode prevents all backend transport calls', async () => {
-  const transport = jest.fn();
-  await expect(
-    apiClient.get('/api/v1/example', { adapter: transport }),
-  ).rejects.toMatchObject({ code: 'API_NOT_CONFIGURED' });
-  expect(transport).not.toHaveBeenCalled();
+test('backend transport is active without a mock-mode branch', async () => {
+  const transport = jest.fn(async config => ({
+    data: {},
+    status: 200,
+    statusText: '',
+    headers: { 'x-restoflow-environment': 'development' },
+    config,
+  }));
+  await apiClient.get('/api/v1/example', { adapter: transport });
+  expect(transport).toHaveBeenCalledTimes(1);
 });

@@ -1,4 +1,4 @@
-import { RESTAURANT_STORAGE_KEY } from '../../services/storage/restaurantStorage';
+const RESTAURANT_STORAGE_KEY = 'restoflow.restaurant.v1';
 import type { LocalizationStorage } from '../types';
 import { TranslationCache } from './translationCache';
 

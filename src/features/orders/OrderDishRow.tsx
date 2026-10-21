@@ -5,15 +5,14 @@ import { AppText } from '../../components/AppText';
 import { Icon } from '../../components/Icon';
 import { colors } from '../../theme/tokens';
 import { formatCurrency } from '../../utils/currency';
-import { DishIllustration } from '../menu/DishIllustration';
-import type { Dish } from '../restaurant/types';
+import { DishImage } from '../menu/DishImage';
 
 export function OrderDishRow({
   dish,
   quantity,
   onChange,
 }: {
-  dish: Dish;
+  dish: { name: string; unitPrice: string; imageUrl?: string };
   quantity: number;
   onChange: (change: number) => void;
 }) {
@@ -21,12 +20,12 @@ export function OrderDishRow({
   return (
     <View style={styles.row}>
       <View style={styles.food}>
-        <DishIllustration id={dish.id} />
+        <DishImage uri={dish.imageUrl} />
       </View>
       <View style={styles.info}>
         <AppText style={styles.name}>{dish.name}</AppText>
         <AppText muted style={styles.price}>
-          {formatCurrency(dish.price)}
+          {formatCurrency(dish.unitPrice)}
         </AppText>
       </View>
       {quantity > 0 ? (

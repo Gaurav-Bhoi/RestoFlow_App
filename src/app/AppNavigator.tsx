@@ -28,10 +28,7 @@ import { LanguageScreen } from '../features/settings/LanguageScreen';
 import { WaitersScreen } from '../features/employees/WaitersScreen';
 import { AddWaiterScreen } from '../features/employees/AddWaiterScreen';
 import { SubscriptionScreen } from '../features/subscription/SubscriptionScreen';
-import {
-  PurchaseScreen,
-  PurchaseSuccessScreen,
-} from '../features/subscription/PurchaseScreen';
+import { PurchaseScreen } from '../features/subscription/PurchaseScreen';
 import { useSubscription } from '../features/subscription/useSubscription';
 import { FloatingTabBar } from './FloatingTabBar';
 import type { HomeTabsParams, RootStackParams } from './navigationTypes';
@@ -78,8 +75,7 @@ export function AppNavigator() {
   const { isExpired } = useSubscription();
   const [currentRoute, setCurrentRoute] = useState<string>();
   const canPurchase = session?.role === 'owner';
-  const isPurchasing =
-    currentRoute === 'Purchase' || currentRoute === 'PurchaseSuccess';
+  const isPurchasing = currentRoute === 'Purchase';
   const updateCurrentRoute = () =>
     setCurrentRoute(navigationRef.getCurrentRoute()?.name);
   return (
@@ -129,10 +125,6 @@ export function AppNavigator() {
                   component={SubscriptionScreen}
                 />
                 <Stack.Screen name="Purchase" component={PurchaseScreen} />
-                <Stack.Screen
-                  name="PurchaseSuccess"
-                  component={PurchaseSuccessScreen}
-                />
               </>
             )}
           </Stack.Group>
@@ -143,12 +135,12 @@ export function AppNavigator() {
         title={t('common.letSKeepYourRestaurantFlowing')}
         description={
           canPurchase
-            ? t('common.your15DayFreeTrialHasEndedActivateA')
+            ? t('api.trialExpired')
             : t('common.yourRestaurantSFreeTrialHasEndedAskThe')
         }
         icon="crown"
         confirmLabel={
-          canPurchase ? t('common.purchaseSubscription') : t('common.logOut')
+          canPurchase ? t('api.subscriptionAccess') : t('common.logOut')
         }
         cancelLabel={canPurchase ? t('common.logOut') : undefined}
         isBlocking

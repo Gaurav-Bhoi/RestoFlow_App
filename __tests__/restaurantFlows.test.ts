@@ -1,133 +1,80 @@
-import { createDemoRestaurant } from '../src/features/restaurant/demoData';
-import { restaurantReducer } from '../src/features/restaurant/restaurantReducer';
+import { filterMenu, menuCategories } from '../src/features/menu/menuData';
 import {
-  calculateOrderTotal,
   changeQuantity,
   countOrderItems,
+  paiseMoney,
+  pricePaise,
 } from '../src/features/orders/orderCalculations';
-import { filterMenu } from '../src/features/menu/menuData';
-import { isValidPhone } from '../src/features/auth/validation';
-import { trialDaysRemaining } from '../src/utils/date';
+import { toE164Phone } from '../src/features/auth/validation';
 import { createReceiptHtml } from '../src/features/billing/receiptPrinting';
-
-test('each guest has an independent total and completing Rahul leaves Amit active', () => {
-  const restaurant = createDemoRestaurant();
-  const [rahul, amit] = restaurant.tables[0].customers;
-  expect(calculateOrderTotal(rahul.items)).toBe(420);
-  expect(calculateOrderTotal(amit.items)).toBe(430);
-  const updated = restaurantReducer(restaurant, {
-    type: 'finishVisit',
-    tableId: 1,
-    customerId: 'rahul',
-  });
-  expect(updated.tables[0].customers).toEqual([amit]);
-  expect(restaurant.tables[0].customers).toHaveLength(2);
+import { formatCurrency } from '../src/utils/currency';
+import { mediaUrl, profileSession } from '../src/api/restoflow';
+import { account, bill, DEV_ORIGIN, PROD_ORIGIN } from './support/apiFixtures';
+import type { Dish } from '../src/features/restaurant/types';
+const menu: Dish[] = [
+  {
+    id: 'uuid-one',
+    name: 'Rice',
+    price: 150,
+    description: '',
+    category: 'Custom category',
+    foodType: 'VEG',
+    available: true,
+  },
+  {
+    id: 'uuid-two',
+    name: 'Tea',
+    price: 25,
+    description: '',
+    category: 'Beverages',
+    foodType: 'VEG',
+    available: true,
+  },
+];
+test('menu categories and search use server dishes instead of fixed IDs', () => {
+  expect(menuCategories(menu)).toEqual(['All', 'Beverages', 'Custom category']);
+  expect(
+    filterMenu(menu, ' RICE ', 'Custom category').map(dish => dish.id),
+  ).toEqual(['uuid-one']);
+  expect(filterMenu(menu, 'rice', 'Beverages')).toEqual([]);
 });
-test('saving or editing one order preserves the other guests and tables', () => {
-  const restaurant = createDemoRestaurant();
-  const priya = { id: 'priya', name: 'Priya', items: { dal: 1, roti: 4 } };
-  const withPriya = restaurantReducer(restaurant, {
-    type: 'saveOrder',
-    tableId: 1,
-    order: priya,
-  });
-  const updated = restaurantReducer(withPriya, {
-    type: 'saveOrder',
-    tableId: 1,
-    order: { ...priya, items: { roti: 2 } },
-  });
-  expect(updated.tables[0].customers).toHaveLength(3);
-  expect(updated.tables[0].customers.slice(0, 2)).toEqual(
-    restaurant.tables[0].customers,
+test('quantities are local drafts only and stay within API bounds', () => {
+  expect(changeQuantity({ item: 1 }, 'item', -2)).toEqual({});
+  expect(changeQuantity({ item: 9999 }, 'item', 5)).toEqual({ item: 10000 });
+  expect(countOrderItems({ a: 2, b: 3 })).toBe(5);
+});
+test('draft prices and displayed server totals retain exact paise', () => {
+  expect(paiseMoney(pricePaise('150.00') * 2n)).toBe('300.00');
+  expect(formatCurrency('9007199254740993.01')).toBe(
+    '₹9,00,71,99,25,47,40,993.01',
   );
-  expect(calculateOrderTotal(updated.tables[0].customers[2].items)).toBe(60);
-  expect(updated.tables.slice(1)).toEqual(restaurant.tables.slice(1));
+  expect(() => pricePaise('1e3')).toThrow();
 });
-test('an occupied table cannot be removed and table numbers are never reused', () => {
-  let restaurant = createDemoRestaurant();
-  restaurant = restaurantReducer(restaurant, {
-    type: 'removeTable',
-    tableId: 1,
-  });
-  expect(restaurant.tables).toHaveLength(4);
-  restaurant = restaurantReducer(restaurant, {
-    type: 'removeTable',
-    tableId: 4,
-  });
-  restaurant = restaurantReducer(restaurant, { type: 'addTable' });
-  expect(restaurant.tables.map(table => table.id)).toEqual([1, 2, 3, 5]);
+test('phone normalization submits E.164 to OTP endpoints', () => {
+  expect(toE164Phone('9876543210')).toBe('+919876543210');
+  expect(toE164Phone('+91 9876543210')).toBe('+919876543210');
+  expect(() => toE164Phone('123')).toThrow();
 });
-test('quantities stop at zero and the sample Priya order costs ₹300', () => {
-  const original = { dal: 1, roti: 3 };
-  const added = changeQuantity(original, 'roti', 1);
-  expect(countOrderItems(added)).toBe(5);
-  expect(calculateOrderTotal(added)).toBe(300);
-  expect(changeQuantity(changeQuantity({}, 'dal', 1), 'dal', -2)).toEqual({});
-  expect(original.roti).toBe(3);
-});
-test('blank or empty orders cannot be stored', () => {
-  const restaurant = createDemoRestaurant();
-  expect(
-    restaurantReducer(restaurant, {
-      type: 'saveOrder',
-      tableId: 1,
-      order: { id: 'empty', name: '', items: { dal: 1 } },
-    }),
-  ).toBe(restaurant);
-  expect(
-    restaurantReducer(restaurant, {
-      type: 'saveOrder',
-      tableId: 1,
-      order: { id: 'empty', name: 'Guest', items: {} },
-    }),
-  ).toBe(restaurant);
-});
-test('duplicate waiter numbers and the owner number cannot be added', () => {
-  const restaurant = createDemoRestaurant();
-  for (const phone of ['9876543210', '9876543211']) {
-    expect(
-      restaurantReducer(restaurant, {
-        type: 'addWaiter',
-        waiter: { name: 'Duplicate', phone },
-      }),
-    ).toBe(restaurant);
-  }
-});
-test('menu search combines category and a case insensitive query', () => {
-  expect(filterMenu(' DAL ', 'Mains').map(dish => dish.id)).toEqual(['dal']);
-  expect(filterMenu('dal', 'Drinks')).toEqual([]);
-  expect(filterMenu('', 'Breads')).toHaveLength(2);
-});
-test('mobile numbers follow the reference’s Indian phone validation', () => {
-  expect(isValidPhone('9876543210')).toBe(true);
-  expect(isValidPhone('1234567890')).toBe(false);
-  expect(isValidPhone('987')).toBe(false);
-});
-test('trial days reach zero at expiry and premium activation retains restaurant data', () => {
-  expect(
-    trialDaysRemaining(
-      '2026-10-17T00:00:00+05:30',
-      new Date('2026-10-17T00:00:00+05:30'),
-    ),
-  ).toBe(0);
-  const restaurant = createDemoRestaurant();
-  const updated = restaurantReducer(restaurant, { type: 'activatePremium' });
-  expect(updated.isPremium).toBe(true);
-  expect(updated.tables).toEqual(restaurant.tables);
-});
-test('printed receipts escape entered names and include only the selected order', () => {
-  const order = {
-    ...createDemoRestaurant().tables[0].customers[0],
-    name: '<script>Rahul</script>',
-  };
+test('printed receipts use server price snapshots and escape names', () => {
   const html = createReceiptHtml(
     'Kitchen & Co',
-    1,
-    order,
-    new Date('2026-10-09T12:30:00+05:30'),
+    { ...bill, customerName: '<script>Guest</script>' },
+    new Date('2026-10-14T12:30:00Z'),
   );
-  expect(html).toContain('&lt;script&gt;Rahul&lt;/script&gt;');
+  expect(html).toContain('&lt;script&gt;Guest&lt;/script&gt;');
   expect(html).toContain('Kitchen &amp; Co');
-  expect(html).toContain('₹420');
-  expect(html).not.toContain('Paneer Tikka');
+  expect(html).toContain('Snapshot Rice');
+  expect(html).toContain('₹300');
+  expect(html).not.toContain('Taxes');
+});
+test('session roles come from server membership and media stays on the Worker origin', () => {
+  expect(profileSession(account)).toMatchObject({
+    userId: account.user.id,
+    restaurantId: account.restaurants[0].id,
+    role: 'owner',
+  });
+  expect(mediaUrl('/api/v1/media/users/key.png')).toBe(
+    `${DEV_ORIGIN}/api/v1/media/users/key.png`,
+  );
+  expect(() => mediaUrl(`${PROD_ORIGIN}/api/v1/media/key.png`)).toThrow();
 });

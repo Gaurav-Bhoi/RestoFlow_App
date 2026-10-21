@@ -1,95 +1,163 @@
 import { useTranslation } from 'react-i18next';
-import i18n from '../../localization/i18n';
 import React, {
   createContext,
   useContext,
   useEffect,
-  useReducer,
+  useCallback,
   useRef,
   useState,
 } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
+import { useSession } from '../auth/SessionProvider';
+import { fetchRestaurant } from '../../api/restoflow';
+import { normalizeApiError } from '../../api/errors';
+import { AppButton } from '../../components/AppButton';
+import { EmptyState } from '../../components/EmptyState';
 import { useFeedback } from '../../app/FeedbackProvider';
-import { colors } from '../../theme/tokens';
-import {
-  loadRestaurant,
-  saveRestaurant,
-} from '../../services/storage/restaurantStorage';
-import { createDemoRestaurant } from './demoData';
-import { restaurantReducer, type RestaurantAction } from './restaurantReducer';
-import type { Restaurant } from './types';
-
+import { hideStartupSplash } from '../../app/bootstrap';
+import type { Restaurant, Session } from './types';
 interface RestaurantContextValue {
-  restaurant: Restaurant;
-  dispatch: React.Dispatch<RestaurantAction>;
+  restaurant: Restaurant | null;
+  refresh: () => Promise<void>;
+  refreshing: boolean;
 }
 const RestaurantContext = createContext<RestaurantContextValue | null>(null);
 export function RestaurantProvider({ children }: React.PropsWithChildren) {
   const { t } = useTranslation();
-  const [restaurant, dispatch] = useReducer(
-    restaurantReducer,
-    undefined,
-    createDemoRestaurant,
-  );
-  const [isLoaded, setIsLoaded] = useState(false);
-  const saveQueue = useRef(Promise.resolve());
+  const { session, signOut } = useSession();
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [error, setError] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const loadedFor = useRef<Session | null>(null);
+  const latestSession = useRef(session);
+  latestSession.current = session;
+  const generation = useRef(0);
+  const pending = useRef<AbortController | null>(null);
   const showFeedback = useFeedback();
-  useEffect(() => {
-    let isMounted = true;
-    loadRestaurant()
-      .then(saved => {
-        if (isMounted && saved) {
-          dispatch({ type: 'replace', restaurant: saved });
-        }
-      })
-      .catch(() =>
-        showFeedback(i18n.t('common.savedDataCouldNotBeLoadedShowingTheDemo')),
+  const refresh = useCallback(async () => {
+    const account = latestSession.current;
+    if (!account) return;
+    pending.current?.abort();
+    const controller = new AbortController();
+    pending.current = controller;
+    const expected = ++generation.current;
+    setRefreshing(true);
+    try {
+      const value = await fetchRestaurant(account, controller.signal);
+      if (
+        generation.current === expected &&
+        latestSession.current === account
+      ) {
+        loadedFor.current = account;
+        setRestaurant(value);
+        setError('');
+      }
+    } catch (cause) {
+      if (
+        controller.signal.aborted ||
+        generation.current !== expected ||
+        latestSession.current !== account
       )
-      .finally(() => {
-        if (isMounted) {
-          setIsLoaded(true);
+        return;
+      const failure = normalizeApiError(cause);
+      // A trial may expire between the subscription read and operational reads.
+      if (failure.status === 402) {
+        try {
+          const value = await fetchRestaurant(account, controller.signal);
+          if (
+            generation.current === expected &&
+            latestSession.current === account
+          ) {
+            loadedFor.current = account;
+            setRestaurant(value);
+            setError('');
+          }
+        } catch (retryError) {
+          if (!controller.signal.aborted && generation.current === expected) {
+            setError(normalizeApiError(retryError).message);
+            throw retryError;
+          }
         }
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, [showFeedback]);
-  useEffect(() => {
-    if (!isLoaded) {
-      return;
+      } else {
+        setError(failure.message);
+        throw failure;
+      }
+    } finally {
+      if (generation.current === expected) setRefreshing(false);
     }
-    // Serialize writes so a slower previous save cannot overwrite a newer order.
-    saveQueue.current = saveQueue.current
-      .then(() => saveRestaurant(restaurant))
-      .catch(() =>
-        showFeedback(
-          i18n.t('common.changesAreAvailableForThisSessionButCouldNot'),
-        ),
-      );
-  }, [restaurant, isLoaded, showFeedback]);
-  if (!isLoaded) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator
-          color={colors.forest}
-          accessibilityLabel={t('common.loadingRestaurant')}
-        />
-      </View>
-    );
-  }
+  }, []);
+  useEffect(() => {
+    generation.current += 1;
+    pending.current?.abort();
+    loadedFor.current = null;
+    setRestaurant(null);
+    setError('');
+    if (session) refresh().catch(() => undefined);
+    return () => {
+      generation.current += 1;
+      pending.current?.abort();
+    };
+  }, [session, refresh]);
+  useEffect(() => {
+    if (!session) return;
+    const reload = () => {
+      refresh().catch(cause => showFeedback(normalizeApiError(cause).message));
+    };
+    const timer = setInterval(reload, 30_000);
+    const listener = AppState.addEventListener('change', state => {
+      if (state === 'active') reload();
+    });
+    return () => {
+      clearInterval(timer);
+      listener.remove();
+    };
+  }, [session, refresh, showFeedback]);
+  useEffect(() => {
+    if (error || restaurant) hideStartupSplash();
+  }, [error, restaurant]);
+  const available = restaurant && loadedFor.current === session;
   return (
-    <RestaurantContext.Provider value={{ restaurant, dispatch }}>
-      {children}
+    <RestaurantContext.Provider
+      value={{ restaurant: available ? restaurant : null, refresh, refreshing }}
+    >
+      {!session || available ? (
+        children
+      ) : error ? (
+        <View style={styles.error}>
+          <EmptyState
+            title={t('api.loadRestaurantFailed')}
+            description={error}
+            action={{
+              label: t('api.retry'),
+              onPress: () => {
+                refresh().catch(() => undefined);
+              },
+            }}
+          />
+          <AppButton variant="secondary" onPress={signOut}>
+            {t('api.signOut')}
+          </AppButton>
+        </View>
+      ) : (
+        <View style={styles.loading}>
+          <ActivityIndicator accessibilityLabel={t('api.loadingRestaurant')} />
+        </View>
+      )}
     </RestaurantContext.Provider>
   );
 }
-const styles = StyleSheet.create({
-  loading: { flex: 1, justifyContent: 'center', backgroundColor: colors.paper },
-});
-export function useRestaurant() {
+export function useRestaurantState() {
   const context = useContext(RestaurantContext);
-  if (!context) {
-    throw new Error('useRestaurant requires RestaurantProvider');
-  }
+  if (!context) throw new Error('useRestaurant requires RestaurantProvider');
   return context;
 }
+export function useRestaurant() {
+  const context = useRestaurantState();
+  if (!context.restaurant) throw new Error('Restaurant data is not loaded.');
+  return { ...context, restaurant: context.restaurant };
+}
+
+const styles = StyleSheet.create({
+  loading: { flex: 1, justifyContent: 'center' },
+  error: { flex: 1, justifyContent: 'center', padding: 24 },
+});

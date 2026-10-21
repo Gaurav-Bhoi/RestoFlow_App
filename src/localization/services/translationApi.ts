@@ -2,6 +2,7 @@ import type { LanguagesResponse, TranslationApi } from '../types';
 import { validateBundle } from '../utils/validateBundle';
 import english from '../locales/en.json';
 import { apiClient } from '../../api/client';
+import { assertApiOrigin } from '../../config/validateEnv';
 
 export function createTranslationApi(
   baseUrl: string,
@@ -10,19 +11,8 @@ export function createTranslationApi(
 ): TranslationApi {
   async function request(path: string, etag?: string) {
     if (!baseUrl) throw new Error('API not configured');
+    assertApiOrigin(baseUrl, environment);
     const url = new URL(baseUrl);
-    const local =
-      environment === 'development' &&
-      ['localhost', '127.0.0.1', '10.0.2.2'].includes(url.hostname);
-    if (
-      (url.protocol !== 'https:' && !(local && url.protocol === 'http:')) ||
-      url.username ||
-      url.password ||
-      url.search ||
-      url.hash ||
-      url.pathname !== '/'
-    )
-      throw new Error('Invalid API configuration');
     if (!fetcher) {
       const response = await apiClient.get<string>(`/api/v1/i18n${path}`, {
         timeout: 270000,

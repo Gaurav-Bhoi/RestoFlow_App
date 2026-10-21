@@ -23,7 +23,28 @@ export function ReceiptScreen({
       navigation.replace('PrintSuccess', route.params);
     }
   };
-  if (!bill.order) {
+  if (bill.loading)
+    return (
+      <Screen>
+        <AppText>{t('api.loadingBill')}</AppText>
+      </Screen>
+    );
+  if (bill.error)
+    return (
+      <Screen>
+        <EmptyState
+          title={t('api.loadBillFailed')}
+          description={bill.error}
+          action={{
+            label: t('api.retry'),
+            onPress: () => {
+              bill.retry();
+            },
+          }}
+        />
+      </Screen>
+    );
+  if (!bill.order || !bill.bill) {
     return (
       <Screen>
         <EmptyState
@@ -70,7 +91,7 @@ export function ReceiptScreen({
           <AppText muted variant="helper">
             {t('billing.tableValueValue', {
               lng: 'en',
-              value0: route.params.tableId,
+              value0: bill.tableNumber,
               value1: bill.order.name,
             })}
           </AppText>
@@ -82,7 +103,7 @@ export function ReceiptScreen({
             })}
           </AppText>
         </View>
-        <BillBreakdown items={bill.order.items} />
+        <BillBreakdown bill={bill.bill} />
         <AppText muted style={styles.thanks}>
           {t('billing.thankYouForDiningWithUsWeHopeTo', { lng: 'en' })}
         </AppText>

@@ -4,7 +4,12 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { publishingPlan } from '../stallion-publish.mjs';
-import { root, getEnvironment, parseValues } from '../environment-utils.mjs';
+import {
+  root,
+  getEnvironment,
+  parseValues,
+  validateBuildEnvironment,
+} from '../environment-utils.mjs';
 import { parseArguments } from '../native-baseline.mjs';
 
 const args = {
@@ -118,33 +123,31 @@ test('missing/invalid env, platform, notes, and duplicate selectors fail', () =>
   );
   assert.throws(() => parseValues('APP_ENV=development\nAPP_ENV=production'));
 });
-test('mocks allow development demo releases but block service releases and conflicting ENVFILE', () => {
-  const run = (extra = [], env = {}) => {
+test('Worker origins are pinned and releases still require OTA credentials', () => {
+  for (const environment of ['development', 'production']) {
     const result = spawnSync(
       process.execPath,
-      ['scripts/validate-environment.mjs', 'development', ...extra],
-      { cwd: root, env: { ...process.env, ...env }, encoding: 'utf8' },
+      ['scripts/validate-environment.mjs', environment],
+      { cwd: root, env: process.env, encoding: 'utf8' },
     );
-    assert.ifError(result.error);
-    return result;
-  };
-  assert.equal(run().status, 0);
-  assert.equal(run(['--release']).status, 1);
-  assert.equal(run(['--release', '--allow-mock-release']).status, 0);
-  assert.equal(run([], { ENVFILE: '.env.production' }).status, 1);
-  const production = spawnSync(
-    process.execPath,
-    [
-      'scripts/validate-environment.mjs',
-      'production',
-      '--release',
-      '--allow-mock-release',
-    ],
-    { cwd: root, env: process.env, encoding: 'utf8' },
-  );
-  assert.ifError(production.error);
-  assert.equal(production.status, 1);
-  assert.match(production.stderr, /Release builds require MOCK_API=false/);
+    assert.equal(result.status, 0, result.stderr);
+    const values = parseValues(
+      readFileSync(resolve(root, getEnvironment(environment).envFile), 'utf8'),
+    );
+    assert.equal(values.API_BASE_URL, getEnvironment(environment).apiOrigin);
+    assert.equal(Object.keys(values).length, 3);
+  }
+  const previous = process.env.ENVFILE;
+  try {
+    process.env.ENVFILE = '.env.production';
+    assert.throws(
+      () => validateBuildEnvironment('development'),
+      /ENVFILE conflicts/,
+    );
+  } finally {
+    if (previous === undefined) delete process.env.ENVFILE;
+    else process.env.ENVFILE = previous;
+  }
 });
 test('all iOS configurations and schemes map to their own native environment', () => {
   const project = readFileSync(
