@@ -9,20 +9,28 @@ import { AppText } from './AppText';
 export function PhotoPicker({
   photo,
   onPress,
+  name,
+  label,
+  disabled = false,
 }: {
   photo?: string;
   onPress: () => void;
+  name?: string;
+  label?: string;
+  disabled?: boolean;
 }) {
   const { t } = useTranslation();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t('common.addOptionalProfilePhoto')}
+      accessibilityLabel={label ?? t('common.addOptionalProfilePhoto')}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={styles.picker}
     >
-      {photo ? (
-        <Avatar name="Profile" photo={photo} size={80} />
+      {photo || name ? (
+        <Avatar name={name ?? 'Profile'} photo={photo} size={80} />
       ) : (
         <View style={styles.placeholder}>
           <FigmaAsset name="camera" />
@@ -30,10 +38,14 @@ export function PhotoPicker({
       )}
       <View style={styles.labelRow}>
         <AppText variant="label" style={styles.label}>
-          {t('common.addPhoto')}{' '}
-          <AppText variant="label" muted>
-            {t('common.optional')}
-          </AppText>
+          {label ?? (
+            <>
+              {t('common.addPhoto')}{' '}
+              <AppText variant="label" muted>
+                {t('common.optional')}
+              </AppText>
+            </>
+          )}
         </AppText>
       </View>
     </Pressable>

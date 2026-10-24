@@ -1,81 +1,230 @@
-import { useTranslation } from 'react-i18next';
-import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Screen } from '../../components/Screen';
-import { AppHeader } from '../../components/AppHeader';
-import { SearchInput } from '../../components/SearchInput';
-import { FilterChips } from '../../components/FilterChips';
-import { AppText } from '../../components/AppText';
-import { Icon } from '../../components/Icon';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { normalizeApiError } from '../../api/errors';
+import { EmptyState } from '../../components/EmptyState';
 import { colors } from '../../theme/tokens';
-import type { MenuCategory } from '../restaurant/types';
-import { menuCategories, filterMenu } from './menuData';
-import { useRestaurant } from '../restaurant/RestaurantProvider';
+import { useTranslation } from 'react-i18next';
+import { Screen } from '../../components/Screen';
+import { SearchInput } from '../../components/SearchInput';
+import { AppText } from '../../components/AppText';
+import { AppButton } from '../../components/AppButton';
+import { useResponsiveLayout } from '../../hooks/useResponsiveLayout';
+import { useAppNavigation } from '../../app/navigationTypes';
+import { useSession } from '../auth/SessionProvider';
+import { useMenu } from './MenuProvider';
+import { filterVisibleMenu, type MenuFilter } from './menuConfig';
 import { DishCard } from './DishCard';
+import { WorkspaceHeader } from './WorkspaceHeader';
+import { WorkspaceSheet } from './WorkspaceSheet';
+import { MenuFilters } from './MenuFilters';
+import { MenuEmptyState } from './MenuEmptyState';
+import {
+  DishManagementOverlay,
+  type DishSelection,
+} from './DishManagementOverlay';
+import { MenuNotice } from './MenuNotice';
 
 export function MenuScreen() {
   const { t } = useTranslation();
+  const navigation = useAppNavigation();
+  const { session } = useSession();
+  const isOwner = session?.role === 'owner';
+  const {
+    dishes,
+    deleteDish,
+    toggleAvailability,
+    refreshing,
+    refreshMenu,
+    cancelRefresh,
+    loadError,
+    busy,
+  } = useMenu();
+  useFocusEffect(
+    useCallback(() => {
+      refreshMenu();
+      return cancelRefresh;
+    }, [refreshMenu, cancelRefresh]),
+  );
+  const [operationError, setOperationError] = useState('');
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState<MenuCategory>('All');
-  const { restaurant } = useRestaurant();
-  const categories = menuCategories(restaurant.menu);
-  const dishes = filterMenu(restaurant.menu, search, category);
+  const [category, setCategory] = useState<MenuFilter>('All');
+  const [workspace, setWorkspace] = useState<'menu' | 'ledger'>('menu');
+  const [workspaceOpen, setWorkspaceOpen] = useState(false);
+  const [selection, setSelection] = useState<DishSelection | null>(null);
+  const { contentWidth, fontScale } = useResponsiveLayout();
+  const singleColumn =
+    contentWidth < 270 || (fontScale >= 1.3 && contentWidth < 450);
+  const cardWidth = {
+    width: singleColumn ? contentWidth : (contentWidth - 16) / 2,
+  };
+  const visibleDishes = filterVisibleMenu(dishes, search, category);
+  const isEmpty = dishes.length === 0;
+  async function handleDishAction(action: 'delete' | 'availability') {
+    if (!selection || busy) return;
+    setOperationError('');
+    try {
+      if (action === 'delete') await deleteDish(selection.dish.id);
+      else await toggleAvailability(selection.dish);
+      setSelection(null);
+    } catch (cause) {
+      setOperationError(normalizeApiError(cause).message);
+    }
+  }
+  const addDish = () => navigation.navigate('DishForm', {});
+  const resetFilters = () => {
+    setSearch('');
+    setCategory('All');
+  };
   return (
-    <Screen
-      hasTabs
-      header={
-        <AppHeader
-          title={t('navigation.menu')}
-          subtitle={t('menu.madeForEveryAppetite')}
-          right={
-            <View style={styles.leaf}>
-              <Icon name="leaf" color={colors.terracotta} />
+    <>
+      <Screen
+        hasTabs
+        refreshing={refreshing}
+        onRefresh={() => {
+          refreshMenu();
+        }}
+        header={
+          <WorkspaceHeader
+            workspace={workspace}
+            addDisabled={busy}
+            onSwitch={() => setWorkspaceOpen(true)}
+            onAdd={
+              isOwner && !isEmpty && workspace === 'menu' ? addDish : undefined
+            }
+          />
+        }
+        contentStyle={(isEmpty || workspace === 'ledger') && styles.fill}
+      >
+        {workspace === 'ledger' ? (
+          <MenuEmptyState ledger />
+        ) : isEmpty && loadError ? (
+          <EmptyState
+            title={t('menu.loadMenuFailed')}
+            description={loadError}
+            action={{
+              label: t('api.retry'),
+              onPress: () => {
+                refreshMenu();
+              },
+            }}
+          />
+        ) : isEmpty && refreshing ? (
+          <ActivityIndicator
+            accessibilityLabel={t('menu.loadingMenu')}
+            color={colors.forest}
+            style={styles.loading}
+          />
+        ) : isEmpty ? (
+          <MenuEmptyState onAdd={isOwner ? addDish : undefined} />
+        ) : (
+          <>
+            {!!loadError && (
+              <View style={styles.loadError}>
+                <AppText accessibilityRole="alert" style={styles.errorText}>
+                  {loadError}
+                </AppText>
+                <AppButton
+                  variant="ghost"
+                  onPress={() => {
+                    refreshMenu();
+                  }}
+                >
+                  {t('api.retry')}
+                </AppButton>
+              </View>
+            )}
+            <SearchInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder={t('menu.searchTheMenu')}
+            />
+            <MenuFilters selected={category} onSelect={setCategory} />
+            <View style={styles.grid}>
+              {visibleDishes.map(dish => (
+                <View key={dish.id} style={cardWidth}>
+                  <DishCard
+                    dish={dish}
+                    disabled={busy}
+                    onMore={
+                      isOwner
+                        ? () => {
+                            setOperationError('');
+                            setSelection({ dish, confirmingDelete: false });
+                          }
+                        : undefined
+                    }
+                  />
+                </View>
+              ))}
             </View>
+            {visibleDishes.length === 0 && (
+              <View style={styles.noResults}>
+                <AppText muted style={styles.noResultsText}>
+                  {t('menu.noDishesFoundTryAnotherNameOrCategory')}
+                </AppText>
+                <AppButton variant="secondary" onPress={resetFilters}>
+                  {t('menu.clearFilters')}
+                </AppButton>
+              </View>
+            )}
+          </>
+        )}
+      </Screen>
+      <MenuNotice />
+      <WorkspaceSheet
+        visible={workspaceOpen}
+        workspace={workspace}
+        isOwner={isOwner}
+        onClose={() => setWorkspaceOpen(false)}
+        onSelect={value => {
+          setWorkspace(value);
+          setWorkspaceOpen(false);
+        }}
+      />
+      <DishManagementOverlay
+        selection={selection}
+        busy={busy}
+        error={operationError}
+        onClose={() => {
+          if (!busy) {
+            setSelection(null);
+            setOperationError('');
           }
-        />
-      }
-    >
-      <SearchInput
-        value={search}
-        onChangeText={setSearch}
-        placeholder={t('menu.searchTheMenu')}
+        }}
+        onEdit={() => {
+          if (selection)
+            navigation.navigate('DishForm', { dishId: selection.dish.id });
+          setSelection(null);
+        }}
+        onToggleAvailability={() => handleDishAction('availability')}
+        onRequestDelete={() =>
+          setSelection(current =>
+            current ? { ...current, confirmingDelete: true } : null,
+          )
+        }
+        onDelete={() => handleDishAction('delete')}
       />
-      <FilterChips
-        options={categories.map(value => ({
-          value,
-          label: value === 'All' ? t('menu.all') : value,
-        }))}
-        selected={category}
-        onSelect={setCategory}
-      />
-      <View style={styles.grid}>
-        {dishes.map(dish => (
-          <DishCard dish={dish} key={dish.id} />
-        ))}
-      </View>
-      {!dishes.length && (
-        <AppText muted style={styles.empty}>
-          {t('menu.noDishesFoundTryAnotherNameOrCategory')}
-        </AppText>
-      )}
-    </Screen>
+    </>
   );
 }
 const styles = StyleSheet.create({
-  leaf: {
-    width: 48,
-    height: 48,
+  loading: { flex: 1, minHeight: 200 },
+  loadError: {
+    backgroundColor: colors.dangerSoft,
     borderRadius: 17,
-    backgroundColor: colors.peach,
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 12,
+    marginBottom: 12,
   },
+  errorText: { color: colors.error, fontSize: 12, lineHeight: 18 },
+  fill: { flex: 1 },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    gap: 16,
     rowGap: 19,
     marginTop: 11,
   },
-  empty: { textAlign: 'center', paddingVertical: 48 },
+  noResults: { alignItems: 'center', gap: 20, paddingVertical: 48 },
+  noResultsText: { textAlign: 'center' },
 });

@@ -1,4 +1,4 @@
-RestoFlow is a native restaurant ordering and billing app with owner and waiter flows, OTP authentication, restaurant setup, tables, customer orders, menu search, waiter management, language settings, and native receipt printing.
+RestoFlow is a native restaurant ordering and billing app with owner and waiter flows, phone and password authentication, restaurant setup, tables, customer orders, menu search, waiter management, language settings, and native receipt printing.
 
 ## Backend environments
 
@@ -9,21 +9,19 @@ RestoFlow is a native restaurant ordering and billing app with owner and waiter 
 
 These exact origins are enforced in build tooling and at runtime. Production has no development fallback, and Preview URLs are rejected. Rebuild the native app after changing environment configuration.
 
-Development uses local OTP mocks controlled by `USE_MOCK_OTP` in `src/config/auth.ts`. Enter **123456** when prompted. Sending, resending, and verifying the code make **no calls** to `/otp/request` or `/otp/verify`; no SMS is sent. Challenges expire after five minutes, and resending replaces the previous local challenge. There is no seeded demo account.
+Continue checks `POST /api/v1/auth/phone/check`. Registered numbers reveal a password field and sign in through `POST /api/v1/auth/login`. New numbers open restaurant registration with the phone prefilled. Password and Confirm password appear below the restaurant details; Create account submits the phone, password, confirmation, names, and optional photo to `POST /api/v1/onboarding/owner/complete` and opens the dashboard after the backend saves the account. OTP requests, verification, resend, and local authentication mocks have been removed.
 
-Continue validates the phone and calls the real `/api/v1/auth/phone/check` API. An **existing number** gets the local mock OTP, then `/api/v1/auth/login` signs the user into their saved restaurant. A **new number** opens restaurant details, gets the local mock OTP, then `/api/v1/onboarding/owner/complete` saves the owner/restaurant and opens the dashboard. Enter `123456` for either mock OTP. The app advances only after a successful API response; lookup and save failures stay on the current screen and can be retried.
-
-Both paths are supported by the deployed DEV backend (`DEV_MOCK_AUTH=true`). Live verification checked a new phone, registered a real temporary restaurant, checked that the phone was now registered, and logged back into the same restaurant. Session refresh, dashboard reads, and logout passed without calling OTP endpoints; the temporary records were removed afterward. Sessions, tables, menu, staff, orders, bills, and subscriptions use real APIs and server data. Production uses real OTP endpoints. Subscription activation is checked against the server after operator activation; the backend does not expose a purchase/payment API.
-
-See [the mobile API integration guide](docs/API_INTEGRATION.md) for flow details and backend migration/deployment prerequisites. The production Worker currently needs backend configuration; its health endpoint returns `CONFIGURATION_ERROR`.
+Passwords use the backend’s 8–128 character limit, preserve spaces, and require matching confirmation during registration. Owners assign a password when adding a waiter. Existing accounts without a password need an administrator to set their first password; see the backend’s authentication guide. The backend must have `0004_password_auth.sql` applied before serving this flow.
 
 ## Design and code
 
 The ZIP's prototype, screen previews, SVGs and tokens are the implementation reference, as requested. No screenshot is used as a screen asset. All supplied SVGs are preserved byte for byte and imported through the [SVG transformer](https://github.com/kristerkari/react-native-svg-transformer). Icons keep their native 24-unit geometry and are tinted at the call site. Android and iOS supply their own status and navigation bars.
 
-SF Pro binaries were not included in the ZIP. iOS uses its system font, Android uses its system sans-serif, and the supplied Noto Sans Devanagari font is bundled on both platforms. Asset and font licenses are in `licenses/`.
+iOS uses its SF Pro system font. Android bundles the supplied SF Pro Display Regular, Medium, and Bold fonts in `android/app/src/main/res/font/`, registered as a single family for text and inputs. The supplied Noto Sans Devanagari font is bundled on both platforms for Devanagari text. Asset and font licenses supplied with the original ZIP are in `licenses/`. Rebuild the Android app after changing bundled fonts; a Metro reload cannot install native font resources.
 
 `src/app` contains typed React Navigation stacks and the floating tab bar. `src/components` contains shared UI controls. Each feature owns its screens, components, types or hooks; API calls, order drafts, and receipt generation are separate from JSX. Tokens are in `src/theme/tokens.ts` and the supplied rules are preserved in `design/implementation-rules.md`.
+
+The menu management UI covers all 33 screenshots supplied on 22 October 2026, including add/edit forms, validation, saving, categories, images, availability, deletion, empty states and feedback. See [the screenshot coverage and verification report](design/menu-ui-implementation.md).
 
 ## Install and verify
 
@@ -36,7 +34,7 @@ npm test -- --runInBand
 
 The legacy peer flag is needed because `react-native-print` declares a Windows peer dependency incompatible with this project's React Native version. Windows is not a target of this app. Its Android SDK is aligned with the app in `android/build.gradle`.
 
-For iOS, install CocoaPods dependencies on macOS before running the app. Android verification can use an emulator or device. The tests cover OTP login/registration, server-backed tables, role-specific settings, secure credentials, token rotation, API pagination, exact bill snapshots, receipt escaping, and environment isolation.
+For iOS, install CocoaPods dependencies on macOS before running the app. Android verification can use an emulator or device. The tests cover password login/registration, server-backed tables, role-specific settings, secure credentials, token rotation, API pagination, exact bill snapshots, receipt escaping, and environment isolation.
 
 Verification details are in [design/verification.md](design/verification.md).
 
@@ -75,7 +73,7 @@ configuration and verification. Translation requests use the same pinned Worker 
 
 ## Application infrastructure
 
-Axios, Redux Toolkit, native environment configuration, MMKV, BootSplash and Stallion are integrated. DEV and PROD use separate Android flavors, iOS schemes, application identities and native Stallion project IDs. Authentication uses backend-issued tokens and persisted server sessions; development can use the fixed OTP described above.
+Axios, Redux Toolkit, native environment configuration, MMKV, BootSplash and Stallion are integrated. DEV and PROD use separate Android flavors, iOS schemes, application identities and native Stallion project IDs. Authentication uses phone numbers and passwords, backend-issued tokens, and persisted server sessions. Passwords are not persisted on the device.
 
 Use `npm run android:dev` / `npm run android:prod`, or on macOS `npm run ios:dev` / `npm run ios:prod`.
 

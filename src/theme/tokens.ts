@@ -22,12 +22,20 @@ export const spacing = {
 export const radius = design.radius;
 export const motion = design.motion_ms;
 export const fonts = {
-  body: Platform.select({ ios: 'System', default: 'sans-serif' }),
-  heading: Platform.select({ ios: 'System', default: 'sans-serif' }),
+  body: Platform.select({
+    ios: 'System',
+    android: 'SF Pro Display',
+    default: 'sans-serif',
+  }),
+  heading: Platform.select({
+    ios: 'System',
+    android: 'SF Pro Display',
+    default: 'sans-serif',
+  }),
   script: 'NotoSansDevanagari-Regular',
 };
 // Read from the text layers in Figma, rather than the older prototype's weights.
-// SF Pro is the iOS system font; Android uses its native sans-serif fallback.
+// SF Pro is the iOS system font; Android registers bundled SF Pro Display weights.
 export const typography = {
   body: { fontSize: 14, lineHeight: 21 },
   heading: { fontSize: 25, lineHeight: 35 },

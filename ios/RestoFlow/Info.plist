@@ -43,8 +43,10 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+	<key>NSCameraUsageDescription</key>
+	<string>Take a photo of a dish for your restaurant menu.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Choose an optional restaurant owner or waiter profile photo.</string>
+	<string>Choose a dish image or an optional restaurant owner or waiter profile photo.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>NotoSansDevanagari-Regular.ttf</string>

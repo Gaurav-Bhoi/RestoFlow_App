@@ -50,7 +50,7 @@ test('draft prices and displayed server totals retain exact paise', () => {
   );
   expect(() => pricePaise('1e3')).toThrow();
 });
-test('phone normalization submits E.164 to OTP endpoints', () => {
+test('phone normalization submits E.164 to authentication endpoints', () => {
   expect(toE164Phone('9876543210')).toBe('+919876543210');
   expect(toE164Phone('+91 9876543210')).toBe('+919876543210');
   expect(() => toE164Phone('123')).toThrow();

@@ -10,12 +10,14 @@ export function AppHeader({
   title,
   subtitle,
   onBack,
+  backDisabled,
   right,
   maxWidth = contentWidths.screen,
 }: {
   title: string;
   subtitle?: string;
   onBack?: () => void;
+  backDisabled?: boolean;
   right?: React.ReactNode;
   maxWidth?: number;
 }) {
@@ -31,6 +33,8 @@ export function AppHeader({
       {onBack && (
         <Pressable
           onPress={onBack}
+          disabled={backDisabled}
+          accessibilityState={{ disabled: backDisabled }}
           accessibilityRole="button"
           accessibilityLabel={t('common.goBack')}
           style={styles.back}

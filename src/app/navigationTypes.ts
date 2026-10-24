@@ -14,8 +14,11 @@ export type RootStackParams = {
   Receipt: { tableId: string; customerId: string };
   PrintSuccess: { tableId: string; customerId: string };
   Language: undefined;
+  EditProfile: undefined;
+  ChangePassword: undefined;
   Waiters: undefined;
   AddWaiter: undefined;
+  DishForm: { dishId?: string };
   Subscription: undefined;
   Purchase: undefined;
 };

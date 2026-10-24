@@ -8,6 +8,8 @@ import Close from '../../assets/icons/close.svg';
 import Crown from '../../assets/icons/crown.svg';
 import Cutlery from '../../assets/icons/cutlery.svg';
 import Edit from '../../assets/icons/edit.svg';
+import Eye from '../../assets/icons/eye.svg';
+import EyeOff from '../../assets/icons/eye-off.svg';
 import Grid from '../../assets/icons/grid.svg';
 import Info from '../../assets/icons/info.svg';
 import Language from '../../assets/icons/language.svg';
@@ -22,9 +24,19 @@ import Search from '../../assets/icons/search.svg';
 import Settings from '../../assets/icons/settings.svg';
 import Shield from '../../assets/icons/shield.svg';
 import Table from '../../assets/icons/table.svg';
+import Clock from '../../assets/icons/clock.svg';
+import Alert from '../../assets/icons/alert.svg';
+import Trash from '../../assets/icons/trash.svg';
+import Gallery from '../../assets/icons/gallery.svg';
+import Ledger from '../../assets/icons/ledger.svg';
 import { colors } from '../theme/tokens';
 
 const icons = {
+  clock: Clock,
+  alert: Alert,
+  trash: Trash,
+  gallery: Gallery,
+  ledger: Ledger,
   arrow: Arrow,
   back: Back,
   camera: Camera,
@@ -33,6 +45,8 @@ const icons = {
   crown: Crown,
   cutlery: Cutlery,
   edit: Edit,
+  eye: Eye,
+  'eye-off': EyeOff,
   grid: Grid,
   info: Info,
   language: Language,

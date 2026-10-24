@@ -46,7 +46,7 @@ export function SettingsScreen() {
             size={53}
             dark
           />
-          <View>
+          <View style={styles.accountDetails}>
             <AppText style={styles.name}>{session?.name}</AppText>
             <AppText muted style={styles.restaurant}>
               {restaurant.name}
@@ -60,6 +60,20 @@ export function SettingsScreen() {
         </View>
         <View style={styles.group}>
           <SettingsRow
+            icon="edit"
+            title={t('settings.editProfile')}
+            subtitle={t('settings.editProfileSubtitle')}
+            onPress={() => navigation.navigate('EditProfile')}
+          />
+          <SettingsRow
+            hasDivider
+            icon="shield"
+            title={t('settings.changePassword')}
+            subtitle={t('settings.changePasswordSubtitle')}
+            onPress={() => navigation.navigate('ChangePassword')}
+          />
+          <SettingsRow
+            hasDivider
             icon="language"
             title={t('settings.language')}
             subtitle={currentLanguage.nativeName}
@@ -132,6 +146,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.sage,
     marginBottom: 23,
   },
+  accountDetails: { flex: 1 },
   name: { fontSize: 16, fontWeight: '700' },
   restaurant: { fontSize: 11, lineHeight: 17, marginTop: 4 },
   role: { marginTop: 8 },

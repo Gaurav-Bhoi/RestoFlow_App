@@ -2,28 +2,23 @@ import { authApi } from '../../api/restoflow';
 import { useSession } from './SessionProvider';
 import { toE164Phone } from './validation';
 import type { ProfilePhoto } from '../restaurant/types';
+import type { OwnerRegistrationInput } from '../../api/types';
 export function useAuth() {
   const { signIn } = useSession();
   return {
     checkPhone: (phone: string) => authApi.checkPhone(toE164Phone(phone)),
-    requestLogin: (phone: string) => authApi.requestOtp(toE164Phone(phone)),
-    requestRegistration: (phone: string) =>
-      authApi.requestOtp(toE164Phone(phone), true),
-    login: async (challengeId: string, otp: string) => {
-      await signIn(await authApi.verifyLogin(challengeId, otp));
+    login: async (phone: string, password: string) => {
+      await signIn(await authApi.login(toE164Phone(phone), password));
     },
-    verifyRegistration: authApi.verifyRegistration,
-    register: async (
-      token: string,
-      restaurantName: string,
-      ownerName: string,
-      photo?: ProfilePhoto,
-    ) => {
+    register: async (input: OwnerRegistrationInput, photo?: ProfilePhoto) => {
       await signIn(
         await authApi.register(
-          token,
-          ownerName.trim(),
-          restaurantName.trim(),
+          {
+            ...input,
+            phoneNumber: toE164Phone(input.phoneNumber),
+            fullName: input.fullName.trim(),
+            restaurantName: input.restaurantName.trim(),
+          },
           photo,
         ),
       );

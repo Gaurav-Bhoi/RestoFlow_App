@@ -5,6 +5,7 @@ import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
+import com.facebook.react.common.assets.ReactFontManager
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.stallion.Stallion
 
@@ -30,6 +31,7 @@ class MainApplication : Application(), ReactApplication {
     check(packageName == expectedId) { "Native application identity mismatch" }
     val expectedProject = if (BuildConfig.NATIVE_APP_ENV == "development") "6aca897a03fc44c9897cf2b5" else "6aca880b9f76d8bbbc714eef"
     check(getString(R.string.StallionProjectId) == expectedProject) { "Stallion project mismatch" }
+    ReactFontManager.getInstance().addCustomFont(this, "SF Pro Display", R.font.sf_pro_display)
     loadReactNative(this)
   }
 }

@@ -1,8 +1,6 @@
 import type { AxiosRequestConfig } from 'axios';
 import { apiClient } from './client';
 import { ENV } from '../config/env';
-import { USE_MOCK_OTP } from '../config/auth';
-import { mockOtp } from '../services/auth/mockOtp';
 import type {
   AccountProfile,
   ApiBill,
@@ -13,8 +11,9 @@ import type {
   ApiUser,
   ApiWaiter,
   AuthResult,
+  ChangePasswordInput,
   Dashboard,
-  OtpChallenge,
+  OwnerRegistrationInput,
   Subscription,
 } from './types';
 import type {
@@ -76,77 +75,50 @@ export function photoForm(
   return body;
 }
 export const authApi = {
-  checkPhone: (phoneNumber: string) =>
-    requestData<{ registered: boolean }>(
+  checkPhone: async (phoneNumber: string) => {
+    const result = await requestData<{ registered: boolean }>(
       'POST',
       '/api/v1/auth/phone/check',
       { phoneNumber },
       { sessionAuth: false },
+    );
+    if (typeof result?.registered !== 'boolean')
+      throw new Error('The backend returned an invalid phone lookup response.');
+    return result;
+  },
+  login: (phoneNumber: string, password: string) =>
+    requestData<AuthResult>(
+      'POST',
+      '/api/v1/auth/login',
+      { phoneNumber, password },
+      { sessionAuth: false },
     ),
-  requestOtp: (phoneNumber: string, ownerRegistration = false) => {
-    if (USE_MOCK_OTP) return mockOtp.request(phoneNumber, ownerRegistration);
-    // Real OTP API is disabled while development uses the local mock.
-    return requestData<OtpChallenge>(
-      'POST',
-      `/api/v1/${
-        ownerRegistration ? 'onboarding/owner' : 'auth/login'
-      }/otp/request`,
-      { phoneNumber },
-      { sessionAuth: false },
-    );
-  },
-  verifyLogin: async (challengeId: string, otp: string) => {
-    if (USE_MOCK_OTP) {
-      const phoneNumber = mockOtp.verify(challengeId, otp, false);
-      const result = await requestData<AuthResult>(
-        'POST',
-        '/api/v1/auth/login',
-        { phoneNumber },
-        { sessionAuth: false },
-      );
-      mockOtp.consume(challengeId);
-      return result;
-    }
-    // Real OTP verification API is disabled in development mock mode.
-    return requestData<AuthResult>(
-      'POST',
-      '/api/v1/auth/login/otp/verify',
-      { challengeId, otp },
-      { sessionAuth: false },
-    );
-  },
-  verifyRegistration: async (challengeId: string, otp: string) => {
-    if (USE_MOCK_OTP) {
-      const phoneNumber = mockOtp.verify(challengeId, otp, true);
-      mockOtp.consume(challengeId);
-      return {
-        onboardingToken: `dev-mock-onboarding:${phoneNumber}`,
-        expiresIn: 900,
-      };
-    }
-    // Real OTP verification API is disabled in development mock mode.
-    return requestData<{ onboardingToken: string; expiresIn: number }>(
-      'POST',
-      '/api/v1/onboarding/owner/otp/verify',
-      { challengeId, otp },
-      { sessionAuth: false },
-    );
-  },
-  register: (
-    token: string,
-    fullName: string,
-    restaurantName: string,
-    image?: ProfilePhoto,
-  ) =>
+  register: (input: OwnerRegistrationInput, image?: ProfilePhoto) =>
     requestData<AuthResult>(
       'POST',
       '/api/v1/onboarding/owner/complete',
-      photoForm({ fullName, restaurantName }, image),
-      { sessionAuth: false, onboardingToken: token },
+      photoForm({ ...input }, image),
+      { sessionAuth: false },
     ),
   me: (signal?: AbortSignal) =>
     requestData<AccountProfile>('GET', '/api/v1/auth/me', undefined, {
       signal,
+    }),
+  updateProfile: (fullName: string, image?: ProfilePhoto) =>
+    requestData<ApiUser>(
+      'PATCH',
+      '/api/v1/auth/me',
+      photoForm({ fullName: fullName.trim() }, image),
+    ),
+  changePassword: (input: ChangePasswordInput) =>
+    requestData<{ passwordChanged: true }>(
+      'POST',
+      '/api/v1/auth/password',
+      input,
+    ).then(result => {
+      if (result?.passwordChanged !== true)
+        throw new Error('The backend did not confirm the password change.');
+      return result;
     }),
   logout: () => requestData<{ loggedOut: true }>('POST', '/api/v1/auth/logout'),
 };
@@ -213,14 +185,15 @@ export const restaurantApi = {
     id: string,
     fullName: string,
     phoneNumber: string,
+    password: string,
     image?: ProfilePhoto,
   ) =>
     requestData<ApiWaiter>(
       'POST',
       `${base(id)}/waiters`,
       image
-        ? photoForm({ fullName, phoneNumber }, image)
-        : { fullName, phoneNumber },
+        ? photoForm({ fullName, phoneNumber, password }, image)
+        : { fullName, phoneNumber, password },
     ),
   getOrder: (id: string, orderId: string, signal?: AbortSignal) =>
     requestData<ApiOrder>(

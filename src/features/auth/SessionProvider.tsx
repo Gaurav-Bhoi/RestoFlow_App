@@ -8,8 +8,8 @@ import React, {
   useState,
 } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import type { Session } from '../restaurant/types';
-import type { AuthResult } from '../../api/types';
+import type { ProfilePhoto, Session } from '../restaurant/types';
+import type { AuthResult, ChangePasswordInput } from '../../api/types';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { signedIn, signedOut } from '../../store/slices/sessionSlice';
 import {
@@ -17,7 +17,7 @@ import {
   getCredentials,
   saveTokens,
 } from '../../services/auth/credentials';
-import { authApi, profileSession } from '../../api/restoflow';
+import { authApi, mediaUrl, profileSession } from '../../api/restoflow';
 import { registerSessionExpiredHandler } from '../../api/client';
 import { normalizeApiError } from '../../api/errors';
 import { EmptyState } from '../../components/EmptyState';
@@ -28,6 +28,8 @@ interface SessionContextValue {
   session: Session | null;
   signIn: (result: AuthResult) => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (fullName: string, photo?: ProfilePhoto) => Promise<void>;
+  changePassword: (input: ChangePasswordInput) => Promise<void>;
 }
 const SessionContext = createContext<SessionContextValue | null>(null);
 export function SessionProvider({ children }: React.PropsWithChildren) {
@@ -74,6 +76,38 @@ export function SessionProvider({ children }: React.PropsWithChildren) {
       setRestoreError('');
     }
   }, [dispatch, showFeedback, t]);
+  const updateProfile = async (fullName: string, photo?: ProfilePhoto) => {
+    if (!session) throw new Error('Please sign in again.');
+    const expected = revision.current;
+    const user = await authApi.updateProfile(fullName, photo);
+    if (expected !== revision.current)
+      throw new Error('The session changed. Please sign in again.');
+    if (user.id !== session.userId || typeof user.fullName !== 'string')
+      throw new Error('The backend returned an invalid profile.');
+    dispatch(
+      signedIn({
+        ...session,
+        name: user.fullName,
+        photo: mediaUrl(user.profileImageUrl),
+      }),
+    );
+  };
+  const changePassword = async (input: ChangePasswordInput) => {
+    const expected = revision.current;
+    await authApi.changePassword(input);
+    if (expected !== revision.current)
+      throw new Error('The session changed. Please sign in again.');
+    revision.current += 1;
+    // The backend revokes every session as part of the password change.
+    try {
+      await clearCredentials();
+    } catch {
+      showFeedback(t('api.clearSessionFailed'));
+    } finally {
+      dispatch(signedOut());
+      setRestoreError('');
+    }
+  };
   useEffect(() => {
     const controller = new AbortController();
     const expectedRevision = revision.current;
@@ -99,7 +133,9 @@ export function SessionProvider({ children }: React.PropsWithChildren) {
     return () => controller.abort();
   }, [attempt, dispatch]);
   return (
-    <SessionContext.Provider value={{ session, signIn, signOut }}>
+    <SessionContext.Provider
+      value={{ session, signIn, signOut, updateProfile, changePassword }}
+    >
       {loading ? (
         <View style={styles.loading}>
           <ActivityIndicator accessibilityLabel={t('api.restoringSession')} />

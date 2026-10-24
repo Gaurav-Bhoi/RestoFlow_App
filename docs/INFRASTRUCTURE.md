@@ -1,6 +1,6 @@
 # RestoFlow application infrastructure
 
-This checkout uses real backend OTP authentication and server restaurant data.
+This checkout uses real backend password authentication and server restaurant data.
 See [API_INTEGRATION.md](API_INTEGRATION.md) for the current implementation,
 exact DEV/PROD Worker origins, secure credential storage, and backend deployment
 prerequisites. All mock runtime paths and the development mock release bypass
@@ -24,7 +24,7 @@ integration guide.
 | Navigation                         | React Navigation 7, native stack and bottom tabs                                        |
 | Existing state                     | Restaurant context/reducer and local session context                                    |
 | Existing API                       | Hono translation API only, originally using fetch                                       |
-| Existing authentication            | Backend OTP; rotating access/refresh tokens in native secure storage |
+| Existing authentication            | Backend phone/password; rotating access/refresh tokens in native secure storage |
 | Existing persistence               | AsyncStorage for restaurant data and localization                                       |
 | Previous splash / OTA              | Template launch screen / none; no CodePush                                              |
 

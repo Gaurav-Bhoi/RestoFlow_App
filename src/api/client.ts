@@ -10,7 +10,6 @@ import type { ApiError, AuthTokens } from './types';
 declare module 'axios' {
   interface AxiosRequestConfig {
     sessionAuth?: boolean;
-    onboardingToken?: string;
     retried?: boolean;
   }
 }
@@ -58,7 +57,6 @@ export function refreshAccessToken() {
   return refreshPromise;
 }
 apiClient.interceptors.request.use(async request => {
-  console.debug('[API] request', request);
   if (
     request.baseURL !== ENV.API_BASE_URL ||
     !request.url?.startsWith('/') ||
@@ -71,9 +69,7 @@ apiClient.interceptors.request.use(async request => {
       message: 'The request API origin does not match this application.',
     } satisfies ApiError;
   request.headers.delete('Authorization');
-  if (request.onboardingToken)
-    request.headers.set('Authorization', `Bearer ${request.onboardingToken}`);
-  else if (request.sessionAuth !== false) {
+  if (request.sessionAuth !== false) {
     const credentials = await getCredentials();
     if (credentials)
       request.headers.set('Authorization', `Bearer ${credentials.accessToken}`);
@@ -82,15 +78,30 @@ apiClient.interceptors.request.use(async request => {
     request.headers.set('Content-Type', 'multipart/form-data');
   request.headers.set('X-RestoFlow-Environment', ENV.APP_ENV);
   if (__DEV__ && ENV.IS_DEVELOPMENT && ENV.ENABLE_API_LOGS)
-    console.debug('[API] request', request.method?.toUpperCase());
+    console.debug('[API] request', request.method?.toUpperCase(), request.url);
   return request;
 });
 function matchesEnvironment(headers: Record<string, unknown>) {
   return headers['x-restoflow-environment'] === ENV.APP_ENV;
 }
+function isOldPasswordError(
+  request: InternalAxiosRequestConfig,
+  error: ApiError,
+) {
+  return (
+    request.url === '/api/v1/auth/password' &&
+    error.code === 'INVALID_CREDENTIALS'
+  );
+}
 apiClient.interceptors.response.use(
   response => {
-    console.debug('[API] response', response);
+    if (__DEV__ && ENV.IS_DEVELOPMENT && ENV.ENABLE_API_LOGS)
+      console.debug(
+        '[API] response',
+        response.status,
+        response.config.method?.toUpperCase(),
+        response.config.url,
+      );
     if (!matchesEnvironment(response.headers))
       return Promise.reject({
         code: 'ENVIRONMENT_MISMATCH',
@@ -110,7 +121,8 @@ apiClient.interceptors.response.use(
         error.response.status === 401 &&
         request &&
         request.sessionAuth !== false &&
-        !request.onboardingToken
+        // An incorrect old password is a form error, not an expired session.
+        !isOldPasswordError(request, normalizeApiError(error))
       ) {
         const credentials = await getCredentials();
         if (credentials && !request.retried) {
@@ -125,7 +137,10 @@ apiClient.interceptors.response.use(
             return await apiClient.request(request);
           } catch (cause) {
             const failure = normalizeApiError(cause);
-            if (failure.status === 401) {
+            if (
+              failure.status === 401 &&
+              !isOldPasswordError(request, failure)
+            ) {
               const latest = await getCredentials();
               if (latest?.refreshToken === credentials.refreshToken) {
                 try {

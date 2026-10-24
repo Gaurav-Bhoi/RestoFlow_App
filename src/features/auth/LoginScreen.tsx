@@ -1,6 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  Keyboard,
+  StyleSheet,
+  View,
+  type TextInputInstance,
+} from 'react-native';
 import { Screen } from '../../components/Screen';
 import { AppText } from '../../components/AppText';
 import { AppButton } from '../../components/AppButton';
@@ -9,62 +14,51 @@ import { FigmaAsset } from '../../components/FigmaAsset';
 import { colors, contentWidths } from '../../theme/tokens';
 import { useResponsiveLayout } from '../../hooks/useResponsiveLayout';
 import type { RootScreenProps } from '../../app/navigationTypes';
-import { normalizePhone } from './validation';
+import { isValidPassword, isValidPhone, normalizePhone } from './validation';
 import { useAuth } from './useAuth';
 import { normalizeApiError } from '../../api/errors';
-import { OtpFields, type PendingOtp } from './OtpFields';
 
 export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
   const { t } = useTranslation();
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
-  const { checkPhone, login, requestLogin } = useAuth();
-  const [challenge, setChallenge] = useState<PendingOtp>();
-  const [otp, setOtp] = useState('');
+  const { checkPhone, login } = useAuth();
+  const [registeredPhone, setRegisteredPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const inFlight = useRef(false);
+  const passwordInput = useRef<TextInputInstance>(null);
   const { contentWidth } = useResponsiveLayout(contentWidths.form);
   const artWidth = Math.min(320, contentWidth - 26);
   const [headline, ...headlineRest] = t('auth.serviceMadeSimple').split('\n');
-  const requestCode = async () => {
-    const requested = await requestLogin(phone);
-    setChallenge({ ...requested, requestedAt: Date.now() });
-    setOtp('');
-  };
   const handleContinue = async () => {
-    if (busy) return;
+    if (inFlight.current) return;
+    inFlight.current = true;
     setBusy(true);
     setError('');
     try {
-      if (challenge) {
-        if (!/^\d{6}$/.test(otp))
-          throw new Error('Enter the six-digit verification code.');
-        await login(challenge.challengeId, otp);
+      if (!isValidPhone(phone))
+        throw new Error(t('auth.enterAValid10DigitIndianMobileNumber'));
+      if (registeredPhone === phone) {
+        if (!isValidPassword(password))
+          throw new Error(t('auth.passwordLength'));
+        await login(phone, password);
+        Keyboard.dismiss();
       } else {
         const { registered } = await checkPhone(phone);
-        if (registered) await requestCode();
+        if (registered) setRegisteredPhone(phone);
         else
           navigation.navigate('Registration', { phone: normalizePhone(phone) });
       }
     } catch (cause) {
       const failure = normalizeApiError(cause);
       if (failure.code === 'ACCOUNT_NOT_FOUND') {
-        setChallenge(undefined);
-        setOtp('');
+        setRegisteredPhone('');
+        setPassword('');
       }
       setError(failure.message);
     } finally {
-      setBusy(false);
-    }
-  };
-  const resend = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      await requestCode();
-      setError('');
-    } catch (cause) {
-      setError(normalizeApiError(cause).message);
-    } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   };
@@ -99,23 +93,38 @@ export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
         value={phone}
         onChangeText={value => {
           setPhone(normalizePhone(value));
-          setChallenge(undefined);
-          setOtp('');
+          setRegisteredPhone('');
+          setPassword('');
           setError('');
         }}
         placeholder={t('auth.enter10DigitNumber')}
         error={error}
         showErrorMessage={false}
-        returnKeyType="done"
-        onSubmitEditing={handleContinue}
+        returnKeyType={registeredPhone ? 'next' : 'done'}
+        onSubmitEditing={() => {
+          if (registeredPhone) passwordInput.current?.focus();
+          else handleContinue();
+        }}
       />
-      {challenge && (
-        <OtpFields
-          challenge={challenge}
-          value={otp}
-          onChange={setOtp}
-          onResend={resend}
-          busy={busy}
+      {!!registeredPhone && (
+        <AppInput
+          ref={passwordInput}
+          label={t('auth.password')}
+          placeholder={t('auth.enterPassword')}
+          value={password}
+          onChangeText={value => {
+            setPassword(value);
+            setError('');
+          }}
+          secureTextEntry
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="current-password"
+          textContentType="password"
+          editable={!busy}
+          autoFocus
+          returnKeyType="done"
+          onSubmitEditing={handleContinue}
         />
       )}
       <View style={styles.errorSpace}>
@@ -136,10 +145,10 @@ export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
         onPress={handleContinue}
         loading={busy}
       >
-        {challenge ? t('api.verifySignIn') : t('auth.continue')}
+        {registeredPhone ? t('auth.signIn') : t('auth.continue')}
       </AppButton>
       <AppText variant="caption" muted style={styles.fine}>
-        {t('auth.yourNumberConnectsYouToYourRestaurantNoPasswords')}
+        {t('auth.phoneAndPasswordHelp')}
       </AppText>
     </Screen>
   );

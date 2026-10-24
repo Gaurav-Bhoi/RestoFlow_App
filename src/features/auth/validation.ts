@@ -1,6 +1,8 @@
 export const normalizePhone = (phone: string) => phone.replace(/\D/g, '');
 export const isValidPhone = (phone: string) =>
   /^[6-9]\d{9}$/.test(normalizePhone(phone));
+export const isValidPassword = (password: string) =>
+  password.length >= 8 && password.length <= 128;
 
 export function toE164Phone(input: string) {
   const phone = normalizePhone(input);

@@ -18,9 +18,8 @@ import { Screen } from '../../components/Screen';
 import { useProfilePhoto } from '../../hooks/useProfilePhoto';
 import { colors, contentWidths } from '../../theme/tokens';
 import { useAuth } from './useAuth';
-import { normalizePhone } from './validation';
+import { isValidPassword, isValidPhone, normalizePhone } from './validation';
 import { normalizeApiError } from '../../api/errors';
-import { OtpFields, type PendingOtp } from './OtpFields';
 
 export function RegistrationScreen({
   route,
@@ -32,55 +31,50 @@ export function RegistrationScreen({
   const [phone, setPhone] = useState(route.params.phone);
   const [error, setError] = useState('');
   const { photo, selectPhoto } = useProfilePhoto();
-  const { register, requestRegistration, verifyRegistration } = useAuth();
-  const [challenge, setChallenge] = useState<PendingOtp>();
-  const [otp, setOtp] = useState('');
-  const [token, setToken] = useState('');
+  const { register } = useAuth();
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const inFlight = useRef(false);
   const showFeedback = useFeedback();
   const ownerInput = useRef<TextInputInstance>(null);
   const phoneInput = useRef<TextInputInstance>(null);
-  const requestCode = async () => {
-    const requested = await requestRegistration(phone);
-    setChallenge({ ...requested, requestedAt: Date.now() });
-    setOtp('');
-    setToken('');
-  };
+  const passwordInput = useRef<TextInputInstance>(null);
+  const confirmPasswordInput = useRef<TextInputInstance>(null);
   const handleRegister = async () => {
-    if (busy) return;
+    if (inFlight.current) return;
+    inFlight.current = true;
     setBusy(true);
     setError('');
     try {
-      if (restaurantName.trim().length < 2 || ownerName.trim().length < 2)
-        throw new Error('Enter your name and restaurant name.');
-      if (!challenge) {
-        await requestCode();
-        return;
-      }
-      if (!token && !/^\d{6}$/.test(otp))
-        throw new Error('Enter the six-digit verification code.');
-      const onboardingToken =
-        token ||
-        (await verifyRegistration(challenge.challengeId, otp)).onboardingToken;
-      setToken(onboardingToken);
-      await register(onboardingToken, restaurantName, ownerName, photo);
+      if (
+        restaurantName.trim().length < 2 ||
+        restaurantName.trim().length > 150 ||
+        ownerName.trim().length < 2 ||
+        ownerName.trim().length > 100
+      )
+        throw new Error(t('auth.enterNames'));
+      if (!isValidPhone(phone))
+        throw new Error(t('auth.enterAValid10DigitIndianMobileNumber'));
+      if (!isValidPassword(password)) throw new Error(t('auth.passwordLength'));
+      if (password !== confirmPassword)
+        throw new Error(t('auth.passwordsDoNotMatch'));
+      await register(
+        {
+          phoneNumber: phone,
+          password,
+          confirmPassword,
+          fullName: ownerName,
+          restaurantName,
+        },
+        photo,
+      );
       Keyboard.dismiss();
       showFeedback(t('auth.yourRestaurantIsReadyAddYourFirstTable'));
     } catch (cause) {
       setError(normalizeApiError(cause).message);
     } finally {
-      setBusy(false);
-    }
-  };
-  const resend = async () => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      await requestCode();
-      setError('');
-    } catch (cause) {
-      setError(normalizeApiError(cause).message);
-    } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   };
@@ -93,6 +87,7 @@ export function RegistrationScreen({
           title={t('auth.welcomeAboard')}
           subtitle={t('auth.aFewDetailsThenYouReReady')}
           onBack={navigation.goBack}
+          backDisabled={busy}
         />
       }
       footer={
@@ -100,6 +95,7 @@ export function RegistrationScreen({
           <AppButton
             variant="secondary"
             onPress={navigation.goBack}
+            disabled={busy}
             style={styles.cancel}
           >
             {t('auth.cancel')}
@@ -109,7 +105,7 @@ export function RegistrationScreen({
             loading={busy}
             style={styles.submit}
           >
-            {challenge ? t('api.verifyCreate') : t('api.sendCode')}
+            {t('auth.createAccount')}
           </AppButton>
         </View>
       }
@@ -118,7 +114,11 @@ export function RegistrationScreen({
       <AppInput
         label={t('auth.restaurantName')}
         value={restaurantName}
-        onChangeText={setRestaurantName}
+        editable={!busy}
+        onChangeText={value => {
+          setRestaurantName(value);
+          setError('');
+        }}
         autoCapitalize="words"
         returnKeyType="next"
         submitBehavior="submit"
@@ -129,7 +129,11 @@ export function RegistrationScreen({
         ref={ownerInput}
         label={t('auth.yourName')}
         value={ownerName}
-        onChangeText={setOwnerName}
+        editable={!busy}
+        onChangeText={value => {
+          setOwnerName(value);
+          setError('');
+        }}
         autoCapitalize="words"
         autoComplete="name"
         returnKeyType="next"
@@ -145,24 +149,56 @@ export function RegistrationScreen({
         value={phone}
         onChangeText={value => {
           setPhone(normalizePhone(value));
-          setChallenge(undefined);
-          setToken('');
+          setError('');
         }}
+        returnKeyType="next"
+        submitBehavior="submit"
+        onSubmitEditing={() => passwordInput.current?.focus()}
+      />
+      <AppInput
+        ref={passwordInput}
+        label={t('auth.password')}
+        placeholder={t('auth.createPassword')}
+        value={password}
+        onChangeText={value => {
+          setPassword(value);
+          setError('');
+        }}
+        editable={!busy}
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="new-password"
+        textContentType="newPassword"
+        returnKeyType="next"
+        submitBehavior="submit"
+        onSubmitEditing={() => confirmPasswordInput.current?.focus()}
+      />
+      <AppInput
+        ref={confirmPasswordInput}
+        label={t('auth.confirmPassword')}
+        placeholder={t('auth.reenterPassword')}
+        value={confirmPassword}
+        onChangeText={value => {
+          setConfirmPassword(value);
+          setError('');
+        }}
+        editable={!busy}
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="new-password"
+        textContentType="newPassword"
         returnKeyType="done"
         onSubmitEditing={handleRegister}
       />
-      {challenge && (
-        <OtpFields
-          challenge={challenge}
-          value={otp}
-          onChange={setOtp}
-          onResend={resend}
-          busy={busy}
-        />
-      )}
       <Notice assetIcon="leaf">{t('api.trialNotice')}</Notice>
       {!!error && (
-        <AppText accessibilityRole="alert" style={styles.error}>
+        <AppText
+          accessibilityRole="alert"
+          accessibilityLiveRegion="polite"
+          style={styles.error}
+        >
           {error}
         </AppText>
       )}

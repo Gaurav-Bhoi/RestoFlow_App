@@ -24,6 +24,7 @@ interface AppButtonProps {
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
   testID?: string;
+  wrapLabel?: boolean;
 }
 export function AppButton({
   children,
@@ -36,6 +37,7 @@ export function AppButton({
   loading = false,
   style,
   testID,
+  wrapLabel = false,
 }: AppButtonProps) {
   const scale = useRef(new Animated.Value(1)).current;
   const isReducedMotion = useReducedMotion();
@@ -76,7 +78,7 @@ export function AppButton({
         )}
         <AppText
           variant="button"
-          numberOfLines={1}
+          numberOfLines={wrapLabel ? undefined : 1}
           ellipsizeMode="tail"
           style={[styles.label, { color }]}
         >
@@ -107,7 +109,7 @@ const styles = StyleSheet.create({
   secondary: { backgroundColor: colors.sage },
   ghost: { backgroundColor: 'transparent' },
   danger: { backgroundColor: colors.error },
-  label: { flexShrink: 1 },
+  label: { flexShrink: 1, textAlign: 'center' },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.45 },
 });

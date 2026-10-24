@@ -18,56 +18,13 @@ the environment even for release JavaScript bundles.
 
 ## Authentication and storage
 
-The temporary OTP mock runs locally in the app, selected by `USE_MOCK_OTP` in
-`src/config/auth.ts`. Sending/resending and code validation use
-`src/services/auth/mockOtp.ts`; neither `/otp/request` nor `/otp/verify` is
-called in mock mode. The local code is `123456`. No SMS is sent. The real OTP
-implementations remain behind the disabled development branch for later use.
+The login screen starts with a phone field. Continue normalizes it to E.164 and calls public `POST /api/v1/auth/phone/check` with `{phoneNumber}`. A registered number reveals the password field on the same screen; Sign in sends `{phoneNumber, password}` to public `POST /api/v1/auth/login`. Editing the phone clears the password and lookup result, so the next Continue checks the new number. Failed or invalid lookups stay on the phone screen and allow retry.
 
-All other APIs remain real, including owner/restaurant completion, account
-restoration, refresh, logout, tables, menu, staff, orders, bills, and subscriptions.
-There are no local demo accounts, restaurant storage, or table mutations.
-Registration posts the actual names and optional image to
-`/api/v1/onboarding/owner/complete` with a local `dev-mock-onboarding:<phone>`
-proof. The prepared backend accepts this proof only in development when
-`DEV_MOCK_AUTH=true`, and still uses the existing real database transaction to
-save the owner, restaurant, subscription, and session. The phone screen first
-calls the real `POST /api/v1/auth/phone/check` with `{ phoneNumber }` in E.164
-format. It returns `{ registered: true | false }` inside the success envelope;
-the lookup sends no OTP and creates no session or restaurant.
+An unregistered number opens restaurant registration with its phone prefilled. Password and Confirm password follow the restaurant name, owner name, and mobile number fields. Create account validates names, phone, the backend’s 8–128 character password limit, and exact confirmation, then sends multipart `phoneNumber`, `password`, `confirmPassword`, `fullName`, `restaurantName`, and optional `image` to public `POST /api/v1/onboarding/owner/complete`. Passwords preserve whitespace. The backend atomically saves the account and restaurant and returns the session; the app opens the dashboard only after success. Failed saves preserve the form for retry. Owners also provide an assigned password when creating waiter accounts.
 
-For an existing phone, the app shows a local mock OTP and validates `123456`
-locally, then calls `POST /api/v1/auth/login` with `{ phoneNumber }`. This DEV-only
-API requires `DEV_MOCK_AUTH=true`, rechecks account access, and issues real
-session tokens for the saved restaurant. It supports owners and active waiters.
-Inactive accounts and session creation failures remain errors.
+OTP challenges, code inputs, resend actions, onboarding proofs, and authentication mocks are removed. None of the public authentication requests attach an existing access token, and invalid credentials never trigger session refresh. No phone is initially prefilled and no phone lookup signs a user in. Roles and restaurant IDs come from the server’s current account profile. Passwords and confirmation remain in form state only; persisted sessions contain tokens and account details.
 
-For a new phone, the app opens restaurant details, then shows and validates the
-local mock OTP before calling restaurant completion. The returned session opens
-the dashboard. A lookup failure keeps the phone screen; a failed registration
-keeps the form and verified proof available for retry. Neither branch calls OTP
-sending/verification APIs or services in mock mode. Production rejects mock
-authentication.
-
-| API | Purpose |
-| --- | --- |
-| `POST /api/v1/auth/phone/check` | Read whether the phone exists. |
-| `POST /api/v1/auth/login` | Create a real DEV session after local mock OTP verification. |
-| `POST /api/v1/onboarding/owner/complete` | Save the owner/restaurant and create its real session. |
-
-This flow is deployed on the DEV Worker as version
-`5136594c-e13d-4f27-9dc1-4b0685c56407`. Live acceptance verified a new-number
-lookup, real restaurant registration, the lookup changing to registered, login
-into the same restaurant, session restoration/refresh, dashboard reads, and
-logout. No OTP endpoint was called. All temporary test records were removed.
-TypeScript checks, 120 mobile tests, and 280 backend tests pass. ESLint has no
-errors and three existing warnings.
-
-With mocks disabled, login requests a purpose-bound OTP from the backend, then verifies the entered
-six-digit code. Unknown accounts can register an owner through registration OTP
-verification followed by multipart restaurant/profile completion. No phone is
-prefilled and no local phone lookup signs a user in. Roles and restaurant IDs
-come from the server's current account profile.
+The backend must serve its password contracts with `0004_password_auth.sql` applied. Existing accounts without a password need administrator provisioning through the backend’s `npm run password:set`; see its README for stdin usage. This mobile change does not migrate, provision, or deploy remote accounts.
 
 Access and refresh tokens are stored together in native Keychain/Keystore using
 `react-native-keychain`, scoped to environment and API origin. Redux contains
@@ -82,6 +39,52 @@ The server must set `X-RestoFlow-Environment` on successful and failed API
 responses. This has been added to the backend's shared request middleware.
 The client rejects absent or mismatched values.
 
+## Account settings
+
+Both endpoints require `Authorization: Bearer <accessToken>` and return the
+standard `{ "success": true, "data": ... }` envelope with the matching
+`X-RestoFlow-Environment` response header.
+
+| Mobile action | Backend contract | Successful `data` |
+| --- | --- | --- |
+| Save profile | `PATCH /api/v1/auth/me`; multipart `fullName` and optional `image` | `{ id, fullName, phoneNumber, profileImageUrl }` |
+| Update password | `POST /api/v1/auth/password`; JSON `{ currentPassword, newPassword }` | `{ "passwordChanged": true }` |
+
+Profile responses contain the saved public user fields directly in `data`,
+without a nested `user` object or new tokens. `GET /api/v1/auth/me` retains its
+existing `{ user, restaurants }` response. A null `profileImageUrl` displays the
+user's initials; a returned media path resolves against the selected API origin.
+The backend also accepts JSON or image-only profile patches; the mobile form
+always sends the validated name and omits an unchanged photo.
+
+Settings exposes Edit profile and Change password to owners and waiters. Edit
+profile sends multipart `fullName` and an optional native `image` file to
+`PATCH /api/v1/auth/me`. Names are trimmed and validated at 2–100 characters;
+the existing photo picker accepts JPEG, PNG and WebP images up to 5 MB. Only a
+confirmed server response updates the shared session name/photo. Profile edits
+preserve the current restaurant data and navigation; startup restores the saved
+profile from the backend. Failed saves keep the draft available for retry.
+
+Change password opens a separate screen with Old password, New password, and
+Confirm password. It validates the backend's 8–128 character limits and exact
+confirmation, then sends JSON `currentPassword` and `newPassword` to the existing
+authenticated `POST /api/v1/auth/password`. Password whitespace is preserved.
+Confirmation stays in form state. An incorrect old password remains a form
+error and does not refresh or clear the valid session. After the server confirms
+`passwordChanged: true`, all backend sessions have been revoked; the app clears
+its local credentials and returns to sign-in without calling logout again.
+
+The password API deliberately accepts no `confirmPassword` field. The screen
+checks confirmation before sending the request. HTTP 400 `VALIDATION_ERROR`,
+401 `INVALID_CREDENTIALS`, and 429 `RATE_LIMITED` leave the draft available for
+correction or retry. A 401 for an expired access token still follows the shared
+refresh flow; an incorrect old password after refresh remains a form error.
+
+The sibling backend implements the new self-profile route, public response
+schema, image replacement/cleanup, and OpenAPI documentation. No database
+migration is needed. Backend deployment is required before profile saving can
+be used against a hosted API; this settings change does not deploy it.
+
 ## Restaurant operations
 
 RestaurantProvider loads the selected restaurant, subscription, paginated menu,
@@ -95,7 +98,7 @@ on foreground/periodic refresh.
 Table creation/deletion, waiter creation/photo upload, order creation and edits,
 and visit completion call the restaurant-scoped APIs. UUIDs identify resources;
 table numbers are separate display values. Menu categories and dish images
-come from server data; missing images use a generic visual placeholder.
+come from server data; missing images use the bundled dish illustrations.
 
 Order editing preserves individual server item IDs and historical price
 snapshots, including repeated dishes with different snapshots. Quantities use
@@ -117,7 +120,7 @@ backend exposes no payment/purchase API, the access screen explains operator
 activation and checks the server for the updated subscription. It does not
 claim that a payment was taken or grant lifetime access locally.
 
-English and Marathi are bundled UI resources, with new OTP/loading/subscription
+English and Marathi are bundled UI resources, with password, loading, and subscription
 messages translated in both catalogs. Translation discovery and additional
 language downloads use the same selected API origin. Existing offline language
 preferences remain supported; they do not substitute for restaurant data.
@@ -145,7 +148,7 @@ A read-only DEV schema check confirmed the customer-name column and nonempty
 constraint are already present. The response-header/catalog changes were deployed to the DEV Worker after
 explicit approval; the live contract checks below passed. Do not substitute Preview URLs or another environment
 while preparing deployment. Production requires its own backend configuration,
-real SMS provider, storage, migration, and release prerequisites.
+password schema, storage, migration, and release prerequisites.
 
 Read-only checks on 14 October 2026 found the DEV health endpoint healthy, with
 `environment=development`. Production `/api/v1/health` returned HTTP 500 with
@@ -155,13 +158,24 @@ OpenAPI, translation, and protected-route error responses. Production still
 returns the configuration error. These findings do not change either mobile
 API origin.
 
-Local verification covers OTP flows through mocked HTTP transport, secure
+Local verification covers password flows through mocked HTTP transport, secure
 credential failure/revocation, single-flight refresh, exact server bill printing,
 pagination past 100 records, restaurant access, and rejection of cross-environment
-and Preview origins. These tests do not claim live SMS, payment, production,
+and Preview origins. These tests do not claim live authentication, payment, production,
 or native device acceptance.
 
-## Verification for this change
+## Password authentication verification — 24 October 2026
+
+- TypeScript passed; ESLint passed with three existing `no-void` warnings.
+- All 153 tests passed across 11 suites, including phone lookup branching,
+  owner/waiter password login, registration validation and retries, changing
+  phone numbers, waiter password assignment, and native multipart registration.
+- English/Marathi catalogs were updated and the generated backend English
+  catalog/mobile version metadata passed synchronization checks.
+- Remote authentication, account provisioning, migrations, deployment, and
+  Android/iOS device acceptance were not performed for this change.
+
+## Historical mobile integration verification — 14 October 2026
 
 - TypeScript checks passed.
 - 104 mobile tests passed across nine suites; seven infrastructure tests passed.
@@ -181,3 +195,63 @@ OpenAPI, the matching English catalog version, and 401 account/restaurant
 responses carrying the correct environment header. No business data was
 written by these acceptance checks. Production configuration/deployment was
 not changed; its exact health URL still returned HTTP 500 `CONFIGURATION_ERROR`.
+
+## Menu management API
+
+The backend source at `../restoflow_backend/src/modules/menu` mounts these routes under
+`/api/v1/restaurants/{restaurantId}/menu`. The mobile client implements them in
+`src/api/dishes.ts` using the existing authenticated Axios client, environment checks,
+and token refresh.
+
+| Action | Method and suffix | Request |
+| --- | --- | --- |
+| List | `GET /dishes` | Fetch every page with `limit=100` and `offset`; include unavailable dishes. |
+| Read/edit | `GET /dishes/{dishId}` | Fetch fresh detail before populating the edit form. |
+| Create | `POST /dishes` | Multipart form containing name, description, foodType, category, price, available, and optional image. |
+| Edit | `PATCH /dishes/{dishId}` | Multipart fields; unchanged images are omitted. |
+| Availability | `PATCH /dishes/{dishId}` | Multipart `available=true` or `available=false` only. |
+| Delete | `DELETE /dishes/{dishId}` | Confirm the returned ID and `deleted: true`. |
+
+Create and update always use multipart, including requests without an image. Prices
+remain decimal strings on writes. The client matches the backend's non-negative price
+range up to `21474836.47`, 120-character names, 2000-character descriptions, and JPEG,
+PNG or WebP images up to 5 MB. Local illustration URIs and existing image URLs are
+never sent as image files. Picker results retain the native file URI, MIME type and
+filename for multipart upload. Returned relative media URLs resolve to the configured
+Worker origin.
+
+`MenuProvider` coordinates confirmed API mutations and `RestaurantProvider` holds the
+shared menu used by ordering. Cached dishes remain visible if a refresh fails. The
+Menu tab refreshes on focus and supports pull-to-refresh. Mutation errors stay on the
+form, action sheet or deletion dialog; they do not produce success feedback. Pending
+submissions are guarded against duplicate taps. Stale list/floor requests cannot
+restore a dish after a newer confirmed deletion.
+
+There is no runtime mock seed or simulated saving delay. Empty restaurants display
+the actual empty-menu state; backend changes survive app restarts. The existing UI
+continues to expose dish management to owners and browsing to waiters.
+
+Verification: 151 mobile tests, including 17 menu interaction tests and 14 dish API/
+validation tests; the backend's 83 existing business route, service, image and OpenAPI
+tests also passed. TypeScript, ESLint (three existing warnings), and Android production
+JavaScript bundling passed.
+
+Live DEV acceptance on 22 October 2026 also passed on Android using the actual mobile
+`dishApi`, Axios interceptors, native network transport and React Native FormData.
+A temporary restaurant and isolated in-memory test credentials kept the test separate
+from saved device sessions. Verified against the configured DEV Worker:
+
+- List an empty menu and read fresh dish details.
+- Create with an app-private PNG file URI; read the returned public media URL.
+- Edit decimal price, category, food type and description; retain the uploaded image
+  when no new file is selected.
+- Toggle availability and confirm unavailable dishes remain in the list.
+- Create without an image, with zero price and unavailable status.
+- Propagate the server's invalid-price validation error.
+- Delete, confirm removal from the list, and receive `DISH_NOT_FOUND` on detail.
+
+The visible native UI also completed add, edit/category/price, mark unavailable, and
+confirmed deletion against DEV. The resulting database fields were checked before
+removing this run's synthetic account, restaurant, sessions, dishes and uploaded images.
+No OTP endpoint was called. Production was unchanged. See the
+[native acceptance capture](../design/menu-api-native-acceptance.png).

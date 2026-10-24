@@ -1,6 +1,6 @@
-# Current API integration — 14 October 2026
+# Current API integration — 24 October 2026
 
-Runtime mock implementations have been replaced with backend OTP authentication,
+Runtime mock implementations have been replaced with backend password authentication,
 secure credentials, and server restaurant operations. The exact DEV/PROD Worker
 origins are enforced without fallback. See [API_INTEGRATION.md](API_INTEGRATION.md)
 for current verification and backend/native release prerequisites. The older

@@ -7,19 +7,19 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useSession } from '../auth/SessionProvider';
 import { fetchRestaurant } from '../../api/restoflow';
 import { normalizeApiError } from '../../api/errors';
 import { AppButton } from '../../components/AppButton';
 import { EmptyState } from '../../components/EmptyState';
-import { useFeedback } from '../../app/FeedbackProvider';
 import { hideStartupSplash } from '../../app/bootstrap';
-import type { Restaurant, Session } from './types';
+import type { Dish, Restaurant } from './types';
 interface RestaurantContextValue {
   restaurant: Restaurant | null;
   refresh: () => Promise<void>;
   refreshing: boolean;
+  updateMenu: (update: (dishes: Dish[]) => Dish[]) => void;
 }
 const RestaurantContext = createContext<RestaurantContextValue | null>(null);
 export function RestaurantProvider({ children }: React.PropsWithChildren) {
@@ -28,12 +28,26 @@ export function RestaurantProvider({ children }: React.PropsWithChildren) {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [error, setError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const loadedFor = useRef<Session | null>(null);
+  // Profile edits keep the current restaurant and navigation mounted.
+  const accountKey = session
+    ? `${session.userId}:${session.restaurantId}:${session.role}`
+    : null;
+  const latestAccountKey = useRef(accountKey);
+  latestAccountKey.current = accountKey;
+  const loadedFor = useRef<string | null>(null);
   const latestSession = useRef(session);
   latestSession.current = session;
   const generation = useRef(0);
   const pending = useRef<AbortController | null>(null);
-  const showFeedback = useFeedback();
+  const menuRevision = useRef(0);
+  const updateMenu = useCallback((update: (dishes: Dish[]) => Dish[]) => {
+    menuRevision.current += 1;
+    setRestaurant(current =>
+      current && loadedFor.current === latestAccountKey.current
+        ? { ...current, menu: update(current.menu) }
+        : current,
+    );
+  }, []);
   const refresh = useCallback(async () => {
     const account = latestSession.current;
     if (!account) return;
@@ -41,22 +55,30 @@ export function RestaurantProvider({ children }: React.PropsWithChildren) {
     const controller = new AbortController();
     pending.current = controller;
     const expected = ++generation.current;
+    const expectedAccountKey = latestAccountKey.current;
+    const menuVersion = menuRevision.current;
     setRefreshing(true);
     try {
       const value = await fetchRestaurant(account, controller.signal);
       if (
         generation.current === expected &&
-        latestSession.current === account
+        latestAccountKey.current === expectedAccountKey
       ) {
-        loadedFor.current = account;
-        setRestaurant(value);
+        loadedFor.current = expectedAccountKey;
+        setRestaurant(current => ({
+          ...value,
+          menu:
+            current && menuVersion !== menuRevision.current
+              ? current.menu
+              : value.menu,
+        }));
         setError('');
       }
     } catch (cause) {
       if (
         controller.signal.aborted ||
         generation.current !== expected ||
-        latestSession.current !== account
+        latestAccountKey.current !== expectedAccountKey
       )
         return;
       const failure = normalizeApiError(cause);
@@ -66,10 +88,16 @@ export function RestaurantProvider({ children }: React.PropsWithChildren) {
           const value = await fetchRestaurant(account, controller.signal);
           if (
             generation.current === expected &&
-            latestSession.current === account
+            latestAccountKey.current === expectedAccountKey
           ) {
-            loadedFor.current = account;
-            setRestaurant(value);
+            loadedFor.current = expectedAccountKey;
+            setRestaurant(current => ({
+              ...value,
+              menu:
+                current && menuVersion !== menuRevision.current
+                  ? current.menu
+                  : value.menu,
+            }));
             setError('');
           }
         } catch (retryError) {
@@ -92,33 +120,24 @@ export function RestaurantProvider({ children }: React.PropsWithChildren) {
     loadedFor.current = null;
     setRestaurant(null);
     setError('');
-    if (session) refresh().catch(() => undefined);
+    if (accountKey) refresh().catch(() => undefined);
     return () => {
       generation.current += 1;
       pending.current?.abort();
     };
-  }, [session, refresh]);
-  useEffect(() => {
-    if (!session) return;
-    const reload = () => {
-      refresh().catch(cause => showFeedback(normalizeApiError(cause).message));
-    };
-    const timer = setInterval(reload, 30_000);
-    const listener = AppState.addEventListener('change', state => {
-      if (state === 'active') reload();
-    });
-    return () => {
-      clearInterval(timer);
-      listener.remove();
-    };
-  }, [session, refresh, showFeedback]);
+  }, [accountKey, refresh]);
   useEffect(() => {
     if (error || restaurant) hideStartupSplash();
   }, [error, restaurant]);
-  const available = restaurant && loadedFor.current === session;
+  const available = restaurant && loadedFor.current === accountKey;
   return (
     <RestaurantContext.Provider
-      value={{ restaurant: available ? restaurant : null, refresh, refreshing }}
+      value={{
+        restaurant: available ? restaurant : null,
+        refresh,
+        refreshing,
+        updateMenu,
+      }}
     >
       {!session || available ? (
         children

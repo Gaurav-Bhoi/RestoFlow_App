@@ -5,15 +5,20 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
+  Pressable,
   StyleSheet,
   TextInput,
   View,
   type TextInputProps,
   type TextInputInstance,
+  type StyleProp,
+  type TextStyle,
 } from 'react-native';
 import { colors, controlSizes, fonts } from '../theme/tokens';
 import { AppText } from './AppText';
+import { Icon } from './Icon';
 import { KeyboardScrollContext } from './KeyboardScrollContext';
 
 interface AppInputProps extends TextInputProps {
@@ -21,13 +26,25 @@ interface AppInputProps extends TextInputProps {
   isPhone?: boolean;
   error?: string;
   showErrorMessage?: boolean;
+  labelStyle?: StyleProp<TextStyle>;
 }
 export const AppInput = forwardRef<TextInputInstance, AppInputProps>(
   function AppInputField(
-    { label, isPhone, error, showErrorMessage = true, style, ...props },
+    {
+      label,
+      isPhone,
+      error,
+      showErrorMessage = true,
+      labelStyle,
+      style,
+      secureTextEntry,
+      ...props
+    },
     ref,
   ) {
+    const { t } = useTranslation();
     const [isFocused, setIsFocused] = useState(false);
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const input = useRef<TextInputInstance | null>(null);
     const scrollToInput = useContext(KeyboardScrollContext);
     const setInputRef = useCallback(
@@ -43,7 +60,7 @@ export const AppInput = forwardRef<TextInputInstance, AppInputProps>(
     );
     return (
       <View style={styles.group}>
-        <AppText variant="label" style={styles.label}>
+        <AppText variant="label" style={[styles.label, labelStyle]}>
           {label}
         </AppText>
         <View
@@ -68,6 +85,7 @@ export const AppInput = forwardRef<TextInputInstance, AppInputProps>(
             maxLength={isPhone ? 10 : undefined}
             autoComplete={isPhone ? 'tel-national' : 'off'}
             {...props}
+            secureTextEntry={secureTextEntry && !isPasswordVisible}
             style={[styles.input, style]}
             maxFontSizeMultiplier={props.maxFontSizeMultiplier ?? 1.5}
             onFocus={event => {
@@ -75,11 +93,40 @@ export const AppInput = forwardRef<TextInputInstance, AppInputProps>(
               if (input.current) scrollToInput?.(input.current);
               props.onFocus?.(event);
             }}
+            onPressIn={event => {
+              if (input.current) scrollToInput?.(input.current);
+              props.onPressIn?.(event);
+            }}
+            onContentSizeChange={event => {
+              if (input.current?.isFocused()) scrollToInput?.(input.current);
+              props.onContentSizeChange?.(event);
+            }}
             onBlur={event => {
               setIsFocused(false);
               props.onBlur?.(event);
             }}
           />
+          {secureTextEntry && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t(
+                isPasswordVisible ? 'auth.hidePassword' : 'auth.showPassword',
+              )}
+              accessibilityState={{ disabled: props.editable === false }}
+              disabled={props.editable === false}
+              onPress={() => setIsPasswordVisible(visible => !visible)}
+              style={({ pressed }) => [
+                styles.visibilityToggle,
+                pressed && styles.visibilityTogglePressed,
+              ]}
+            >
+              <Icon
+                name={isPasswordVisible ? 'eye-off' : 'eye'}
+                size={22}
+                color={colors.muted}
+              />
+            </Pressable>
+          )}
         </View>
         {!!error && showErrorMessage && (
           <AppText
@@ -129,6 +176,17 @@ const styles = StyleSheet.create({
     borderRightColor: colors.line,
   },
   prefixText: { color: colors.muted, fontSize: 13, lineHeight: 19.5 },
+  visibilityToggle: {
+    width: controlSizes.touch,
+    height: controlSizes.touch,
+    flexShrink: 0,
+    marginLeft: 8,
+    marginRight: -10,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  visibilityTogglePressed: { backgroundColor: colors.sage },
   disabled: { opacity: 0.45 },
   error: { color: colors.error, fontSize: 12, marginTop: 7 },
 });

@@ -3,10 +3,12 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
   ScrollView,
   StyleSheet,
-  TextInput,
   View,
+  type KeyboardEvent,
+  type KeyboardMetrics,
   type ScrollViewInstance,
   type TextInputInstance,
   type StyleProp,
@@ -23,6 +25,8 @@ interface ScreenProps extends React.PropsWithChildren {
   hasTabs?: boolean;
   contentMaxWidth?: number;
   contentStyle?: StyleProp<ViewStyle>;
+  refreshing?: boolean;
+  onRefresh?: () => void;
 }
 export function Screen({
   header,
@@ -30,36 +34,98 @@ export function Screen({
   hasTabs,
   contentMaxWidth = contentWidths.screen,
   contentStyle,
+  refreshing = false,
+  onRefresh,
   children,
 }: ScreenProps) {
   const insets = useSafeAreaInsets();
   const { frameWidth, pagePadding } = useResponsiveLayout(contentMaxWidth);
   const scroll = useRef<ScrollViewInstance>(null);
   const focused = useRef<TextInputInstance | null>(null);
-  const footerHeight = useRef(0);
-  const scrollToInput = useCallback((input: TextInputInstance) => {
-    focused.current = input;
-    if (Keyboard.isVisible()) {
-      scroll.current?.scrollResponderScrollNativeHandleToKeyboard(
-        input,
-        12 + footerHeight.current,
-        true,
-      );
-    }
-  }, []);
-  useEffect(() => {
-    const subscription = Keyboard.addListener('keyboardDidShow', () => {
-      const focusedInput = TextInput.State.currentlyFocusedInput();
-      if (focusedInput && focusedInput === focused.current) {
-        scroll.current?.scrollResponderScrollNativeHandleToKeyboard(
-          focusedInput,
-          12 + footerHeight.current,
-          true,
-        );
-      }
+  const scrollOffset = useRef(0);
+  const keyboardFrame = useRef<KeyboardMetrics | undefined>(Keyboard.metrics());
+  const revealFrame = useRef<number | null>(null);
+  const bottomObstruction = hasTabs
+    ? insets.bottom + navigationLayout.height + navigationLayout.bottomGap
+    : 0;
+  const revealFocusedInput = useCallback(() => {
+    const input = focused.current;
+    const scroller = scroll.current;
+    if (!scroller || !input?.isFocused()) return;
+    // The viewport accounts for fixed headers/footers; the keyboard frame
+    // also protects the field while the native resize is still settling.
+    scroller.measureInWindow((_x, viewportY, _width, viewportHeight) => {
+      input.measureInWindow((_inputX, inputY, _inputWidth, inputHeight) => {
+        // Native measurements can finish after focus or navigation changes.
+        if (
+          focused.current !== input ||
+          scroll.current !== scroller ||
+          !input.isFocused() ||
+          viewportHeight <= 0 ||
+          inputHeight <= 0
+        )
+          return;
+        const visibleTop = viewportY + 12;
+        const visibleBottom =
+          Math.min(
+            viewportY + viewportHeight - bottomObstruction,
+            keyboardFrame.current?.screenY ?? Infinity,
+          ) - 12;
+        if (visibleBottom <= visibleTop) return;
+        const delta =
+          inputY < visibleTop || inputHeight > visibleBottom - visibleTop
+            ? inputY - visibleTop
+            : Math.max(0, inputY + inputHeight - visibleBottom);
+        if (Math.abs(delta) > 1)
+          scroller.scrollTo({
+            y: Math.max(0, scrollOffset.current + delta),
+            animated: true,
+          });
+      });
     });
-    return () => subscription.remove();
-  }, []);
+  }, [bottomObstruction]);
+  const scheduleReveal = useCallback(() => {
+    if (revealFrame.current !== null) cancelAnimationFrame(revealFrame.current);
+    revealFrame.current = requestAnimationFrame(() => {
+      revealFrame.current = null;
+      revealFocusedInput();
+    });
+  }, [revealFocusedInput]);
+  const scrollToInput = useCallback(
+    (input: TextInputInstance) => {
+      focused.current = input;
+      scheduleReveal();
+    },
+    [scheduleReveal],
+  );
+  useEffect(() => {
+    const keyboardChanged = (event: KeyboardEvent) => {
+      keyboardFrame.current = event.endCoordinates;
+      scheduleReveal();
+    };
+    const keyboardHidden = () => {
+      keyboardFrame.current = undefined;
+    };
+    const subscriptions = [
+      Keyboard.addListener('keyboardDidShow', keyboardChanged),
+      Keyboard.addListener('keyboardDidHide', keyboardHidden),
+      ...(Platform.OS === 'ios'
+        ? [
+            Keyboard.addListener('keyboardWillShow', keyboardChanged),
+            Keyboard.addListener('keyboardWillChangeFrame', keyboardChanged),
+            Keyboard.addListener('keyboardDidChangeFrame', keyboardChanged),
+            Keyboard.addListener('keyboardWillHide', keyboardHidden),
+          ]
+        : []),
+    ];
+    return () => {
+      subscriptions.forEach(subscription => subscription.remove());
+      if (revealFrame.current !== null) {
+        cancelAnimationFrame(revealFrame.current);
+        revealFrame.current = null;
+      }
+    };
+  }, [scheduleReveal]);
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -75,6 +141,22 @@ export function Screen({
       {header}
       <ScrollView
         ref={scroll}
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.forest}
+              colors={[colors.forest]}
+            />
+          ) : undefined
+        }
+        onScroll={event => {
+          scrollOffset.current = event.nativeEvent.contentOffset.y;
+        }}
+        scrollEventThrottle={16}
+        onLayout={scheduleReveal}
+        onContentSizeChange={scheduleReveal}
         style={styles.scroll}
         contentContainerStyle={[
           styles.scrollContent,
@@ -103,12 +185,7 @@ export function Screen({
         </View>
       </ScrollView>
       {footer && (
-        <View
-          onLayout={event => {
-            footerHeight.current = event.nativeEvent.layout.height;
-          }}
-          style={[styles.footer, { paddingBottom: insets.bottom + 8 }]}
-        >
+        <View style={[styles.footer, { paddingBottom: insets.bottom + 8 }]}>
           <View
             style={[
               styles.footerContent,

@@ -33,7 +33,7 @@ test('uses securely stored credentials and clears arbitrary authorization', asyn
   expect(adapter.mock.calls.at(-1)?.[0].headers.get('Authorization')).toBe(
     'Bearer access-token',
   );
-  await apiClient.get('/api/v1/auth/login/otp/request', {
+  await apiClient.get('/api/v1/auth/phone/check', {
     adapter,
     sessionAuth: false,
   });
@@ -138,19 +138,20 @@ test('rejected refresh clears credentials and ends the session without a retry l
   expect(expired).toHaveBeenCalledTimes(1);
   unregister();
 });
-test('public OTP failures never attempt token refresh', async () => {
+test('public password login failures never attempt token refresh or clear an existing session', async () => {
   await saveTokens(account);
   const transport = jest.fn(async (config: InternalAxiosRequestConfig) => {
     throw unauthorized(config);
   });
   await expect(
     apiClient.post(
-      '/api/v1/auth/login/otp/verify',
-      {},
+      '/api/v1/auth/login',
+      { phoneNumber: '+919876543210', password: 'incorrect-password' },
       { sessionAuth: false, adapter: transport },
     ),
   ).rejects.toMatchObject({ status: 401 });
   expect(transport).toHaveBeenCalledTimes(1);
+  expect((await getCredentials())?.refreshToken).toBe(account.refreshToken);
 });
 test('network failures retain credentials for retry', async () => {
   await saveTokens(account);

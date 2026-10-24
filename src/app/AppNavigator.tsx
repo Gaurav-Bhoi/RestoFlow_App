@@ -23,8 +23,12 @@ import { BillScreen } from '../features/billing/BillScreen';
 import { ReceiptScreen } from '../features/billing/ReceiptScreen';
 import { PrintSuccessScreen } from '../features/billing/PrintSuccessScreen';
 import { MenuScreen } from '../features/menu/MenuScreen';
+import { DishFormScreen } from '../features/menu/DishFormScreen';
+import { MenuProvider } from '../features/menu/MenuProvider';
 import { SettingsScreen } from '../features/settings/SettingsScreen';
 import { LanguageScreen } from '../features/settings/LanguageScreen';
+import { EditProfileScreen } from '../features/settings/EditProfileScreen';
+import { ChangePasswordScreen } from '../features/settings/ChangePasswordScreen';
 import { WaitersScreen } from '../features/employees/WaitersScreen';
 import { AddWaiterScreen } from '../features/employees/AddWaiterScreen';
 import { SubscriptionScreen } from '../features/subscription/SubscriptionScreen';
@@ -79,76 +83,87 @@ export function AppNavigator() {
   const updateCurrentRoute = () =>
     setCurrentRoute(navigationRef.getCurrentRoute()?.name);
   return (
-    <NavigationContainer
-      ref={navigationRef}
-      theme={theme}
-      onReady={() => {
-        updateCurrentRoute();
-        hideStartupSplash();
-      }}
-      onStateChange={updateCurrentRoute}
-    >
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          animation: isReducedMotion ? 'none' : 'fade',
-          animationDuration: motion.route,
-          contentStyle: { backgroundColor: colors.paper },
-          statusBarStyle: 'dark',
-          statusBarHidden: false,
+    <MenuProvider key={session?.restaurantId ?? 'signed-out'}>
+      <NavigationContainer
+        ref={navigationRef}
+        theme={theme}
+        onReady={() => {
+          updateCurrentRoute();
+          hideStartupSplash();
         }}
+        onStateChange={updateCurrentRoute}
       >
-        {!session ? (
-          <Stack.Group navigationKey="signed-out">
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Registration" component={RegistrationScreen} />
-          </Stack.Group>
-        ) : (
-          <Stack.Group navigationKey={session.phone}>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Customers" component={CustomersScreen} />
-            <Stack.Screen name="Language" component={LanguageScreen} />
-            {session.role === 'waiter' ? (
-              <Stack.Screen name="Order" component={OrderScreen} />
-            ) : (
-              <>
-                <Stack.Screen name="Bill" component={BillScreen} />
-                <Stack.Screen name="Receipt" component={ReceiptScreen} />
-                <Stack.Screen
-                  name="PrintSuccess"
-                  component={PrintSuccessScreen}
-                />
-                <Stack.Screen name="Waiters" component={WaitersScreen} />
-                <Stack.Screen name="AddWaiter" component={AddWaiterScreen} />
-                <Stack.Screen
-                  name="Subscription"
-                  component={SubscriptionScreen}
-                />
-                <Stack.Screen name="Purchase" component={PurchaseScreen} />
-              </>
-            )}
-          </Stack.Group>
-        )}
-      </Stack.Navigator>
-      <ConfirmationSheet
-        visible={!!session && isExpired && !isPurchasing}
-        title={t('common.letSKeepYourRestaurantFlowing')}
-        description={
-          canPurchase
-            ? t('api.trialExpired')
-            : t('common.yourRestaurantSFreeTrialHasEndedAskThe')
-        }
-        icon="crown"
-        confirmLabel={
-          canPurchase ? t('api.subscriptionAccess') : t('common.logOut')
-        }
-        cancelLabel={canPurchase ? t('common.logOut') : undefined}
-        isBlocking
-        onConfirm={
-          canPurchase ? () => navigationRef.navigate('Purchase') : signOut
-        }
-        onCancel={signOut}
-      />
-    </NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+            animation: isReducedMotion ? 'none' : 'fade',
+            animationDuration: motion.route,
+            contentStyle: { backgroundColor: colors.paper },
+            statusBarStyle: 'dark',
+            statusBarHidden: false,
+          }}
+        >
+          {!session ? (
+            <Stack.Group navigationKey="signed-out">
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen
+                name="Registration"
+                component={RegistrationScreen}
+              />
+            </Stack.Group>
+          ) : (
+            <Stack.Group navigationKey={session.phone}>
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="Customers" component={CustomersScreen} />
+              <Stack.Screen name="Language" component={LanguageScreen} />
+              <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+              <Stack.Screen
+                name="ChangePassword"
+                component={ChangePasswordScreen}
+              />
+              {session.role === 'waiter' ? (
+                <Stack.Screen name="Order" component={OrderScreen} />
+              ) : (
+                <>
+                  <Stack.Screen name="Bill" component={BillScreen} />
+                  <Stack.Screen name="Receipt" component={ReceiptScreen} />
+                  <Stack.Screen
+                    name="PrintSuccess"
+                    component={PrintSuccessScreen}
+                  />
+                  <Stack.Screen name="Waiters" component={WaitersScreen} />
+                  <Stack.Screen name="AddWaiter" component={AddWaiterScreen} />
+                  <Stack.Screen name="DishForm" component={DishFormScreen} />
+                  <Stack.Screen
+                    name="Subscription"
+                    component={SubscriptionScreen}
+                  />
+                  <Stack.Screen name="Purchase" component={PurchaseScreen} />
+                </>
+              )}
+            </Stack.Group>
+          )}
+        </Stack.Navigator>
+        <ConfirmationSheet
+          visible={!!session && isExpired && !isPurchasing}
+          title={t('common.letSKeepYourRestaurantFlowing')}
+          description={
+            canPurchase
+              ? t('api.trialExpired')
+              : t('common.yourRestaurantSFreeTrialHasEndedAskThe')
+          }
+          icon="crown"
+          confirmLabel={
+            canPurchase ? t('api.subscriptionAccess') : t('common.logOut')
+          }
+          cancelLabel={canPurchase ? t('common.logOut') : undefined}
+          isBlocking
+          onConfirm={
+            canPurchase ? () => navigationRef.navigate('Purchase') : signOut
+          }
+          onCancel={signOut}
+        />
+      </NavigationContainer>
+    </MenuProvider>
   );
 }

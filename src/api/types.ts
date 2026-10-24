@@ -35,11 +35,16 @@ export interface AuthTokens {
   refreshTokenExpiresIn: number;
 }
 export type AuthResult = AccountProfile & AuthTokens;
-export interface OtpChallenge {
-  challengeId: string;
-  expiresIn: number;
-  resendAfter: number;
-  mockCode?: string;
+export interface OwnerRegistrationInput {
+  phoneNumber: string;
+  password: string;
+  confirmPassword: string;
+  fullName: string;
+  restaurantName: string;
+}
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
 }
 export interface ApiDish {
   id: string;
@@ -50,6 +55,14 @@ export interface ApiDish {
   available: boolean;
   price: string;
   imageUrl: string | null;
+}
+export interface ApiDishInput {
+  name: string;
+  description: string;
+  category: string;
+  foodType: 'VEG' | 'NON_VEG';
+  available: boolean;
+  price: string;
 }
 export interface ApiWaiter {
   id: string;

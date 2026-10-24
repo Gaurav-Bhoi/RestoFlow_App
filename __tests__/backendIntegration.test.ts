@@ -1,4 +1,3 @@
-jest.mock('../src/config/auth', () => ({ USE_MOCK_OTP: false }));
 import { apiClient } from '../src/api/client';
 import {
   authApi,
@@ -18,10 +17,19 @@ import {
 import type { InternalAxiosRequestConfig } from 'axios';
 import { saveTokens } from '../src/services/auth/credentials';
 const originalAdapter = apiClient.defaults.adapter;
+const originalFormData = FormData;
 afterEach(() => {
   apiClient.defaults.adapter = originalAdapter;
+  Object.defineProperty(globalThis, 'FormData', {
+    value: originalFormData,
+    configurable: true,
+    writable: true,
+  });
 });
-function transport(handler: (request: InternalAxiosRequestConfig) => unknown) {
+function transport(
+  handler: (request: InternalAxiosRequestConfig) => unknown,
+  client = apiClient,
+) {
   const adapter = jest.fn(async (config: InternalAxiosRequestConfig) => ({
     data: { success: true, data: handler(config) },
     status: 200,
@@ -29,7 +37,7 @@ function transport(handler: (request: InternalAxiosRequestConfig) => unknown) {
     headers: { 'x-restoflow-environment': 'development' },
     config,
   }));
-  apiClient.defaults.adapter = adapter;
+  client.defaults.adapter = adapter;
   return adapter;
 }
 test('pagination continues past 100 records and keeps the route restaurant-scoped', async () => {
@@ -129,18 +137,25 @@ test('waiter restaurant refresh does not call the owner-only staff API', async (
     adapter.mock.calls.some(([config]) => config.url?.endsWith('/waiters')),
   ).toBe(false);
 });
-test('OTP requests never attach an existing access token and use purpose-specific routes', async () => {
-  const adapter = transport(() => ({
-    challengeId: tableId,
-    expiresIn: 300,
-    resendAfter: 60,
-  }));
-  await authApi.requestOtp('+919876543210');
-  await authApi.requestOtp('+919876543210', true);
+test('phone lookup and password login never attach an existing access token', async () => {
+  await saveTokens(account);
+  const adapter = transport(config =>
+    config.url?.endsWith('/phone/check') ? { registered: true } : account,
+  );
+  expect(await authApi.checkPhone('+919876543210')).toEqual({
+    registered: true,
+  });
+  expect(await authApi.login('+919876543210', ' password123 ')).toEqual(
+    account,
+  );
   expect(adapter.mock.calls.map(([config]) => config.url)).toEqual([
-    '/api/v1/auth/login/otp/request',
-    '/api/v1/onboarding/owner/otp/request',
+    '/api/v1/auth/phone/check',
+    '/api/v1/auth/login',
   ]);
+  expect(JSON.parse(adapter.mock.calls[1][0].data)).toEqual({
+    phoneNumber: '+919876543210',
+    password: ' password123 ',
+  });
   expect(
     adapter.mock.calls.every(
       ([config]) => !config.headers.has('Authorization'),
@@ -159,31 +174,68 @@ test('visit completion waits for a backend close response and returns the final 
 });
 
 test('restaurant registration, profile restoration, and logout use backend tokens and APIs', async () => {
-  const adapter = transport(() => account);
-  const result = await authApi.register(
-    'signed-onboarding-token',
-    'Owner',
-    'Saved Restaurant',
-  );
-  expect(result).toEqual(account);
-  const completion = adapter.mock.calls[0][0];
-  expect(completion.url).toBe('/api/v1/onboarding/owner/complete');
-  expect(completion.headers.get('Authorization')).toBe(
-    'Bearer signed-onboarding-token',
-  );
-  expect(completion.data.get('fullName')).toBe('Owner');
-  expect(completion.data.get('restaurantName')).toBe('Saved Restaurant');
-  await saveTokens(result);
-  await authApi.me();
-  await authApi.logout();
-  expect(
-    adapter.mock.calls
-      .slice(1)
-      .map(([config]) => [config.url, config.headers.get('Authorization')]),
-  ).toEqual([
-    ['/api/v1/auth/me', 'Bearer access-token'],
-    ['/api/v1/auth/logout', 'Bearer access-token'],
-  ]);
+  Object.defineProperty(globalThis, 'FormData', {
+    value: jest.requireActual('react-native/Libraries/Network/FormData')
+      .default,
+    configurable: true,
+    writable: true,
+  });
+  await jest.isolateModulesAsync(async () => {
+    const { authApi: nativeAuthApi } = require('../src/api/restoflow');
+    const { apiClient: nativeClient } = require('../src/api/client');
+    const {
+      saveTokens: saveNativeTokens,
+    } = require('../src/services/auth/credentials');
+    await saveNativeTokens(account);
+    const adapter = transport(() => account, nativeClient);
+    const result = await nativeAuthApi.register(
+      {
+        phoneNumber: '+919876543210',
+        password: ' password123 ',
+        confirmPassword: ' password123 ',
+        fullName: 'Owner',
+        restaurantName: 'Saved Restaurant',
+      },
+      { uri: 'file:///profile.jpg', type: 'image/jpeg', name: 'profile.jpg' },
+    );
+    expect(result).toEqual(account);
+    const completion = adapter.mock.calls[0][0];
+    expect(completion.url).toBe('/api/v1/onboarding/owner/complete');
+    expect(completion.headers.has('Authorization')).toBe(false);
+    expect(completion.headers.get('Content-Type')).toBe('multipart/form-data');
+    const parts = completion.data.getParts();
+    const fields = Object.fromEntries(
+      parts.map((part: { fieldName: string; string?: string }) => [
+        part.fieldName,
+        part.string,
+      ]),
+    );
+    expect(fields).toMatchObject({
+      phoneNumber: '+919876543210',
+      password: ' password123 ',
+      confirmPassword: ' password123 ',
+      fullName: 'Owner',
+      restaurantName: 'Saved Restaurant',
+    });
+    expect(
+      parts.find((part: { fieldName: string }) => part.fieldName === 'image'),
+    ).toMatchObject({
+      uri: 'file:///profile.jpg',
+      name: 'profile.jpg',
+      headers: { 'content-type': 'image/jpeg' },
+    });
+    await saveNativeTokens(result);
+    await nativeAuthApi.me();
+    await nativeAuthApi.logout();
+    expect(
+      adapter.mock.calls
+        .slice(1)
+        .map(([config]) => [config.url, config.headers.get('Authorization')]),
+    ).toEqual([
+      ['/api/v1/auth/me', 'Bearer access-token'],
+      ['/api/v1/auth/logout', 'Bearer access-token'],
+    ]);
+  });
 });
 
 test('a failed restaurant save propagates the backend failure', async () => {
@@ -191,7 +243,13 @@ test('a failed restaurant save propagates the backend failure', async () => {
     throw new Error('Restaurant could not be saved.');
   });
   await expect(
-    authApi.register('signed-onboarding-token', 'Owner', 'Restaurant'),
+    authApi.register({
+      phoneNumber: '+919876543210',
+      password: 'password123',
+      confirmPassword: 'password123',
+      fullName: 'Owner',
+      restaurantName: 'Restaurant',
+    }),
   ).rejects.toMatchObject({ message: 'Restaurant could not be saved.' });
   expect(adapter).toHaveBeenCalledTimes(1);
 });

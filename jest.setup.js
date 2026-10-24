@@ -56,6 +56,7 @@ jest.mock('react-native-print', () => ({
 }));
 jest.mock('react-native-image-picker', () => ({
   launchImageLibrary: jest.fn(async () => ({ didCancel: true })),
+  launchCamera: jest.fn(async () => ({ didCancel: true })),
 }));
 
 jest.mock('react-native-keychain', () => {

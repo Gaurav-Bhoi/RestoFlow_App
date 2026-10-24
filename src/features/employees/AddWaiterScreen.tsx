@@ -19,11 +19,12 @@ export function AddWaiterScreen({ navigation }: RootScreenProps<'AddWaiter'>) {
   const { t } = useTranslation();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const { photo, selectPhoto } = useProfilePhoto();
   const { error, busy, addWaiter } = useWaiters();
   const showFeedback = useFeedback();
   const handleAddWaiter = async () => {
-    if (await addWaiter(name, phone, photo)) {
+    if (await addWaiter(name, phone, password, photo)) {
       navigation.goBack();
       showFeedback(
         t('employees.valueAddedToYourTeam', { value0: name.trim() }),
@@ -37,6 +38,7 @@ export function AddWaiterScreen({ navigation }: RootScreenProps<'AddWaiter'>) {
           title={t('employees.welcomeToTheTeam')}
           subtitle={t('employees.addAWaiterToYourRestaurant')}
           onBack={navigation.goBack}
+          backDisabled={busy}
         />
       }
       footer={
@@ -44,6 +46,7 @@ export function AddWaiterScreen({ navigation }: RootScreenProps<'AddWaiter'>) {
           <AppButton
             variant="secondary"
             onPress={navigation.goBack}
+            disabled={busy}
             style={styles.cancel}
           >
             {t('employees.cancel')}
@@ -62,6 +65,7 @@ export function AddWaiterScreen({ navigation }: RootScreenProps<'AddWaiter'>) {
       <AppInput
         label={t('employees.waiterName')}
         value={name}
+        editable={!busy}
         onChangeText={setName}
         placeholder={t('employees.eGSneha')}
       />
@@ -69,8 +73,23 @@ export function AddWaiterScreen({ navigation }: RootScreenProps<'AddWaiter'>) {
         label={t('employees.mobileNumber')}
         isPhone
         value={phone}
+        editable={!busy}
         onChangeText={value => setPhone(normalizePhone(value))}
         placeholder={t('employees.10DigitMobileNumber')}
+      />
+      <AppInput
+        label={t('auth.password')}
+        placeholder={t('auth.createPassword')}
+        value={password}
+        onChangeText={setPassword}
+        editable={!busy}
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="new-password"
+        textContentType="newPassword"
+        returnKeyType="done"
+        onSubmitEditing={handleAddWaiter}
       />
       <Notice>
         {t('employees.thisNumberGivesTheWaiterAccessToTablesAnd')}
