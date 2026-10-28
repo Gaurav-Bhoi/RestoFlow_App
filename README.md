@@ -23,6 +23,8 @@ iOS uses its SF Pro system font. Android bundles the supplied SF Pro Display Reg
 
 The menu management UI covers all 33 screenshots supplied on 22 October 2026, including add/edit forms, validation, saving, categories, images, availability, deletion, empty states and feedback. See [the screenshot coverage and verification report](design/menu-ui-implementation.md).
 
+The owner's **Menu → Ledger** workspace implements the expense screenshots supplied on 25 October 2026: searchable/filterable expenses, add/edit/detail/delete, receipts, and native PDF export, sharing and printing. Expenses currently persist locally per restaurant in MMKV because no expense API is defined in this repository. The file/PDF integrations require a new native build. See [Ledger coverage, previews and verification](design/ledger-ui-implementation.md).
+
 ## Install and verify
 
 ```sh

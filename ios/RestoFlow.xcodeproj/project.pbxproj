@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A72000000000000000000001 /* LedgerFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = A72000000000000000000002 /* LedgerFiles.swift */; };
+		A72000000000000000000003 /* ExpensePdf.swift in Sources */ = {isa = PBXBuildFile; fileRef = A72000000000000000000004 /* ExpensePdf.swift */; };
+		A72000000000000000000005 /* LedgerFilesBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = A72000000000000000000006 /* LedgerFilesBridge.m */; };
+
 		A71000000000000000000001 /* NotoSansDevanagari-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A71000000000000000000002 /* NotoSansDevanagari-Regular.ttf */; };
 		0C80B921A6F3F58F76C31292 /* libPods-RestoFlow.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-RestoFlow.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -17,6 +21,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A72000000000000000000002 /* LedgerFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LedgerFiles.swift; path = RestoFlow/LedgerFiles.swift; sourceTree = "<group>"; };
+		A72000000000000000000004 /* ExpensePdf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExpensePdf.swift; path = RestoFlow/ExpensePdf.swift; sourceTree = "<group>"; };
+		A72000000000000000000006 /* LedgerFilesBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = LedgerFilesBridge.m; path = RestoFlow/LedgerFilesBridge.m; sourceTree = "<group>"; };
+
 		A71000000000000000000002 /* NotoSansDevanagari-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "NotoSansDevanagari-Regular.ttf"; path = "../assets/fonts/NotoSansDevanagari-Regular.ttf"; sourceTree = SOURCE_ROOT; };
 		13B07F961A680F5B00A75B9A /* RestoFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RestoFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = RestoFlow/Images.xcassets; sourceTree = "<group>"; };
@@ -53,6 +61,10 @@
 			children = (
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
+				A72000000000000000000002 /* LedgerFiles.swift */,
+				A72000000000000000000004 /* ExpensePdf.swift */,
+				A72000000000000000000006 /* LedgerFilesBridge.m */,
+
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
@@ -301,6 +313,10 @@ if [ -f \"$SRCROOT/.xcode.env.local\" ]; then . \"$SRCROOT/.xcode.env.local\"; f
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				A72000000000000000000001 /* LedgerFiles.swift in Sources */,
+				A72000000000000000000003 /* ExpensePdf.swift in Sources */,
+				A72000000000000000000005 /* LedgerFilesBridge.m in Sources */,
+
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

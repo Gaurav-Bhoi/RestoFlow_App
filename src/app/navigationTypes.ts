@@ -4,6 +4,9 @@ import type {
 } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 
+import type { ExpenseReceipt } from '../features/ledger/types';
+import type { ExpensePdfDocument } from '../features/ledger/ledgerFiles';
+
 export type RootStackParams = {
   Login: undefined;
   Registration: { phone: string };
@@ -19,6 +22,11 @@ export type RootStackParams = {
   Waiters: undefined;
   AddWaiter: undefined;
   DishForm: { dishId?: string };
+  ExpenseForm: { expenseId?: string };
+  ExpenseDetails: { expenseId: string };
+  ExpenseReceipt: { receipt: ExpenseReceipt };
+  ExpenseReport: undefined;
+  ExpenseReportPreview: { document: ExpensePdfDocument; uri: string };
   Subscription: undefined;
   Purchase: undefined;
 };

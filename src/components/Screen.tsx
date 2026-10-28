@@ -27,6 +27,7 @@ interface ScreenProps extends React.PropsWithChildren {
   contentStyle?: StyleProp<ViewStyle>;
   refreshing?: boolean;
   onRefresh?: () => void;
+  scrollable?: boolean;
 }
 export function Screen({
   header,
@@ -36,6 +37,7 @@ export function Screen({
   contentStyle,
   refreshing = false,
   onRefresh,
+  scrollable = true,
   children,
 }: ScreenProps) {
   const insets = useSafeAreaInsets();
@@ -139,51 +141,68 @@ export function Screen({
       ]}
     >
       {header}
-      <ScrollView
-        ref={scroll}
-        refreshControl={
-          onRefresh ? (
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={colors.forest}
-              colors={[colors.forest]}
-            />
-          ) : undefined
-        }
-        onScroll={event => {
-          scrollOffset.current = event.nativeEvent.contentOffset.y;
-        }}
-        scrollEventThrottle={16}
-        onLayout={scheduleReveal}
-        onContentSizeChange={scheduleReveal}
-        style={styles.scroll}
-        contentContainerStyle={[
-          styles.scrollContent,
-          {
-            paddingBottom:
-              insets.bottom +
-              (hasTabs
-                ? navigationLayout.height + navigationLayout.bottomGap + 24
-                : 36),
-          },
-        ]}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        showsVerticalScrollIndicator={false}
-      >
+      {!scrollable ? (
         <View
           style={[
             styles.content,
-            { width: frameWidth, paddingHorizontal: pagePadding },
+            styles.scroll,
+            styles.centered,
+            {
+              width: frameWidth,
+              paddingHorizontal: pagePadding,
+            },
             contentStyle,
           ]}
         >
-          <KeyboardScrollContext.Provider value={scrollToInput}>
-            {children}
-          </KeyboardScrollContext.Provider>
+          {children}
         </View>
-      </ScrollView>
+      ) : (
+        <ScrollView
+          ref={scroll}
+          refreshControl={
+            onRefresh ? (
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={colors.forest}
+                colors={[colors.forest]}
+              />
+            ) : undefined
+          }
+          onScroll={event => {
+            scrollOffset.current = event.nativeEvent.contentOffset.y;
+          }}
+          scrollEventThrottle={16}
+          onLayout={scheduleReveal}
+          onContentSizeChange={scheduleReveal}
+          style={styles.scroll}
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingBottom:
+                insets.bottom +
+                (hasTabs
+                  ? navigationLayout.height + navigationLayout.bottomGap + 24
+                  : 36),
+            },
+          ]}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          showsVerticalScrollIndicator={false}
+        >
+          <View
+            style={[
+              styles.content,
+              { width: frameWidth, paddingHorizontal: pagePadding },
+              contentStyle,
+            ]}
+          >
+            <KeyboardScrollContext.Provider value={scrollToInput}>
+              {children}
+            </KeyboardScrollContext.Provider>
+          </View>
+        </ScrollView>
+      )}
       {footer && (
         <View style={[styles.footer, { paddingBottom: insets.bottom + 8 }]}>
           <View
@@ -202,6 +221,7 @@ export function Screen({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.paper },
   scroll: { flex: 1 },
+  centered: { alignSelf: 'center' },
   scrollContent: { alignItems: 'center', flexGrow: 1 },
   content: { paddingTop: 8 },
   footerContent: { alignSelf: 'center' },

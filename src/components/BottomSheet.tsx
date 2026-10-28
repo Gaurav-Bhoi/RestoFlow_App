@@ -1,5 +1,12 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { ModalSurface } from './ModalSurface';
@@ -12,14 +19,23 @@ export function BottomSheet({
   title,
   onClose,
   children,
+  footer,
+  tall,
 }: React.PropsWithChildren<{
   visible: boolean;
   title: string;
   onClose: () => void;
+  footer?: React.ReactNode;
+  tall?: boolean;
 }>) {
   return (
     <ModalSurface visible={visible} onClose={onClose}>
-      <BottomSheetContent title={title} onClose={onClose}>
+      <BottomSheetContent
+        title={title}
+        onClose={onClose}
+        footer={footer}
+        tall={tall}
+      >
         {children}
       </BottomSheetContent>
     </ModalSurface>
@@ -30,17 +46,26 @@ export function BottomSheetContent({
   onClose,
   closeDisabled,
   children,
+  footer,
+  tall,
 }: React.PropsWithChildren<{
   title: string;
   onClose: () => void;
   closeDisabled?: boolean;
+  footer?: React.ReactNode;
+  tall?: boolean;
 }>) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   return (
-    <View
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       accessibilityViewIsModal
-      style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 20) }]}
+      style={[
+        styles.sheet,
+        tall && styles.tall,
+        { paddingBottom: Math.max(insets.bottom, 20) },
+      ]}
     >
       <View style={styles.handle} />
       <View style={styles.heading}>
@@ -70,7 +95,8 @@ export function BottomSheetContent({
       >
         {children}
       </ScrollView>
-    </View>
+      {footer && <View style={styles.footer}>{footer}</View>}
+    </KeyboardAvoidingView>
   );
 }
 const styles = StyleSheet.create({
@@ -107,4 +133,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   content: { paddingHorizontal: 22, paddingBottom: 12, gap: 5 },
+  tall: { height: '90%' },
+  footer: { paddingHorizontal: 22, paddingTop: 12 },
 });

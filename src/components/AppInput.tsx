@@ -27,6 +27,7 @@ interface AppInputProps extends TextInputProps {
   error?: string;
   showErrorMessage?: boolean;
   labelStyle?: StyleProp<TextStyle>;
+  right?: React.ReactNode;
 }
 export const AppInput = forwardRef<TextInputInstance, AppInputProps>(
   function AppInputField(
@@ -36,6 +37,7 @@ export const AppInput = forwardRef<TextInputInstance, AppInputProps>(
       error,
       showErrorMessage = true,
       labelStyle,
+      right,
       style,
       secureTextEntry,
       ...props
@@ -106,6 +108,7 @@ export const AppInput = forwardRef<TextInputInstance, AppInputProps>(
               props.onBlur?.(event);
             }}
           />
+          {right}
           {secureTextEntry && (
             <Pressable
               accessibilityRole="button"

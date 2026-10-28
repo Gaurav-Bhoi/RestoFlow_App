@@ -31,7 +31,23 @@ import Gallery from '../../assets/icons/gallery.svg';
 import Ledger from '../../assets/icons/ledger.svg';
 import { colors } from '../theme/tokens';
 
+import Calendar from '../../assets/icons/calendar.svg';
+import Download from '../../assets/icons/download.svg';
+import Filter from '../../assets/icons/filter.svg';
+import Package from '../../assets/icons/package.svg';
+import Wallet from '../../assets/icons/wallet.svg';
+import File from '../../assets/icons/file.svg';
+import Share from '../../assets/icons/share.svg';
+
 const icons = {
+  calendar: Calendar,
+  download: Download,
+  filter: Filter,
+  package: Package,
+  wallet: Wallet,
+  file: File,
+  share: Share,
+
   clock: Clock,
   alert: Alert,
   trash: Trash,

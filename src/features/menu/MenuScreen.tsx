@@ -24,6 +24,7 @@ import {
   type DishSelection,
 } from './DishManagementOverlay';
 import { MenuNotice } from './MenuNotice';
+import { LedgerScreen } from '../ledger/LedgerScreen';
 
 export function MenuScreen() {
   const { t } = useTranslation();
@@ -76,6 +77,8 @@ export function MenuScreen() {
     setSearch('');
     setCategory('All');
   };
+  if (workspace === 'ledger' && isOwner)
+    return <LedgerScreen onMenu={() => setWorkspace('menu')} />;
   return (
     <>
       <Screen
@@ -94,11 +97,9 @@ export function MenuScreen() {
             }
           />
         }
-        contentStyle={(isEmpty || workspace === 'ledger') && styles.fill}
+        contentStyle={isEmpty && styles.fill}
       >
-        {workspace === 'ledger' ? (
-          <MenuEmptyState ledger />
-        ) : isEmpty && loadError ? (
+        {isEmpty && loadError ? (
           <EmptyState
             title={t('menu.loadMenuFailed')}
             description={loadError}

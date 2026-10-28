@@ -11,11 +11,13 @@ export function WorkspaceHeader({
   onSwitch,
   onAdd,
   addDisabled,
+  right,
 }: {
   workspace: 'menu' | 'ledger';
   onSwitch: () => void;
   onAdd?: () => void;
   addDisabled?: boolean;
+  right?: React.ReactNode;
 }) {
   const { t } = useTranslation();
   const { frameWidth, pagePadding } = useResponsiveLayout();
@@ -44,7 +46,7 @@ export function WorkspaceHeader({
           {t(
             workspace === 'menu'
               ? 'menu.madeForEveryAppetite'
-              : 'menu.ledgerSubtitle',
+              : 'ledger.subtitle',
           )}
         </AppText>
       </View>
@@ -61,6 +63,7 @@ export function WorkspaceHeader({
           <AppText style={styles.addLabel}>{t('menu.addDishAction')}</AppText>
         </Pressable>
       )}
+      {right}
     </View>
   );
 }
