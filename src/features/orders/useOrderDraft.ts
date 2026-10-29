@@ -18,6 +18,7 @@ interface DraftLine {
   name: string;
   unitPrice: string;
   imageUrl?: string;
+  note?: string | null;
 }
 export function useOrderDraft(tableId: string, customerId?: string) {
   const { restaurant, refresh } = useRestaurant();
@@ -30,6 +31,7 @@ export function useOrderDraft(tableId: string, customerId?: string) {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(!!customerId);
   const [busy, setBusy] = useState(false);
+  const [hasConflict, setHasConflict] = useState(false);
   const pending = useRef(false);
   const initial = useRef({ name: '', items: {} as OrderItems });
   const load = useCallback(
@@ -54,6 +56,7 @@ export function useOrderDraft(tableId: string, customerId?: string) {
         setName(order.customerName ?? '');
         setItems(quantities);
         setError('');
+        setHasConflict(false);
       } catch (cause) {
         if (!signal?.aborted) setError(normalizeApiError(cause).message);
       } finally {
@@ -73,6 +76,7 @@ export function useOrderDraft(tableId: string, customerId?: string) {
       itemId: item.id,
       dishId: item.dishId,
       name: item.name,
+      note: item.note,
       unitPrice: item.unitPrice,
       imageUrl: restaurant.menu.find(dish => dish.id === item.dishId)?.imageUrl,
     }));
@@ -115,7 +119,13 @@ export function useOrderDraft(tableId: string, customerId?: string) {
     }
   }
   async function saveOrder() {
-    if (session?.role !== 'waiter' || !table || pending.current || loading)
+    if (
+      (session?.role !== 'owner' && session?.role !== 'waiter') ||
+      !table ||
+      pending.current ||
+      loading ||
+      hasConflict
+    )
       return false;
     if (!name.trim()) {
       setError('Add the customer’s name before confirming.');
@@ -134,33 +144,33 @@ export function useOrderDraft(tableId: string, customerId?: string) {
     setError('');
     try {
       if (original) {
-        if (name.trim() !== original.customerName)
-          await restaurantApi.renameOrder(
+        // Submit the whole selection atomically: a failed item validation
+        // cannot leave this guest with a partially updated order.
+        let updated = await restaurantApi.replaceOrderItems(
+          restaurant.id,
+          original.id,
+          original.orderUpdatedAt,
+          selectedLines.map(line => ({
+            ...(line.itemId ? { id: line.itemId } : {}),
+            dishId: line.dishId,
+            quantity: line.quantity,
+            note: line.note,
+          })),
+        );
+        setOriginal(updated);
+        initial.current.items = Object.fromEntries(
+          updated.items.map(item => [item.id, item.quantity]),
+        );
+        setItems(initial.current.items);
+        if (name.trim() !== updated.customerName) {
+          updated = await restaurantApi.renameOrder(
             restaurant.id,
-            original.id,
+            updated.id,
             name.trim(),
           );
-        for (const item of original.items) {
-          const quantity = items[item.id] ?? 0;
-          if (quantity === 0)
-            await restaurantApi.removeItem(restaurant.id, original.id, item.id);
-          else if (quantity !== item.quantity)
-            await restaurantApi.updateItem(
-              restaurant.id,
-              original.id,
-              item.id,
-              quantity,
-            );
+          setOriginal(updated);
         }
-        for (const line of selectedLines.filter(
-          value => !value.itemId && value.dishId,
-        ))
-          await restaurantApi.addItem(
-            restaurant.id,
-            original.id,
-            line.dishId!,
-            line.quantity,
-          );
+        initial.current.name = updated.customerName ?? '';
       } else {
         await restaurantApi.createOrder(
           restaurant.id,
@@ -176,9 +186,10 @@ export function useOrderDraft(tableId: string, customerId?: string) {
       await refresh().catch(() => undefined);
       return true;
     } catch (cause) {
-      const message = normalizeApiError(cause).message;
-      if (original) await load();
-      setError(message);
+      const failure = normalizeApiError(cause);
+      // Retain the editable draft on a conflict; explicit retry reloads it.
+      setHasConflict(failure.status === 409);
+      setError(failure.message);
       return false;
     } finally {
       pending.current = false;
@@ -197,6 +208,7 @@ export function useOrderDraft(tableId: string, customerId?: string) {
     isAvailable: !!table && (!customerId || original?.id === customerId),
     loading,
     busy,
+    hasConflict,
     retry: load,
     tableNumber: table?.number,
     lines,

@@ -1,5 +1,12 @@
 import React, { useEffect } from 'react';
-import { Keyboard, Modal, Pressable, StyleSheet, View } from 'react-native';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 
@@ -33,14 +40,17 @@ export function ModalSurface({
       statusBarTranslucent
       navigationBarTranslucent
     >
-      <View style={[styles.overlay, centered && styles.centered, safePadding]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={[styles.overlay, centered && styles.centered, safePadding]}
+      >
         <Pressable
           accessible={false}
           onPress={onClose}
           style={StyleSheet.absoluteFill}
         />
         {children}
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

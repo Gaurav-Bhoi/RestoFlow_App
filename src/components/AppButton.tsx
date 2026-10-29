@@ -24,6 +24,7 @@ interface AppButtonProps {
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
   testID?: string;
+  accessibilityLabel?: string;
   wrapLabel?: boolean;
 }
 export function AppButton({
@@ -37,6 +38,7 @@ export function AppButton({
   loading = false,
   style,
   testID,
+  accessibilityLabel,
   wrapLabel = false,
 }: AppButtonProps) {
   const scale = useRef(new Animated.Value(1)).current;
@@ -56,6 +58,7 @@ export function AppButton({
     <Animated.View style={[style, { transform: [{ scale }] }]}>
       <Pressable
         accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
         accessibilityState={{ disabled: isDisabled, busy: loading }}
         disabled={isDisabled}
         onPress={onPress}

@@ -280,6 +280,7 @@ test('reports pass real snapshot data to native PDF generation and cancelled dow
   await button('Generate PDF');
   expect(files.createPdf).toHaveBeenCalledWith(
     expect.objectContaining({
+      title: 'Expense Report',
       totals: [
         ['Daily Inventory', '₹13,650'],
         ['Miscellaneous', '₹35,100'],
@@ -287,11 +288,28 @@ test('reports pass real snapshot data to native PDF generation and cancelled dow
       ],
     }),
   );
+  expect(files.createPdf).not.toHaveBeenCalledWith(
+    expect.objectContaining({ fileName: expect.any(String) }),
+  );
+  expect(files.createPdf).not.toHaveBeenCalledWith(
+    expect.objectContaining({ layout: 'receipt' }),
+  );
   files.savePdf.mockResolvedValueOnce(false);
   await button('Download PDF');
   expect(text()).not.toContain('PDF saved');
   await button('Download PDF');
   expect(text()).toContain('PDF saved');
+  expect(files.savePdf).toHaveBeenLastCalledWith(
+    'file:///private/report.pdf',
+    'RestoFlow-Expense-Report.pdf',
+  );
+  await press('Share expense report');
+  await option('WhatsApp');
+  expect(files.sharePdf).toHaveBeenLastCalledWith(
+    'file:///private/report.pdf',
+    'RestoFlow-Expense-Report.pdf',
+    'whatsapp',
+  );
   await press('Share expense report');
   await option('Copy report');
   expect(files.copyText).toHaveBeenCalledWith(

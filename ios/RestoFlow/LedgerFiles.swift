@@ -42,6 +42,19 @@ class LedgerFiles: NSObject, UIDocumentPickerDelegate, QLPreviewControllerDataSo
 
   private func failure(_ message: String) -> NSError { NSError(domain: "LedgerFiles", code: 1, userInfo: [NSLocalizedDescriptionKey: message]) }
 
+  private func exportPdf(_ uri: String, name: String) throws -> URL {
+    let source = try safeFile(uri)
+    let filename = name.replacingOccurrences(of: "[<>:\"/\\\\|?*\\p{Cc}]", with: "_", options: .regularExpression)
+    guard filename.hasSuffix(".pdf") else { throw failure("ledger.actionFailed") }
+    if source.lastPathComponent == filename { return source }
+    // The share sheet and document picker display the file URL's actual name.
+    let targetDirectory = try directory(true).appendingPathComponent(UUID().uuidString, isDirectory: true)
+    try fileManager.createDirectory(at: targetDirectory, withIntermediateDirectories: true)
+    let target = targetDirectory.appendingPathComponent(filename)
+    try fileManager.copyItem(at: source, to: target)
+    return target
+  }
+
   // Present from the active controller, including an existing RN sheet. Waiting
   // for its transition avoids presenting a picker while a sheet is dismissing.
   private func present(_ controller: UIViewController, reject: @escaping RCTPromiseRejectBlock) {
@@ -105,7 +118,14 @@ class LedgerFiles: NSObject, UIDocumentPickerDelegate, QLPreviewControllerDataSo
             try? self.fileManager.removeItem(at: old)
           }
         }
-        let url = directory.appendingPathComponent("expense-report-\(UUID().uuidString).pdf")
+        var outputDirectory = directory
+        var name = "expense-report-\(UUID().uuidString).pdf"
+        if let requested = document["fileName"] as? String, requested.hasSuffix(".pdf") {
+          name = requested.replacingOccurrences(of: "[<>:\"/\\\\|?*\\p{Cc}]", with: "_", options: .regularExpression)
+          outputDirectory = directory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+          try self.fileManager.createDirectory(at: outputDirectory, withIntermediateDirectories: true)
+        }
+        let url = outputDirectory.appendingPathComponent(name)
         try ExpensePdf.write(document, to: url)
         resolve(url.absoluteString)
       } catch { reject("LEDGER_PDF", "ledger.reportFailed", error) }
@@ -116,7 +136,7 @@ class LedgerFiles: NSObject, UIDocumentPickerDelegate, QLPreviewControllerDataSo
     DispatchQueue.main.async {
       do {
         guard self.pickerResolve == nil else { throw self.failure("ledger.actionFailed") }
-        let url = try self.safeFile(uri)
+        let url = try self.exportPdf(uri, name: name)
         self.pickerResolve = resolve; self.pickerReject = reject; self.exporting = true
         let picker = UIDocumentPickerViewController(forExporting: [url], asCopy: true)
         picker.delegate = self
@@ -148,7 +168,7 @@ class LedgerFiles: NSObject, UIDocumentPickerDelegate, QLPreviewControllerDataSo
   @objc func sharePdf(_ uri: String, name: String, channel: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
     DispatchQueue.main.async {
       do {
-        let url = try self.safeFile(uri)
+        let url = try self.exportPdf(uri, name: name)
         if channel == "email", MFMailComposeViewController.canSendMail() {
           let mail = MFMailComposeViewController()
           mail.mailComposeDelegate = self

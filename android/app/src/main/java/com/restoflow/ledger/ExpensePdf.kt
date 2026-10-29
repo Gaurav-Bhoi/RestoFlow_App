@@ -18,6 +18,10 @@ object ExpensePdf {
   private val ink = Color.rgb(34, 53, 45)
 
   fun write(data: ReadableMap, destination: File) {
+    if (data.hasKey("layout") && data.getString("layout") == "receipt") {
+      ReceiptPdf.write(data, destination)
+      return
+    }
     val pdf = PdfDocument()
     val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { color = ink; textSize = 10f }
     var page: PdfDocument.Page? = null
@@ -90,6 +94,115 @@ object ExpensePdf {
         y += height + 12
       }
       finishPage()
+      destination.outputStream().use { pdf.writeTo(it) }
+    } finally { pdf.close() }
+  }
+}
+
+/** Matches the stacked receipt preview, with native shaping and page breaks. */
+private object ReceiptPdf {
+  private val ink = Color.rgb(34, 53, 45)
+  private val forest = Color.rgb(24, 65, 55)
+  private val muted = Color.rgb(103, 116, 108)
+  private const val LEFT = 26f
+  private const val WIDTH = 368
+  private const val BOTTOM = 700f
+
+  fun write(data: ReadableMap, destination: File) {
+    val pdf = PdfDocument()
+    var page: PdfDocument.Page? = null
+    var pageNumber = 0
+    var y = 0f
+    fun block(value: String, width: Int, size: Float, color: Int = ink, alignment: Layout.Alignment = Layout.Alignment.ALIGN_NORMAL): StaticLayout {
+      val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color; textSize = size }
+      return StaticLayout.Builder.obtain(value, 0, value.length, paint, width)
+        .setAlignment(alignment).setIncludePad(false).build()
+    }
+    fun draw(layout: StaticLayout, x: Float, top: Float) {
+      val canvas = page!!.canvas
+      canvas.save()
+      canvas.translate(x, top)
+      layout.draw(canvas)
+      canvas.restore()
+    }
+    fun rule() {
+      page!!.canvas.drawLine(LEFT, y, LEFT + WIDTH, y, Paint().apply { color = Color.rgb(226, 230, 222); strokeWidth = 1f })
+    }
+    fun beginPage() {
+      page?.let { pdf.finishPage(it) }
+      page = pdf.startPage(PdfDocument.PageInfo.Builder(420, 740, ++pageNumber).create())
+      y = 32f
+      for ((key, size) in listOf("restaurant" to 14f, "period" to 14f, "generated" to 12f)) {
+        val layout = block(data.getString(key).orEmpty(), WIDTH, size, if (key == "restaurant") forest else muted, Layout.Alignment.ALIGN_CENTER)
+        draw(layout, LEFT, y)
+        y += layout.height + 18f
+      }
+      y += 16f
+      rule()
+      y += 30f
+    }
+    // Clip at native line boundaries so even a long note continues on a new page.
+    fun flow(layout: StaticLayout, x: Float) {
+      var line = 0
+      while (line < layout.lineCount) {
+        if (y + layout.getLineBottom(line) - layout.getLineTop(line) > BOTTOM) beginPage()
+        val top = layout.getLineTop(line)
+        var end = line
+        while (end + 1 < layout.lineCount && y + layout.getLineBottom(end + 1) - top <= BOTTOM) end++
+        val height = layout.getLineBottom(end) - top
+        val canvas = page!!.canvas
+        canvas.save()
+        canvas.clipRect(x, y, x + layout.width, y + height)
+        draw(layout, x, y - top)
+        canvas.restore()
+        y += height
+        line = end + 1
+      }
+    }
+    try {
+      beginPage()
+      val rows = data.getArray("rows")!!
+      val notes = if (data.hasKey("notes")) data.getArray("notes") else null
+      for (index in 0 until rows.size()) {
+        val row = rows.getArray(index)!!
+        val name = block(row.getString(0).orEmpty(), 246, 16f)
+        val amount = block(row.getString(3).orEmpty(), 110, 16f, forest, Layout.Alignment.ALIGN_OPPOSITE)
+        val quantity = block("${row.getString(1)} × ${row.getString(2)}", WIDTH, 12f, muted)
+        val note = notes?.getString(index).orEmpty()
+        val noteLayout = if (note.isNotEmpty()) block(note, WIDTH, 12f, muted) else null
+        val height = maxOf(name.height, amount.height) + 8 + quantity.height + (noteLayout?.let { it.height + 8 } ?: 0) + 26
+        if (y + height > BOTTOM && y > 200f) beginPage()
+        val top = y
+        flow(name, LEFT)
+        val nameBottom = y
+        // Amounts use their own column and never overlap the dish name.
+        if (nameBottom - top == name.height.toFloat()) {
+          draw(amount, LEFT + 258, top)
+          y = maxOf(nameBottom, top + amount.height)
+        } else flow(amount, LEFT + 258)
+        y += 8
+        flow(quantity, LEFT)
+        if (noteLayout != null) { y += 8; flow(noteLayout, LEFT) }
+        y += 26
+      }
+      val totals = data.getArray("totals")!!
+      val totalLayouts = (0 until totals.size()).map { index ->
+        val row = totals.getArray(index)!!
+        val grand = index == totals.size() - 1
+        block(row.getString(0).orEmpty(), 205, if (grand) 19f else 13f, if (grand) ink else muted) to
+          block(row.getString(1).orEmpty(), 151, if (grand) 30f else 13f, forest, Layout.Alignment.ALIGN_OPPOSITE)
+      }
+      val totalsHeight = totalLayouts.sumOf { maxOf(it.first.height, it.second.height) + 30 } + 28
+      if (y + totalsHeight > BOTTOM) beginPage()
+      y = maxOf(y, minOf(538f, BOTTOM - totalsHeight))
+      rule()
+      y += 28
+      for ((label, amount) in totalLayouts) {
+        draw(label, LEFT, y)
+        draw(amount, LEFT + 217, y)
+        y += maxOf(label.height, amount.height) + 30
+      }
+      page?.let { pdf.finishPage(it) }
       destination.outputStream().use { pdf.writeTo(it) }
     } finally { pdf.close() }
   }

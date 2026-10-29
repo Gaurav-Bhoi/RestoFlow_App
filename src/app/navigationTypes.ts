@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import type { ExpenseReceipt } from '../features/ledger/types';
 import type { ExpensePdfDocument } from '../features/ledger/ledgerFiles';
+import type { BillDraft } from '../api/billing';
 
 export type RootStackParams = {
   Login: undefined;
@@ -14,8 +15,14 @@ export type RootStackParams = {
   Customers: { tableId: string };
   Order: { tableId: string; customerId?: string };
   Bill: { tableId: string; customerId: string };
-  Receipt: { tableId: string; customerId: string };
-  PrintSuccess: { tableId: string; customerId: string };
+  BillOverview: { tableId: string; customerId: string; draft?: BillDraft };
+  Receipt: {
+    tableId: string;
+    customerId: string;
+    draft?: BillDraft;
+    presentation?: 'table';
+  };
+  PrintSuccess: { tableId: string; customerId: string; printJobId: string };
   Language: undefined;
   EditProfile: undefined;
   ChangePassword: undefined;

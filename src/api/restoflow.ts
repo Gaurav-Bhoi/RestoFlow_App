@@ -219,6 +219,22 @@ export const restaurantApi = {
       `${base(id)}/orders/${encodeURIComponent(orderId)}`,
       { customerName },
     ),
+  replaceOrderItems: (
+    id: string,
+    orderId: string,
+    expectedOrderUpdatedAt: string,
+    items: {
+      id?: string;
+      dishId: string | null;
+      quantity: number;
+      note?: string | null;
+    }[],
+  ) =>
+    requestData<ApiOrder>(
+      'PUT',
+      `${base(id)}/orders/${encodeURIComponent(orderId)}/items`,
+      { expectedOrderUpdatedAt, items },
+    ),
   addItem: (id: string, orderId: string, dishId: string, quantity: number) =>
     requestData(
       'POST',

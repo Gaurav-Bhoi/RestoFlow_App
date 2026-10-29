@@ -1,0 +1,2215 @@
+{
+  "referenceCount": 221,
+  "images": [
+    {
+      "index": 1,
+      "file": "Screenshot From 2026-10-28 23-27-37.png",
+      "width": 900,
+      "height": 1319,
+      "sha256": "987bb61e69321f7acef28c91f4f8e49f14cc6603c1d943373df7057423b5a6bc",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 2,
+      "file": "Screenshot From 2026-10-28 23-27-51.png",
+      "width": 900,
+      "height": 1319,
+      "sha256": "71a9036396c928aa603c3a9d9de0f117e440b9894f1c3e168781b8e4caf8a7d6",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 3,
+      "file": "Screenshot From 2026-10-28 23-27-56.png",
+      "width": 900,
+      "height": 1319,
+      "sha256": "c3b6aa276b94861859b9043d93f3159b36d67ce4855235cad1e565ad98e5ae8b",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 4,
+      "file": "Screenshot From 2026-10-28 23-28-25.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "a90576c05c87268a6999c534c2509241767732bb4d2300a7d07f6b8f235052f2",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 5,
+      "file": "Screenshot From 2026-10-28 23-28-44.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "8c1dc293d2a2f1e6ad5124f0dd0c8608a85241389c0e3ee882b9a3e6e3bfdf62",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 6,
+      "file": "Screenshot From 2026-10-28 23-28-50.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "aafd04d0e6e93295164ba69ec61cfec82c8b0d591cc21edc4b40d9efa2b343c2",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 7,
+      "file": "Screenshot From 2026-10-28 23-28-54.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "d339f2ce56b706c37d842c2e00a906df40dcfacae08d79f01b7737a69e51a3ed",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 8,
+      "file": "Screenshot From 2026-10-28 23-28-58.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "cb6622e2bac18a776ab898d3999adbe86472fbc4aacf833a7318df45343bd81d",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 9,
+      "file": "Screenshot From 2026-10-28 23-29-01.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "ae9d3ff4b20d418ea7ec0d0ab1182a542bfd4e4812492202df7237413c99b255",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 10,
+      "file": "Screenshot From 2026-10-28 23-29-06.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "8ae3bd6a2f80817644698c8957dd4dbb3abb23527845b2f376b7c245e9c2bc64",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 11,
+      "file": "Screenshot From 2026-10-28 23-29-52.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "f48529bb71220f7fd85fa36c1207d1365d4d5b61c38c836c78718d82755d5618",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 12,
+      "file": "Screenshot From 2026-10-28 23-29-58.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "58c4601d9a0f245b70ef2349d37ab91e45ae6db38f95cd54f19e32b93f501d8e",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 13,
+      "file": "Screenshot From 2026-10-28 23-30-02.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "3351c60319372fdde9408dbcfb130161e60df0fbc204e444bfdb3f71a2e3e1a1",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 14,
+      "file": "Screenshot From 2026-10-28 23-30-05.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "d3f859916118a433b42a0b87165d435746dbd9003a3717fc3ed1e8f2fb9893e2",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 15,
+      "file": "Screenshot From 2026-10-28 23-30-50.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "1f4936e441b8462e776ca5e2c49e7352e37d79fafaee20c2306bfcc38cf2d2fc",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 16,
+      "file": "Screenshot From 2026-10-28 23-30-58.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "4fd92607d563a972622040dc363955c637fa7b537c4e56f6b20f308e3e2ef015",
+      "state": "Owner customers",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 17,
+      "file": "Screenshot From 2026-10-28 23-31-19.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "d11239b6d79b08208d9e4fc4cb8eac6ec91c83abba488498595e135c0fb53389",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 18,
+      "file": "Screenshot From 2026-10-28 23-31-29.png",
+      "width": 916,
+      "height": 1321,
+      "sha256": "85ab2b1d1d9cc03b4ffc8cbc11035ef5f3b679eab5b8f4c1531b2326d2b3eeb0",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 19,
+      "file": "Screenshot From 2026-10-28 23-31-42.png",
+      "width": 950,
+      "height": 1316,
+      "sha256": "0cf8b4a8b02e669af9c657224c7c85573ec4ffbdfcdd6e23860c6a429e637143",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 20,
+      "file": "Screenshot From 2026-10-28 23-32-03.png",
+      "width": 950,
+      "height": 1316,
+      "sha256": "345a23065ad864e9d9fe0b916e4297307c9d7e8c31a0217555cf3714376b947e",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 21,
+      "file": "Screenshot From 2026-10-28 23-32-09.png",
+      "width": 950,
+      "height": 1316,
+      "sha256": "5b148c5305d653f3f13532e912f4b1e1ce3b8d2dbe5f4d928167b5dd938a0e5e",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 22,
+      "file": "Screenshot From 2026-10-28 23-32-16.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "ce0fea0edcd651f5758b4e198f9801bedf15bebabc194de6845e0eff426f555d",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 23,
+      "file": "Screenshot From 2026-10-28 23-32-18.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "39eec034d53f031c666b9e27889c59d42f18d8548f47cd4445e98c96cc0b236f",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 24,
+      "file": "Screenshot From 2026-10-28 23-32-23.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "61061bc1c7955273507184f220dd7c7698132ca5c3c86a199cdb6e2f8a2d4ec6",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 25,
+      "file": "Screenshot From 2026-10-28 23-33-36.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "3d7a85e7eb63fd73112b728dc620542b7f8974a97351f40c3c101fc5858a262b",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 26,
+      "file": "Screenshot From 2026-10-28 23-34-43.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "4b612ed4b2d27861c4eaaf46115be442026ead4146f2158f2139df3d88a1969f",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 27,
+      "file": "Screenshot From 2026-10-28 23-34-47.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "86a6abaf1b010b329f5eca8b54996127a31be450495eb6512b3778ac2f0a4b88",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 28,
+      "file": "Screenshot From 2026-10-28 23-34-50.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "d9ac567cdd8b83eaea405c3f9df5a8b1a26e3acc7bb96aaa575e832c86c8cba8",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 29,
+      "file": "Screenshot From 2026-10-28 23-34-52.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "1976b90b2fcb4cf9e12b51ed3274e9c36b49cb790fe06b01aa4d74c1e5a3bcd3",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 30,
+      "file": "Screenshot From 2026-10-28 23-35-00.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "33a57b9269f708051b6977f0e626857ee702c88222f6892cf9f079877dfcf546",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 31,
+      "file": "Screenshot From 2026-10-28 23-35-03.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "b0c534e52acd8a695ff381f2b194d0771be16f7a944c5113952a45befb310d8e",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 32,
+      "file": "Screenshot From 2026-10-28 23-35-09.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "f8a92213b6e1b3ef60abe575612ceaf2dcfc571f84071cade84553412886b172",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 33,
+      "file": "Screenshot From 2026-10-28 23-35-12.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "a4165285e55ffc54350b046c5afc16b3cacb7d1b4fd28a4c8db50a145e227cdc",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 34,
+      "file": "Screenshot From 2026-10-28 23-35-14.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "bd132df91df5fd759a7e824c096e8fc0d62aab4575501d17acfd547c03837064",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 35,
+      "file": "Screenshot From 2026-10-28 23-35-16.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "48c00e07e089df63380db4f896fbb246f40c82b12aa8744c2556e95ce672d718",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 36,
+      "file": "Screenshot From 2026-10-28 23-35-25.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "92c91379f19a925ecb59c67febe6dfd17865d602e2a47a9535cad18897ffadad",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 37,
+      "file": "Screenshot From 2026-10-28 23-35-30.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "ebf77c5e2c67c84bdd9b642c044b79d72675eb56e345a90d7affd390be783763",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 38,
+      "file": "Screenshot From 2026-10-28 23-35-33.png",
+      "width": 930,
+      "height": 1291,
+      "sha256": "69c738eeba1aaec1fe0c56ef79938460530125e3fd2cc7c8e7f00ca0ee076486",
+      "state": "Customer bill details",
+      "implementation": "src/features/billing/BillOverviewScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 39,
+      "file": "Screenshot From 2026-10-28 23-35-56.png",
+      "width": 930,
+      "height": 1321,
+      "sha256": "a00fd7caa7efac8250fb67d0eedf2df92f73fadd79f6d0a99aefcc65e535e90e",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 40,
+      "file": "Screenshot From 2026-10-28 23-36-09.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "b19a280bf2d929913c1054926785ba32d6657c7ff4225263660d2cf2c7f96578",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 41,
+      "file": "Screenshot From 2026-10-28 23-36-13.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "827bd212c26a8549515e1872dfc4dc1df3af3c3e260f1ceb66833898176d5d85",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 42,
+      "file": "Screenshot From 2026-10-28 23-36-18.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "c3e42989a4dd739fa8e19a168d23371118bbdb468c3910c7fdaafd8c1f18f278",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 43,
+      "file": "Screenshot From 2026-10-28 23-36-22.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "f8a7181026dabaf2029aba48edf0624ae78cecc2c00a8b05a3b947053eb2d25b",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 44,
+      "file": "Screenshot From 2026-10-28 23-36-26.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "7b2e6342e9095e40b4d6bc1014cc59646ce5165d650cc5ffeca19296fa586923",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 45,
+      "file": "Screenshot From 2026-10-28 23-36-32.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "787a602292fe558f21ee90b9ee870423a9a6937c4b4bc6b45e6af31de8cf64a0",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 46,
+      "file": "Screenshot From 2026-10-28 23-36-34.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "128f37808c18a2688f50cb03758bf656a96493bab949e6ef937edf44572665ef",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 47,
+      "file": "Screenshot From 2026-10-28 23-36-41.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "26b40444e0d401015ccd307b0bcc0b0d580a73b4f0fefa190cbe5dbfe65d7ff2",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 48,
+      "file": "Screenshot From 2026-10-28 23-36-54.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "2b3308b323275b0898392b42cbff02ded4c57014e1a481b27171f5cf482c7b36",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 49,
+      "file": "Screenshot From 2026-10-28 23-37-20.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "c480525ac36b4d39ff74e2a99d34d67c372e2f27a2b033b48f967f9605f75e04",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 50,
+      "file": "Screenshot From 2026-10-28 23-37-27.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "5bf3fa10ab5ade3584d3769c31c2886d38fa2f5159b6da6fb97c10648ac992b8",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 51,
+      "file": "Screenshot From 2026-10-28 23-37-30.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "ab84d24ada74a0e98d87a0fc304a28580fb681a856e483681a35af21aa3fa93f",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 52,
+      "file": "Screenshot From 2026-10-28 23-37-33.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "abee46396e428df03f9fc93b15fc0b02d1d6f09c252d44317812457a2b5e00ef",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 53,
+      "file": "Screenshot From 2026-10-28 23-37-51.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "2220ea05f2956f23b210db322370a786fe78225c8051314d5787ff5beae5ec6d",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 54,
+      "file": "Screenshot From 2026-10-28 23-37-55.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "182ac57e6f30cc28e1e14571b4219ee921658eb03dbb258eec99758782fc7f3e",
+      "state": "Four-column receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 55,
+      "file": "Screenshot From 2026-10-28 23-38-18.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "917f7adf3c2ad1cad2c37c26bc9c86d14fdc9f2d5d50fdd78f63023da8e11930",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 56,
+      "file": "Screenshot From 2026-10-28 23-38-23.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "6e5b4c7051fa91a0d1327836ae1efea778a072417b8f23256e7726e9b497bf0d",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 57,
+      "file": "Screenshot From 2026-10-28 23-38-36.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "5bd73696ce1ff0d9f90b44fc06915606d578cf27840c5a6eed7e34e37690b52f",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 58,
+      "file": "Screenshot From 2026-10-28 23-38-41.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "c4f671946a9be16c2c4a652633af40be05b407c6eb4eb7155e19d83644473cf4",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 59,
+      "file": "Screenshot From 2026-10-28 23-38-52.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "c6f994a4d9f8582c54988651f589354b5d3c227d126864299a1744f186381ca7",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 60,
+      "file": "Screenshot From 2026-10-28 23-38-55.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "9c1b556506d3de78ca23218bc2bbceec27a2380bf98700e5a3b79ac8f5608e96",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 61,
+      "file": "Screenshot From 2026-10-28 23-38-58.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "58e9b07e6a670e5ff1cf9cf2b05b896be3760c1acf5dd22f16b3a988bcc9414d",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 62,
+      "file": "Screenshot From 2026-10-28 23-39-06.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "b903e0ab49c2c518dc6444822ea86e4f0345bdefcb4f70122a59faee5451615e",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 63,
+      "file": "Screenshot From 2026-10-28 23-39-10.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "632e891c1626181aaaf2f17200c6e2f0570a63a3d7a4d5af0fb056c4472e0cb9",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 64,
+      "file": "Screenshot From 2026-10-28 23-39-12.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "6d47cb7e64d2cff5a50f4bc4f0cbefc4294f8ebe3844ce6a9c452df035379338",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 65,
+      "file": "Screenshot From 2026-10-28 23-39-15.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "7276cd5a12ca6d12d95a12f5e2dd0a7471c4877898022a5a9a2b16ff3d7e3074",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 66,
+      "file": "Screenshot From 2026-10-28 23-39-18.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "2f0dfa61c2a5073cdad2e6600f8871e9ace934c662bfd3e83b1d882b382c6d80",
+      "state": "Receipt confirmation and finish visit",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 67,
+      "file": "Screenshot From 2026-10-28 23-55-48.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "1febbfc82da01ab4f510fac28ce577d80c143af7dda7a3d963c0ef1e8b9a403c",
+      "state": "Waiter empty table",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 68,
+      "file": "Screenshot From 2026-10-28 23-55-54.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "7794f31085e2d99472966ea190887e8ff90b2f35afc79a86c324c6715c517390",
+      "state": "Waiter empty table",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 69,
+      "file": "Screenshot From 2026-10-28 23-56-01.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "c16f467a98621d586000df5f770a05537863b8315e15566a2bc863fe5b85e5ef",
+      "state": "Waiter empty table",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 70,
+      "file": "Screenshot From 2026-10-28 23-56-04.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "6924dfca128d3df55af3f7b0cff3d97fe5a15e85737037c49f979b4c66af4c8b",
+      "state": "Waiter empty table",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 71,
+      "file": "Screenshot From 2026-10-28 23-56-18.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "4b489536e71e29db43ceac4827af8037ae5060b001d82c417342e801cf7c92b4",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 72,
+      "file": "Screenshot From 2026-10-28 23-56-27.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "a20e558a8d8e58f9280291c15d6a068d03988b75ea95281daf4f083f045c550d",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 73,
+      "file": "Screenshot From 2026-10-28 23-56-30.png",
+      "width": 922,
+      "height": 1320,
+      "sha256": "cec5e0f74f639c8828e5ecf972a70663f5907764d3f23583f4e6abceb8272508",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 74,
+      "file": "Screenshot From 2026-10-28 23-57-39.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "ac3a1c1fa80242cbde448b61a37d9288a67d9404134df950044f2d159982d05a",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 75,
+      "file": "Screenshot From 2026-10-28 23-57-44.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "0289db2d5c260ff68702d465288c476ce1d044f270f6197c7db0b7a01d73d457",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 76,
+      "file": "Screenshot From 2026-10-28 23-57-48.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "26d8e02ab8d9869775dda79d5d653cd9734089def39f4796efa3d4d13fc1ab9d",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 77,
+      "file": "Screenshot From 2026-10-28 23-57-50.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "a2f89134a6eb539e074d31dee2c17ad801794a3d0b6da69a7381584bca806ab9",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 78,
+      "file": "Screenshot From 2026-10-28 23-57-54.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "9cf2fa0394cd9d3910c9bd04e71e9bb3626649a97725c1d09769e0ebf2f2079f",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 79,
+      "file": "Screenshot From 2026-10-28 23-57-58.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "c29df6f440cb8fd06fbb5dbe59c3791ffdc5e3861b1e4d8e01e77518269a5fe9",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 80,
+      "file": "Screenshot From 2026-10-28 23-58-01.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "1074386d36c2b6b6b4fe9366588becc5ad6220e89b577544f255147e34d95c82",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 81,
+      "file": "Screenshot From 2026-10-28 23-58-05.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "b6d4c2f97893f05c4b2e643cf1d3f6a29f95ac6296f9175829c1877b29f275e0",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 82,
+      "file": "Screenshot From 2026-10-28 23-58-07.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "698389efd7874d12f1aedd069379d273648e1e732a52c8d890ed9fbc13d1ed1f",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 83,
+      "file": "Screenshot From 2026-10-28 23-58-11.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "eae7212b5d9714b84f5cc570435376f6502d94988df888051cbe4ccfd1d1e5dd",
+      "state": "Waiter customer orders",
+      "implementation": "src/features/orders/CustomersScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 84,
+      "file": "Screenshot From 2026-10-28 23-58-46.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "18d29da44ab74f837507e616667f5392e5878ab56dbf14ea9d65cb68b78469a6",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 85,
+      "file": "Screenshot From 2026-10-28 23-58-57.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "d4343db25851f5a0c3e5d08168250f849e9e10e5d5ee19410ebbfc3626e890f2",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 86,
+      "file": "Screenshot From 2026-10-28 23-58-59.png",
+      "width": 906,
+      "height": 1326,
+      "sha256": "8961df1edc512aa42dbaea9818cf3fa898344f62e3afe57c1d50d964110dbda5",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 87,
+      "file": "Screenshot From 2026-10-28 23-59-09.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "7e298f07783d3b18ee071332182264d3b8f17f2a6e4cb6289d33bac33ed5d452",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 88,
+      "file": "Screenshot From 2026-10-28 23-59-14.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "e576545cb46d18f6d5ef517e783922776bcebb5c0aef40b584bfb4fd5d19b227",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 89,
+      "file": "Screenshot From 2026-10-28 23-59-21.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "78d3268c1b00db965ee8e1b9e2ae299e2c5e035d14f28b5d0ce3c8f9009c2926",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 90,
+      "file": "Screenshot From 2026-10-28 23-59-26.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "65f027059361747ffd939e5275c25b2a2a053b8f99e3402c14f216210d65d766",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 91,
+      "file": "Screenshot From 2026-10-28 23-59-37.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "510d5c90949c7e939f1849702a5cf7f7ae71cac213cc43989033042fc1f63168",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 92,
+      "file": "Screenshot From 2026-10-28 23-59-40.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "1d4d08ee6a3cf7fbe3ac959980b58b9f2f53e4790c9be94213e9bd31dd9640dd",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 93,
+      "file": "Screenshot From 2026-10-28 23-59-43.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "6cabcd9a2459e6bbc70882d500fb97639f2fd1d45867d073da162a37632ca082",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 94,
+      "file": "Screenshot From 2026-10-28 23-59-47.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "247d6c9dde5aeff22c684eb227d81e9cfbed387d9107ebb112fb855d3dff8bdb",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 95,
+      "file": "Screenshot From 2026-10-29 00-01-20.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "3d329f1dc51f5390299fb6dd01925b20d8ded641d41d780fd7acc2fa5f0ef9b7",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 96,
+      "file": "Screenshot From 2026-10-29 00-01-27.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "cc9f6558e0a53db926396d7a0461254ce934f97cc81a76bbeb842587fc542e45",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 97,
+      "file": "Screenshot From 2026-10-29 00-01-31.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "658411366293c9a71426eaeb8116c9e453d44f83c8db5086c9be00d7fdee8035",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 98,
+      "file": "Screenshot From 2026-10-29 00-01-35.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "03f9cbef0e105b19b54efa36909007122d8ed066dfa8fcd9236943297f27e00e",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 99,
+      "file": "Screenshot From 2026-10-29 00-01-37.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "6d14b12c00c1273de47e9aeebd1640fde4a6803b4d174db02ae1744eb4568a77",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 100,
+      "file": "Screenshot From 2026-10-29 00-01-41.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "e06c6214629afcbac760c1031c650eddc77e745c02ae6dd5437163861c2359df",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 101,
+      "file": "Screenshot From 2026-10-29 00-01-48.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "b754007f1c6d9524614cf22805ab46dd66575a8c7d385e2a12aafe3679f1440c",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 102,
+      "file": "Screenshot From 2026-10-29 00-01-52.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "dbcb77315e44236d2a07deb1f3c50a6fa257d03632c1d2b2ed07e5ac7fa81162",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 103,
+      "file": "Screenshot From 2026-10-29 00-01-54.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "9dc35dfa7e8ef6a07138dcd6de13f30876351bb9a0633de4761936e738dbe73a",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 104,
+      "file": "Screenshot From 2026-10-29 00-02-02.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "291c4389248bb3315a286e8ad29a87b00d51564894e39adda6e3f5cb23f950b9",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 105,
+      "file": "Screenshot From 2026-10-29 00-02-06.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "e0836f05b0597169f9e3f73e59a36d20897f4b735ef572d4be820443d9702e42",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 106,
+      "file": "Screenshot From 2026-10-29 00-02-14.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "714eb75ee3ddcd3016f9bd069a283690987d7e54f328353a1255910a8944e06e",
+      "state": "New customer and empty order",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 107,
+      "file": "Screenshot From 2026-10-29 00-02-47.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "316510d2397b75aa1383b3e91863b33714f09cf43a1926c6d3442531ff28ab4d",
+      "state": "Selected order quantities",
+      "implementation": "src/features/orders/OrderDishRow.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 108,
+      "file": "Screenshot From 2026-10-29 00-02-54.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "a80b1680116c20b836217430ed692266616f7c266b23bd146160b0cc9c4eca60",
+      "state": "Selected order quantities",
+      "implementation": "src/features/orders/OrderDishRow.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 109,
+      "file": "Screenshot From 2026-10-29 00-02-58.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "ec98387700fff725dcc87be41ee6477dc8d6bf4e3ccb0827d8646ffc3e447385",
+      "state": "Selected order quantities",
+      "implementation": "src/features/orders/OrderDishRow.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 110,
+      "file": "Screenshot From 2026-10-29 00-03-04.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "27f1946c526a3c3eb72452ad8146a1b42c7acf2cdeba27669e78256e4f35879c",
+      "state": "Selected order quantities",
+      "implementation": "src/features/orders/OrderDishRow.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 111,
+      "file": "Screenshot From 2026-10-29 00-03-09.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "049d2e8fe86bd511504506d4a52fd7a743932276fab753526087a784a2ad8191",
+      "state": "Selected order quantities",
+      "implementation": "src/features/orders/OrderDishRow.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 112,
+      "file": "Screenshot From 2026-10-29 00-03-12.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "267a9adeea042a8fc9183a4e777eaebc5422e96a3505ab6547db8dde4c21a2c3",
+      "state": "Selected order quantities",
+      "implementation": "src/features/orders/OrderDishRow.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 113,
+      "file": "Screenshot From 2026-10-29 00-03-16.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "585dddf058e989a6c5bef2341abd5038238e4fef2d9807aa1f0170889c9014fa",
+      "state": "Selected order quantities",
+      "implementation": "src/features/orders/OrderDishRow.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 114,
+      "file": "Screenshot From 2026-10-29 00-03-18.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "8a19c03589ac2cebe86ef7074d67c300a6776aa89417222c3b5195aba6d86290",
+      "state": "Selected order quantities",
+      "implementation": "src/features/orders/OrderDishRow.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 115,
+      "file": "Screenshot From 2026-10-29 00-03-21.png",
+      "width": 916,
+      "height": 1307,
+      "sha256": "0051aa6e2f55e60c67befff4384716460a50a05e22fe80dc7a8f64578ef3a8c9",
+      "state": "Selected order quantities",
+      "implementation": "src/features/orders/OrderDishRow.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 116,
+      "file": "Screenshot From 2026-10-29 00-03-31.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "b5d3dce5edfe4db200aa82a92dfcc9eef7a609b9a674c419444b28228dec5b1d",
+      "state": "Selected order quantities",
+      "implementation": "src/features/orders/OrderDishRow.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 117,
+      "file": "Screenshot From 2026-10-29 00-03-35.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "917511483aacb1d9a22a90255c0aa7dfc53c60add5a1cacfdf4b9ce7bbfae878",
+      "state": "Selected order quantities",
+      "implementation": "src/features/orders/OrderDishRow.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 118,
+      "file": "Screenshot From 2026-10-29 00-03-56.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "1255a3b695a623a5e385f9e24991cb7796bb313e2d67ff63ec36aa6af619a294",
+      "state": "Filtered order and complete summary",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 119,
+      "file": "Screenshot From 2026-10-29 00-04-04.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "198ba56ac6a396196c73f8d3ba9f67a305bdaafb9d7a5deb6abcba02e6103138",
+      "state": "Filtered order and complete summary",
+      "implementation": "src/features/orders/OrderScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 120,
+      "file": "Screenshot From 2026-10-29 00-06-12.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "0ffa9fe7d67734103fc49b2b674f5fd0d626e1fb4d6a9844c9fa83ade2aa88bd",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 121,
+      "file": "Screenshot From 2026-10-29 00-06-19.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "b70abc4ab69a6de67f0733675758111b7927047cba69cc1e526feae29d384499",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 122,
+      "file": "Screenshot From 2026-10-29 00-06-24.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "6713d22d0af4b9071c84b5a5716a89d6d2c9b8085c38499908b75f98cb84ff78",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 123,
+      "file": "Screenshot From 2026-10-29 00-06-27.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "393a8569f9b7489484783fdd350f080db7806c2da30980e97c326169240a2e5c",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 124,
+      "file": "Screenshot From 2026-10-29 00-06-30.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "915d58ea8863020ef84a75ae539b55f5de8875e9e75b4593af53b7de3441354e",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 125,
+      "file": "Screenshot From 2026-10-29 00-06-41.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "471e87b6355e5e3eedf018b682b20b3a827fe4ae0ee14e5d0a6e21f5407b1aed",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 126,
+      "file": "Screenshot From 2026-10-29 00-06-45.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "8b24954aeb1a03ab335242342fbb892a8d6297dfa12a268fcd3a60fef1612390",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 127,
+      "file": "Screenshot From 2026-10-29 00-06-47.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "509f1efb363efafbeb3cd766c46143b696336f41ef20adc1e124f68387f89f2b",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 128,
+      "file": "Screenshot From 2026-10-29 00-06-50.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "c1851ad23ef50807ab6e97ae332b3c5059c0610f9cbcac01c52c2d00b7b03a48",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 129,
+      "file": "Screenshot From 2026-10-29 00-06-52.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "c82c1f85a0f4b6ca7fdfa4bede78720cbcd63a0248b93fbd93cc3b408eed3029",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 130,
+      "file": "Screenshot From 2026-10-29 00-07-02.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "74f6b504e7ba3544d3f008001b9af2f7a858c2b22ab7dddc4fd43e8d287dfc7c",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 131,
+      "file": "Screenshot From 2026-10-29 00-07-09.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "74faef06ed3ee18ead0fa8c784017cfc69dd1c877d9bb022db2378344436c7dc",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 132,
+      "file": "Screenshot From 2026-10-29 00-07-12.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "6d6329070fdec51740f297bafe0f80d32f1ec5fc7a71ac2c0ffc582b9ebb5709",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 133,
+      "file": "Screenshot From 2026-10-29 00-07-15.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "fe081942889380671b18e9de5c753a5da2237bfaa51c536ff2ee4f7df17ab8d2",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 134,
+      "file": "Screenshot From 2026-10-29 00-07-18.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "c904328a67c34de4e0245fd55d3b97d0157ab66f1f4f3666e4bc0d27e0783040",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 135,
+      "file": "Screenshot From 2026-10-29 00-07-21.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "52fd3ab3e292e4d1a090354b054e2a1a2f99fde62abd8f434105da34c9e43d40",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 136,
+      "file": "Screenshot From 2026-10-29 00-07-24.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "5ba20c181eda47915a40488fee018ba508878e676e54f1b23164d725d20ba735",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 137,
+      "file": "Screenshot From 2026-10-29 00-07-27.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "e4d478715980ff133e0cb3725c958708848470ab1d0b82b99c0c5e1dbf27f8d3",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 138,
+      "file": "Screenshot From 2026-10-29 00-07-32.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "e2e97e53fd157a9657a95cff2811ae59bf73d8d9ba2ca8dfada082559fe4b8de",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 139,
+      "file": "Screenshot From 2026-10-29 00-07-44.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "b0466d071a25b0e7da91c4ce26e15c6dd5e8c24681bbea5b4bceabf48e7d75a0",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 140,
+      "file": "Screenshot From 2026-10-29 00-07-48.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "7a0f1a561a3d2559bd879dd90e534c406501296d52c035db03c6513d3277494d",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 141,
+      "file": "Screenshot From 2026-10-29 00-07-51.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "129d41cf12fedddf0a99e963e4ea5bce97180b9a84ae748a8518d3e7754b53bc",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 142,
+      "file": "Screenshot From 2026-10-29 00-07-57.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "ad6419523b31510e76dc30ebd68cc85ec87252764b71f1f6c896339c3c024eee",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 143,
+      "file": "Screenshot From 2026-10-29 00-08-00.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "aeca60d67ace72bc4fb1e813cce054bc5185995ccf7bb58de3ce19d88284ab7f",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 144,
+      "file": "Screenshot From 2026-10-29 00-08-03.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "0bef64cc044d9022a92135a1a23af8d4b72fef9b9e4c6be4dcad926c497586e4",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 145,
+      "file": "Screenshot From 2026-10-29 00-08-06.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "c351ea40bcf53a5408d5adaed80cb73fa0ea882ac3a44df022434dd843a9e239",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 146,
+      "file": "Screenshot From 2026-10-29 00-08-08.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "50f73a62b4ba4a13cef29c808e69a055cd2dcff7be360ad79e494810edacedd8",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 147,
+      "file": "Screenshot From 2026-10-29 00-08-11.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "a6026339ff05697f321591a4716b5906afc0345950401f9d867eb76def54e75d",
+      "state": "Editable bill",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 148,
+      "file": "Screenshot From 2026-10-29 00-08-48.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "2612ea8df453372247ed5c70c4eb4cce14cb430360dd1b4a0c1f2962f34834bb",
+      "state": "Updated bill quantities and unsaved edits",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 149,
+      "file": "Screenshot From 2026-10-29 00-08-51.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "5cd28e0ea9cfccfce302d935c823ff900387dcaa756a29a44b2a918965b72ea4",
+      "state": "Updated bill quantities and unsaved edits",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 150,
+      "file": "Screenshot From 2026-10-29 00-10-05.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "ebd4ca56f25bc117b04a15dd1880d183dc3a66eff89ed6efeb8d55cf2c4dbb74",
+      "state": "Bill saved feedback",
+      "implementation": "src/features/billing/useBillDraft.ts",
+      "reviewed": true
+    },
+    {
+      "index": 151,
+      "file": "Screenshot From 2026-10-29 00-11-30.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "52d780bfcc41c33600dcc788905e4d36a964c250722a539d5003c52ed8b254c8",
+      "state": "Bill name editor",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 152,
+      "file": "Screenshot From 2026-10-29 00-14-06.png",
+      "width": 904,
+      "height": 1314,
+      "sha256": "57d72914c7dce88d822950f1fb85a97b6435f99dfc58623a9b37ee7e2885d09e",
+      "state": "Bill name editor",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 153,
+      "file": "Screenshot From 2026-10-29 00-14-20.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "c5c1d35b5c536a1ee4ce8d50e46a485038b5788ac549029fe5e4a6afd04f6ac1",
+      "state": "Bill name editor",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 154,
+      "file": "Screenshot From 2026-10-29 00-14-25.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "460417875e80ec224ad86767e615d4a2e27739503487085b6c924faf122d6fba",
+      "state": "Bill name editor",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 155,
+      "file": "Screenshot From 2026-10-29 00-14-29.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "a8dea9a58324e76cf388c117f9a1377b5ab1a20e70c8bd3eeb4dcae2a496a790",
+      "state": "Bill name editor",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 156,
+      "file": "Screenshot From 2026-10-29 00-14-33.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "7d64fd79f32ac3107578c5efe5335c22981800675c223a648755a863de9db09f",
+      "state": "Bill name editor",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 157,
+      "file": "Screenshot From 2026-10-29 00-14-36.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "edaa69b2a18b5b89c704e91471067aff4d4cc9bfd871e72028f1a0cbc864dbdf",
+      "state": "Bill name editor",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 158,
+      "file": "Screenshot From 2026-10-29 00-14-38.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "77a3a70b1a4851617955e7d45ceca37b8790f73be32ff649ce9e108ba51bcf49",
+      "state": "Bill name editor",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 159,
+      "file": "Screenshot From 2026-10-29 00-14-40.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "f645ab8bc0de3f1cb21b034eb22afed2704698a52587aa1b37532cb401180f6b",
+      "state": "Bill name editor",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 160,
+      "file": "Screenshot From 2026-10-29 00-14-57.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "b0864d2ffac17439dd631667e4cc7e8c994681d837f750ba47b437ceead1256d",
+      "state": "Bill price editor",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 161,
+      "file": "Screenshot From 2026-10-29 00-15-05.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "c3c826f21b5571842b86399045891f5219d3d4942e3a1745440f23f45bf50247",
+      "state": "Quantity editor initial and changed",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 162,
+      "file": "Screenshot From 2026-10-29 00-15-11.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "601caada265a0f60b6998af1a0a8b4b0f5198ec99433c939e473921060f16e0a",
+      "state": "Quantity editor initial and changed",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 163,
+      "file": "Screenshot From 2026-10-29 00-15-20.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "d2382b5a0053eb7b32a40a3c8d9d540ce8e8a3bd4be400223474d83647f5a58c",
+      "state": "Quantity editor initial and changed",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 164,
+      "file": "Screenshot From 2026-10-29 00-15-24.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "de928cf7b23581b173c6f56428a2c220a58cbd1b70f6fb9c4d2d470907dbcb7e",
+      "state": "Quantity editor initial and changed",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 165,
+      "file": "Screenshot From 2026-10-29 00-15-29.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "d2bc0964c82293afd75ae661d95147dd85c653693f98942863c2900f4eb35135",
+      "state": "Quantity editor initial and changed",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 166,
+      "file": "Screenshot From 2026-10-29 00-15-35.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "4ac9d0cf86b5ac6732f43608c174c59b439eac8c41b2497532f21cdf0fc7b915",
+      "state": "Quantity editor initial and changed",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 167,
+      "file": "Screenshot From 2026-10-29 00-15-41.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "00582da3d91f044d860985c3f9637e68f9bb34b8504737b06a628e9b94223878",
+      "state": "Quantity editor initial and changed",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 168,
+      "file": "Screenshot From 2026-10-29 00-15-45.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "b62a63901a6e0e01bbc755fa15df4a6fd493ec1b6bd2461b380ccb4ecaf2ca92",
+      "state": "Quantity editor initial and changed",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 169,
+      "file": "Screenshot From 2026-10-29 00-16-01.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "1821ea73636ef97089cbf1152deaeecf6b516d430e51a701bc9f94bb5be491f6",
+      "state": "Quantity validation error",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 170,
+      "file": "Screenshot From 2026-10-29 00-16-07.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "0239fa38401ab23040cc33f14dedf83d7de8af517ae81a5b90cd33a96dccca3b",
+      "state": "Quantity validation error",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 171,
+      "file": "Screenshot From 2026-10-29 00-16-13.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "4e921220a1e016c871defa0ed0460503c83766708fdf266a7ff8e32ac7bad517",
+      "state": "Quantity validation error",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 172,
+      "file": "Screenshot From 2026-10-29 00-16-15.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "65931a908b2f4ca95a8f5be945abe3a23eb1e2445ec83f35e40d1e4113520a9a",
+      "state": "Quantity validation error",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 173,
+      "file": "Screenshot From 2026-10-29 00-16-25.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "a8f225ccec601e821866560d57081fd82c176d6d471f514d5db6f61137fdac10",
+      "state": "Quantity validation error",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 174,
+      "file": "Screenshot From 2026-10-29 00-16-29.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "94ebd2f8bfb45529720343e26d6a38dcb09a05824fafca6c6cf036a90dac027d",
+      "state": "Quantity validation error",
+      "implementation": "src/features/billing/BillItemEditor.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 175,
+      "file": "Screenshot From 2026-10-29 00-17-05.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "a2b61f0c91a82cee682abf742409f0f9ab7af14732060a0ce151460c5b9fced0",
+      "state": "Added paneer quantity and bill total",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 176,
+      "file": "Screenshot From 2026-10-29 00-17-09.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "c3bcb6faa715f04da6ed1b913ef806e0079885203c57eaec17b97898613c4965",
+      "state": "Added paneer quantity and bill total",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 177,
+      "file": "Screenshot From 2026-10-29 00-19-08.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "ffa595b48cca63f12fe7474819b1e4e99c61ebf035dc08ca3d49485a9b77eced",
+      "state": "Add item to bill",
+      "implementation": "src/features/billing/BillAddItemSheet.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 178,
+      "file": "Screenshot From 2026-10-29 00-19-11.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "fd297c79f723535e37d356123306552da4318508354843c795159c03f45e80ce",
+      "state": "Add item to bill",
+      "implementation": "src/features/billing/BillAddItemSheet.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 179,
+      "file": "Screenshot From 2026-10-29 00-19-13.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "490a5e5a7821211f3288e91f0d9c673723d2532f168dc407610afcb6f981d59c",
+      "state": "Add item to bill",
+      "implementation": "src/features/billing/BillAddItemSheet.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 180,
+      "file": "Screenshot From 2026-10-29 00-19-17.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "df9c968efa52dc73c81bd4ce8b49d7b2fcebba320b3a7e8adb421dafa1e9ff98",
+      "state": "Add item to bill",
+      "implementation": "src/features/billing/BillAddItemSheet.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 181,
+      "file": "Screenshot From 2026-10-29 00-19-20.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "5c0d8a9cd93c67f5cd23a18ebf6a389d11da6f97f66a779465ea3f638ecb55ee",
+      "state": "Add item to bill",
+      "implementation": "src/features/billing/BillAddItemSheet.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 182,
+      "file": "Screenshot From 2026-10-29 00-19-27.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "302dc4e8a1faeea61d43332f5941b66904e45b5acdc16d4d2050844fefa373a8",
+      "state": "Add item to bill",
+      "implementation": "src/features/billing/BillAddItemSheet.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 183,
+      "file": "Screenshot From 2026-10-29 00-19-58.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "5b9e16fba7d604019ca6a8be5d90ca9eb6abab2dee4e95c2dc6529f38f2cedeb",
+      "state": "Add item to bill",
+      "implementation": "src/features/billing/BillAddItemSheet.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 184,
+      "file": "Screenshot From 2026-10-29 00-20-28.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "8ab21ef4ef2a57cd369b4283fefffa627a8369a586b8dfa909b951ff6b3ec389",
+      "state": "Manage bill items",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 185,
+      "file": "Screenshot From 2026-10-29 00-20-34.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "c8aa3840abccceab340bf779867cd6349a105b83e8c7c63dcd81e2dd73bda5b3",
+      "state": "Manage bill items",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 186,
+      "file": "Screenshot From 2026-10-29 00-20-39.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "e3266d821c95b9fc3d575deaed9d8f10af6787bb79b16c8a8344d5e54bf86338",
+      "state": "Manage bill items",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 187,
+      "file": "Screenshot From 2026-10-29 00-20-52.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "ca0c3080885dc3f023cd5a1dfbfedd80245306f005d8a83ddf0aa0f9f1f9f99c",
+      "state": "Manage bill items",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 188,
+      "file": "Screenshot From 2026-10-29 00-20-56.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "9605b71a583dfcf1239234b76288756bf89221848b61b5dae876c9983350628e",
+      "state": "Manage bill items",
+      "implementation": "src/features/billing/BillScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 189,
+      "file": "Screenshot From 2026-10-29 00-21-07.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "7f7d30b7b6713a23b1f3d34b6447a8562c6c65e548418f7dc9bb0a6ac8c4c62b",
+      "state": "Remove item confirmation",
+      "implementation": "src/components/ConfirmationDialog.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 190,
+      "file": "Screenshot From 2026-10-29 00-21-29.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "d078e93382b745daaa27bfe1e2b59549823de5fe49072d7c2c0f4217bab862ee",
+      "state": "Latest edited receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 191,
+      "file": "Screenshot From 2026-10-29 00-21-34.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "da75fb606c7cd7df6244942a3c9e0f9a8fa1c6ea0b0ac4a13360a6d26ad3e2df",
+      "state": "Latest edited receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 192,
+      "file": "Screenshot From 2026-10-29 00-21-38.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "070107174af6b44afd0896274c18107d4dfb24aca99c34ae438ae3dfcdafa4f1",
+      "state": "Latest edited receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 193,
+      "file": "Screenshot From 2026-10-29 00-21-41.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "47c65de1f0f67313c2046a169663ae4221f992d0d351218855f55dcbb5588da1",
+      "state": "Latest edited receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 194,
+      "file": "Screenshot From 2026-10-29 00-21-45.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "69d8e1f14d06b5c74a7a8bc92ea79c77c4160564d56ac465cfccc02625d33846",
+      "state": "Latest edited receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 195,
+      "file": "Screenshot From 2026-10-29 00-21-52.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "65d5f2255309cecc6b7a21a00aa90c121b7303863c48d2a62eb9d9be296582fd",
+      "state": "Latest edited receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 196,
+      "file": "Screenshot From 2026-10-29 00-21-54.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "6b85c29cb30648c819e8df286ba4786aafe8d374d7bb9ce60f1a8e2fcb48a920",
+      "state": "Latest edited receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 197,
+      "file": "Screenshot From 2026-10-29 00-21-58.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "93f5dc03a296b897b373596d44be8ec85d963d2ab72c10032f26c33d8ae98d38",
+      "state": "Latest edited receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 198,
+      "file": "Screenshot From 2026-10-29 00-22-01.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "439c1dbc9282b2c637e15e52d0905e01206a7b1c5a44e17645fcae66ebd14765",
+      "state": "Latest edited receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 199,
+      "file": "Screenshot From 2026-10-29 00-22-07.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "1427b3bd58a5a4004c5255449cc23d8c7ad59f7a3477145ba53e5a06f424dcf9",
+      "state": "Latest edited receipt preview",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 200,
+      "file": "Screenshot From 2026-10-29 00-22-51.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "9799a9afdc199ad05034fb493c83cfa7e8d31c2165495a6dc3a6855c9be07075",
+      "state": "Print customer bill sheet",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 201,
+      "file": "Screenshot From 2026-10-29 00-22-56.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "9fc34fd9c000a51691ace9b9725022a3f1d0481a5673dd73facb8cfbb9b1ca80",
+      "state": "Print customer bill sheet",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 202,
+      "file": "Screenshot From 2026-10-29 00-22-59.png",
+      "width": 941,
+      "height": 1316,
+      "sha256": "1b2dfb752aa97f3296164a4d35fb5edde376367aafaf0a6ca48de9f41df49f53",
+      "state": "Print customer bill sheet",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 203,
+      "file": "Screenshot From 2026-10-29 00-23-06.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "ee240bf698343f05c15854828e4177d6c6af860416577c75e3c51ff422c2b703",
+      "state": "Print customer bill sheet",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 204,
+      "file": "Screenshot From 2026-10-29 00-23-10.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "4504f81bbc6132a67f963d0dfcf174a18c30d000e3681afdd93ac94d39df99a0",
+      "state": "Print customer bill sheet",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 205,
+      "file": "Screenshot From 2026-10-29 00-23-12.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "cb9299ad115a4a31eb959c0efb2775e5ee6adfe729260891b8207504a150f7d8",
+      "state": "Print customer bill sheet",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 206,
+      "file": "Screenshot From 2026-10-29 00-23-16.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "18d8edfeae6adc02af0b4141c2c472848a9f9c519d7239bcd654637b020d7208",
+      "state": "Print customer bill sheet",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 207,
+      "file": "Screenshot From 2026-10-29 00-23-19.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "e8a28fa4f17d1825b83ec594c4091c4037a4850184341f7ded80b6b93ac6db3d",
+      "state": "Print customer bill sheet",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 208,
+      "file": "Screenshot From 2026-10-29 00-23-21.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "c0b6f98be2ad0c3b028d9a507b5293e03b47bd7ffbda003520b9465dea23ffa7",
+      "state": "Print customer bill sheet",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 209,
+      "file": "Screenshot From 2026-10-29 00-23-45.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "c17c51241475fd3effa48ed84c9a31177bbceaea845c9a032bd1aa81076f2408",
+      "state": "Share customer bill sheet",
+      "implementation": "src/features/billing/ReceiptScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 210,
+      "file": "Screenshot From 2026-10-29 00-23-57.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "4773cd5abd435907de5e1d202d97f424daf92e0341c4a5f3404c9e4847449680",
+      "state": "PDF download ready",
+      "implementation": "src/features/billing/BillStatus.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 211,
+      "file": "Screenshot From 2026-10-29 00-24-00.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "ccd2bf7e330edc360020fe19c72bcac6db868dc74f527d919016b4f3e42c6e38",
+      "state": "PDF download ready",
+      "implementation": "src/features/billing/BillStatus.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 212,
+      "file": "Screenshot From 2026-10-29 00-24-06.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "5fcc6889fee967f04d320652fe0516abfe9b6077e57199a1594b08e03f7d1f57",
+      "state": "PDF download ready",
+      "implementation": "src/features/billing/BillStatus.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 213,
+      "file": "Screenshot From 2026-10-29 00-24-09.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "af5a6e57a82fa04d36673156356da58b77043575b4739e9b6a9ecda5db06e2a6",
+      "state": "PDF download ready",
+      "implementation": "src/features/billing/BillStatus.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 214,
+      "file": "Screenshot From 2026-10-29 00-25-50.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "7d7c7ec8be5a7eb47e0f6d360c3f30351b57d3b61789ccd7917d73e0901f8765",
+      "state": "Printing in progress",
+      "implementation": "src/features/billing/BillStatus.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 215,
+      "file": "Screenshot From 2026-10-29 00-25-55.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "77929dc7b232a011a9e68df90e168aca2ce509d0ef481156cb86ba8faf222f83",
+      "state": "Printing in progress",
+      "implementation": "src/features/billing/BillStatus.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 216,
+      "file": "Screenshot From 2026-10-29 00-26-43.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "dca0ba8d1fe59aec8f40c66f1a722a19dfbb2229207aab4fee107c828d05bde5",
+      "state": "Printing in progress",
+      "implementation": "src/features/billing/BillStatus.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 217,
+      "file": "Screenshot From 2026-10-29 00-26-53.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "9ac927822de04e3185a09704e62cdd8b2fccfaa5b18141c70bb3a716c079eac6",
+      "state": "Printing in progress",
+      "implementation": "src/features/billing/BillStatus.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 218,
+      "file": "Screenshot From 2026-10-29 00-27-00.png",
+      "width": 948,
+      "height": 1341,
+      "sha256": "755007f9491316b9abeb6de5e79088a993c5c3e78657c4c77f2a42fc926164df",
+      "state": "Printing in progress",
+      "implementation": "src/features/billing/BillStatus.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 219,
+      "file": "Screenshot From 2026-10-29 00-27-11.png",
+      "width": 913,
+      "height": 1317,
+      "sha256": "49ddd4e94bd843835f67bece6024f1fb2043dd58f8b33f2866baa4e05f056489",
+      "state": "Printing in progress",
+      "implementation": "src/features/billing/BillStatus.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 220,
+      "file": "Screenshot From 2026-10-29 00-27-24.png",
+      "width": 913,
+      "height": 1317,
+      "sha256": "395b3fa05963307c3047bdc56e97e13a04205aa0ece540160de770f885099b88",
+      "state": "Bill sent to printer",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    },
+    {
+      "index": 221,
+      "file": "Screenshot From 2026-10-29 00-27-35.png",
+      "width": 913,
+      "height": 1317,
+      "sha256": "05671f512fe75e18361c14ebc7c97b296f74c5b5493123c7cdd98011abf8ffde",
+      "state": "Bill sent to printer",
+      "implementation": "src/features/billing/PrintSuccessScreen.tsx",
+      "reviewed": true
+    }
+  ]
+}

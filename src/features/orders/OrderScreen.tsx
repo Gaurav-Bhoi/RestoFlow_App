@@ -20,18 +20,21 @@ import { colors, layout } from '../../theme/tokens';
 import { formatCurrency } from '../../utils/currency';
 import { OrderDishRow } from './OrderDishRow';
 import { useOrderDraft } from './useOrderDraft';
+import { useSession } from '../auth/SessionProvider';
 
 export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
   const { t } = useTranslation();
+  const { session } = useSession();
   const draft = useOrderDraft(route.params.tableId, route.params.customerId);
   const showFeedback = useFeedback();
   const [pendingAction, setPendingAction] = useState<NavigationAction | null>(
     null,
   );
   const [canLeave, setCanLeave] = useState(false);
-  usePreventRemove(draft.isDirty && !canLeave, ({ data }) =>
-    setPendingAction(data.action),
-  );
+  const [reloadOrder, setReloadOrder] = useState(false);
+  usePreventRemove((draft.isDirty || draft.busy) && !canLeave, ({ data }) => {
+    if (!draft.busy) setPendingAction(data.action);
+  });
   useEffect(() => {
     if (canLeave) {
       if (pendingAction) {
@@ -90,19 +93,23 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
       <Screen
         header={
           <AppHeader
+            wrap
             title={
               draft.isEditing ? t('orders.editOrder') : t('orders.newCustomer')
             }
-            subtitle={t('orders.tableValueWaiter', {
-              value0: draft.tableNumber,
-            })}
+            subtitle={t(
+              session?.role === 'owner'
+                ? 'orders.tableValueOwner'
+                : 'orders.tableValueWaiter',
+              { value0: draft.tableNumber },
+            )}
             onBack={navigation.goBack}
           />
         }
         footer={
           <>
             <View style={[layout.row, styles.total]}>
-              <AppText variant="small">
+              <AppText variant="small" style={styles.summaryItem}>
                 {t('orders.valueItemsCustomerOrder', {
                   value0: draft.itemCount,
                 })}
@@ -112,7 +119,10 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
               </AppText>
             </View>
             <AppButton
-              disabled={!draft.itemCount}
+              wrapLabel
+              disabled={
+                !draft.itemCount || !draft.name.trim() || draft.hasConflict
+              }
               loading={draft.busy}
               onPress={handleConfirm}
               icon="check"
@@ -128,10 +138,23 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
           value={draft.name}
           onChangeText={draft.setName}
           placeholder={t('orders.nameOnTheOrder')}
+          maxLength={120}
           error={draft.error}
+          editable={!draft.busy}
         />
+        {draft.hasConflict && (
+          <AppButton
+            wrapLabel
+            variant="secondary"
+            onPress={() => setReloadOrder(true)}
+          >
+            {t('orders.reloadLatestOrder')}
+          </AppButton>
+        )}
         <View style={[layout.section, styles.section]}>
-          <AppText variant="section">{t('orders.whatCanWeGetYou')}</AppText>
+          <AppText variant="section" style={styles.summaryItem}>
+            {t('orders.whatCanWeGetYou')}
+          </AppText>
           <Badge>{t('orders.valueItems', { value0: draft.itemCount })}</Badge>
         </View>
         <SearchInput
@@ -143,6 +166,7 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
           <OrderDishRow
             key={dish.key}
             dish={dish}
+            disabled={draft.busy}
             quantity={draft.items[dish.key] ?? 0}
             onChange={change => draft.updateQuantity(dish.key, change)}
           />
@@ -152,28 +176,43 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
             {t('orders.noDishesFound')}
           </AppText>
         )}
-        <View style={styles.summary}>
-          <AppText style={styles.summaryTitle}>
-            {t('orders.orderSummary')}
-          </AppText>
-          {draft.itemCount ? (
-            draft.selectedLines.map(line => (
-              <View key={line.key} style={[layout.row, styles.summaryLine]}>
-                <AppText muted variant="small">
-                  {line.name} × {line.quantity}
-                </AppText>
-                <AppText muted variant="small">
-                  {formatCurrency(line.lineTotal)}
-                </AppText>
-              </View>
-            ))
-          ) : (
-            <AppText muted variant="small">
-              {t('orders.addDishesToStartThisOrder')}
+        {!!draft.search.trim() && !!draft.itemCount && (
+          <View style={styles.summary}>
+            <AppText style={styles.summaryTitle}>
+              {t('orders.orderSummary')}
             </AppText>
-          )}
-        </View>
+            {draft.itemCount ? (
+              draft.selectedLines.map(line => (
+                <View key={line.key} style={[layout.row, styles.summaryLine]}>
+                  <AppText muted variant="small" style={styles.summaryItem}>
+                    {line.name} × {line.quantity}
+                  </AppText>
+                  <AppText muted variant="small">
+                    {formatCurrency(line.lineTotal)}
+                  </AppText>
+                </View>
+              ))
+            ) : (
+              <AppText muted variant="small">
+                {t('orders.addDishesToStartThisOrder')}
+              </AppText>
+            )}
+          </View>
+        )}
       </Screen>
+      <ConfirmationSheet
+        visible={reloadOrder}
+        title={t('orders.reloadLatestOrder')}
+        description={t('orders.reloadOrderDescription')}
+        confirmLabel={t('orders.reloadLatestOrder')}
+        cancelLabel={t('orders.keepEditing')}
+        onConfirm={() => {
+          setReloadOrder(false);
+          draft.retry();
+        }}
+        onCancel={() => setReloadOrder(false)}
+        onDismiss={() => setReloadOrder(false)}
+      />
       <ConfirmationSheet
         visible={!!pendingAction && !canLeave}
         title={t('orders.leaveThisOrder')}
@@ -190,16 +229,17 @@ export function OrderScreen({ navigation, route }: RootScreenProps<'Order'>) {
   );
 }
 const styles = StyleSheet.create({
-  section: { marginTop: 0 },
+  section: { marginTop: 0, gap: 10, flexWrap: 'wrap' },
+  summaryItem: { flexShrink: 1 },
   total: { marginBottom: 12 },
-  amount: { fontSize: 24, fontWeight: '700', letterSpacing: -0.6 },
+  amount: { fontSize: 24, lineHeight: 36 },
   summary: {
     padding: 18,
     backgroundColor: colors.sage,
     borderRadius: 23,
     marginTop: 24,
   },
-  summaryTitle: { fontWeight: '700', marginBottom: 8 },
+  summaryTitle: { marginBottom: 8 },
   summaryLine: { marginTop: 8 },
   empty: { paddingVertical: 40, textAlign: 'center' },
 });

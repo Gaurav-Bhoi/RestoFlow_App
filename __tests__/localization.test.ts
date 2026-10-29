@@ -337,8 +337,8 @@ test('every Marathi key matches English and preserves interpolation', () => {
   const translated = flatten(BUNDLED_LANGUAGES.mr.translations);
   expect(Object.keys(translated).sort()).toEqual(Object.keys(source).sort());
   for (const [key, text] of Object.entries(source))
-    expect(translated[key].match(/\{\{[^}]+\}\}/g) ?? []).toEqual(
-      text.match(/\{\{[^}]+\}\}/g) ?? [],
+    expect((translated[key].match(/\{\{[^}]+\}\}/g) ?? []).sort()).toEqual(
+      (text.match(/\{\{[^}]+\}\}/g) ?? []).sort(),
     );
 });
 test('a missing remote startup cache uses English immediately, then restores the saved choice online', async () => {

@@ -12,6 +12,7 @@ import { layout } from '../../theme/tokens';
 import { useSession } from '../auth/SessionProvider';
 import { useRestaurant } from '../restaurant/RestaurantProvider';
 import { CustomerCard } from './CustomerCard';
+import { useTableCustomers } from './useTableCustomers';
 
 export function CustomersScreen({
   navigation,
@@ -24,6 +25,11 @@ export function CustomersScreen({
     item => item.id === route.params.tableId,
   );
   const isOwner = session?.role === 'owner';
+  const guests = useTableCustomers(
+    restaurant.id,
+    route.params.tableId,
+    isOwner,
+  );
   if (!table) {
     return (
       <Screen>
@@ -42,31 +48,49 @@ export function CustomersScreen({
     <Screen
       header={
         <AppHeader
+          wrap
           title={t('orders.tableValue', { value0: table.number })}
-          subtitle={t(isOwner ? 'orders.guestsOwner' : 'orders.guestsWaiter', {
-            count: table.customers.length,
-          })}
+          subtitle={t(
+            isOwner && guests.guestCount > 0
+              ? 'orders.guestsOwner'
+              : 'orders.guestsWaiter',
+            { count: guests.guestCount },
+          )}
           onBack={navigation.goBack}
         />
       }
       footer={
         <AppButton
-          variant={isOwner ? 'secondary' : 'primary'}
-          icon={isOwner ? undefined : 'plus'}
-          onPress={
-            isOwner
-              ? () => navigation.popToTop()
-              : () => navigation.navigate('Order', { tableId: table.id })
-          }
+          wrapLabel
+          icon="plus"
+          onPress={() => navigation.navigate('Order', { tableId: table.id })}
         >
-          {isOwner ? t('orders.backToFloor') : t('orders.addCustomer')}
+          {t('orders.addCustomer')}
         </AppButton>
       }
+      refreshing={guests.loading}
+      onRefresh={() => {
+        guests.load();
+      }}
     >
-      {table.customers.length ? (
+      {!!guests.error && (
+        <EmptyState
+          title={t('api.loadOrderFailed')}
+          description={guests.error}
+          action={{
+            label: t('api.retry'),
+            onPress: () => {
+              guests.load();
+            },
+          }}
+        />
+      )}
+      {!guests.error && guests.loading && !guests.customers.length ? (
+        <AppText>{t('api.loadingOrder')}</AppText>
+      ) : !guests.error && guests.customers.length ? (
         <>
           <View style={[layout.section, styles.section]}>
-            <AppText variant="section">
+            <AppText variant="section" style={styles.sectionTitle}>
               {isOwner ? t('orders.whoSCheckingOut') : t('orders.yourGuests')}
             </AppText>
             <Badge warm={isOwner}>
@@ -74,7 +98,7 @@ export function CustomersScreen({
             </Badge>
           </View>
           <View style={layout.stack}>
-            {table.customers.map(order => (
+            {guests.customers.map(order => (
               <CustomerCard
                 order={order}
                 key={order.id}
@@ -90,17 +114,19 @@ export function CustomersScreen({
           </View>
         </>
       ) : (
-        <EmptyState
-          title={t('orders.readyForYourGuests')}
-          description={
-            isOwner
-              ? t('orders.yourWaiterCanAddCustomersAndTakeTheirOrders')
-              : t('orders.startANewCustomerOrderTheirDishesAndBill')
-          }
-          icon="people"
-        />
+        !guests.error &&
+        !guests.loading && (
+          <EmptyState
+            title={t('orders.readyForYourGuests')}
+            description={t('orders.startANewCustomerOrderTheirDishesAndBill')}
+            icon="people"
+          />
+        )
       )}
     </Screen>
   );
 }
-const styles = StyleSheet.create({ section: { marginTop: 5 } });
+const styles = StyleSheet.create({
+  section: { marginTop: 5, flexWrap: 'wrap', gap: 10 },
+  sectionTitle: { flexShrink: 1 },
+});

@@ -1,161 +1,426 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { usePreventRemove } from '@react-navigation/native';
 import type { RootScreenProps } from '../../app/navigationTypes';
+import { normalizeApiError } from '../../api/errors';
 import { AppHeader } from '../../components/AppHeader';
 import { AppButton } from '../../components/AppButton';
 import { AppText } from '../../components/AppText';
 import { Screen } from '../../components/Screen';
 import { EmptyState } from '../../components/EmptyState';
+import { BottomSheet } from '../../components/BottomSheet';
+import { SheetOption } from '../../components/SheetOption';
+import { Icon } from '../../components/Icon';
 import { colors, layout } from '../../theme/tokens';
-import { formatDate } from '../../utils/date';
-import { useCustomerBill } from './useCustomerBill';
-import { BillBreakdown } from './BillBreakdown';
+import { formatCurrency } from '../../utils/currency';
+import { useReceipt } from './useReceipt';
+import { BillIconButton } from './BillControls';
+import { BillStatus } from './BillStatus';
+import { ReadOnlyBill } from './ReadOnlyBill';
+import { billDate, billTime, billPdfLabels, downloadBill } from './billExport';
 
 export function ReceiptScreen({
   route,
   navigation,
 }: RootScreenProps<'Receipt'>) {
-  const { t } = useTranslation();
-  const bill = useCustomerBill(route.params.tableId, route.params.customerId);
-  const handlePrint = async () => {
-    if (await bill.printReceipt()) {
-      navigation.replace('PrintSuccess', route.params);
+  const { t, i18n } = useTranslation();
+  const receipt = useReceipt(
+    route.params.tableId,
+    route.params.customerId,
+    route.params.draft,
+  );
+  const [sheet, setSheet] = useState<'share' | 'print' | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [downloadReady, setDownloadReady] = useState(false);
+  const [exportError, setExportError] = useState('');
+  const pendingExport = useRef(false);
+  const [completedJob, setCompletedJob] = useState<string | null>(null);
+  const tablePresentation = route.params.presentation === 'table';
+  const busy = receipt.busy || exporting;
+  usePreventRemove(busy, () => undefined);
+  useEffect(() => {
+    if (completedJob && !busy)
+      navigation.replace('PrintSuccess', {
+        tableId: route.params.tableId,
+        customerId: route.params.customerId,
+        printJobId: completedJob,
+      });
+  }, [
+    completedJob,
+    busy,
+    navigation,
+    route.params.tableId,
+    route.params.customerId,
+  ]);
+  async function handlePrint() {
+    setSheet(null);
+    const printJobId = await receipt.print();
+    if (printJobId) setCompletedJob(printJobId);
+  }
+  async function handleDownload() {
+    if (!receipt.bill || pendingExport.current) return;
+    pendingExport.current = true;
+    setExporting(true);
+    setExportError('');
+    try {
+      const saved = await downloadBill(
+        receipt.bill,
+        billPdfLabels(t),
+        i18n.language,
+      );
+      if (saved) {
+        setSheet(null);
+        setDownloadReady(true);
+      }
+    } catch (cause) {
+      setExportError(normalizeApiError(cause).message);
+    } finally {
+      pendingExport.current = false;
+      setExporting(false);
     }
-  };
-  if (bill.loading)
+  }
+  const bill = receipt.bill;
+  if (receipt.printing || downloadReady)
     return (
       <Screen>
-        <AppText>{t('api.loadingBill')}</AppText>
+        <BillStatus
+          loading={receipt.printing}
+          title={t(
+            receipt.printing ? 'billing.printingBill' : 'billing.pdfReady',
+          )}
+          description={t(
+            receipt.printing
+              ? 'billing.sendingLatestBill'
+              : 'billing.pdfIncludesEdits',
+            { name: bill?.customerName },
+          )}
+        >
+          {downloadReady ? (
+            <AppButton wrapLabel onPress={navigation.goBack}>
+              {t('billing.backToBill')}
+            </AppButton>
+          ) : (
+            <AppButton wrapLabel disabled onPress={() => undefined}>
+              {t('billing.printing')}
+            </AppButton>
+          )}
+        </BillStatus>
       </Screen>
     );
-  if (bill.error)
+  if (receipt.loading || !bill)
     return (
-      <Screen>
-        <EmptyState
-          title={t('api.loadBillFailed')}
-          description={bill.error}
-          action={{
-            label: t('api.retry'),
-            onPress: () => {
-              bill.retry();
-            },
+      <Screen
+        header={
+          <AppHeader
+            wrap
+            title={t('billing.receiptPreview')}
+            onBack={navigation.goBack}
+          />
+        }
+      >
+        {receipt.error ? (
+          <EmptyState
+            title={t('api.loadBillFailed')}
+            description={receipt.error}
+            action={{
+              label: t('billing.backToBill'),
+              onPress: navigation.goBack,
+            }}
+          />
+        ) : (
+          <AppText>{t('api.loadingBill')}</AppText>
+        )}
+      </Screen>
+    );
+  return (
+    <>
+      <Screen
+        header={
+          <AppHeader
+            wrap
+            title={t(
+              tablePresentation
+                ? 'billing.readyToPrint'
+                : 'billing.receiptPreview',
+            )}
+            subtitle={t(
+              tablePresentation
+                ? 'billing.receiptPreview'
+                : 'billing.latestValuesReady',
+            )}
+            onBack={navigation.goBack}
+            backDisabled={busy}
+            right={
+              <BillIconButton
+                icon="share"
+                label={t('billing.shareBill')}
+                disabled={busy}
+                onPress={() => setSheet('share')}
+              />
+            }
+          />
+        }
+        footer={
+          tablePresentation ? (
+            <View style={styles.footerRow}>
+              <AppButton
+                wrapLabel
+                variant="secondary"
+                disabled={busy}
+                onPress={navigation.goBack}
+                style={styles.cancel}
+              >
+                {t('billing.cancel')}
+              </AppButton>
+              <AppButton
+                wrapLabel
+                icon="print"
+                disabled={busy}
+                onPress={() => setSheet('print')}
+                style={styles.printAction}
+              >
+                {t('billing.printBill')}
+              </AppButton>
+            </View>
+          ) : (
+            <AppButton
+              wrapLabel
+              icon="print"
+              disabled={busy}
+              onPress={() => setSheet('print')}
+            >
+              {t('billing.printBill')}
+            </AppButton>
+          )
+        }
+      >
+        <View style={[styles.paper, tablePresentation && styles.tablePaper]}>
+          <View style={styles.heading}>
+            <AppText
+              style={[
+                styles.restaurant,
+                tablePresentation && styles.tableRestaurant,
+              ]}
+            >
+              {tablePresentation
+                ? bill.restaurantName
+                : bill.restaurantName.toLocaleUpperCase()}
+            </AppText>
+            <AppText muted style={styles.identity}>
+              {bill.table.name} · {bill.customerName}
+            </AppText>
+            <AppText muted variant="helper">
+              {billDate(bill, i18n.language)}
+              {tablePresentation ? ` · ${billTime(bill, i18n.language)}` : ''}
+              {bill.billNumber
+                ? ` · ${t('billing.billNumber', { number: bill.billNumber })}`
+                : ''}
+            </AppText>
+          </View>
+          {tablePresentation ? (
+            <ReadOnlyBill bill={bill} />
+          ) : (
+            <>
+              <View style={styles.lines}>
+                {bill.items.map(line => (
+                  <View key={line.id} style={styles.line}>
+                    <View style={layout.row}>
+                      <AppText style={styles.item}>{line.name}</AppText>
+                      <AppText style={styles.amount}>
+                        {formatCurrency(line.lineTotal)}
+                      </AppText>
+                    </View>
+                    <AppText muted variant="helper" style={styles.quantity}>
+                      {line.quantity} × {formatCurrency(line.unitPrice)}
+                    </AppText>
+                    {!!line.note && (
+                      <AppText muted variant="helper">
+                        {line.note}
+                      </AppText>
+                    )}
+                  </View>
+                ))}
+              </View>
+              <View style={styles.totals}>
+                <View style={layout.row}>
+                  <AppText muted variant="small">
+                    {t('billing.taxesCharges')}
+                  </AppText>
+                  <AppText variant="small">
+                    {formatCurrency(bill.taxesAndCharges)}
+                  </AppText>
+                </View>
+                <View style={[layout.row, styles.grand]}>
+                  <AppText style={styles.totalLabel}>
+                    {t('billing.grandTotal')}
+                  </AppText>
+                  <AppText style={styles.total}>
+                    {formatCurrency(bill.total)}
+                  </AppText>
+                </View>
+              </View>
+            </>
+          )}
+          {tablePresentation && (
+            <AppText muted variant="helper" style={styles.thanks}>
+              {t('billing.thankYouForDiningWithUsWeHopeTo')}
+            </AppText>
+          )}
+        </View>
+        <AppText muted variant="helper" style={styles.caption}>
+          {t(
+            tablePresentation
+              ? 'billing.printsThroughYourDeviceSPrintService'
+              : 'billing.appliedWhenSaved',
+          )}
+        </AppText>
+        {!!receipt.error && (
+          <AppText accessibilityRole="alert" style={styles.error}>
+            {receipt.error}
+          </AppText>
+        )}
+      </Screen>
+      <BottomSheet
+        visible={sheet === 'print'}
+        title={t('billing.printCustomerBill')}
+        onClose={() => setSheet(null)}
+        footer={
+          <AppButton
+            wrapLabel
+            icon="print"
+            onPress={handlePrint}
+            disabled={busy}
+          >
+            {t('billing.printBill')}
+          </AppButton>
+        }
+      >
+        <View style={styles.printBody}>
+          <AppText muted variant="small">
+            {t('billing.printer')}
+          </AppText>
+          <View style={styles.printer}>
+            <AppText style={styles.item}>
+              {t('billing.devicePrintService')}
+            </AppText>
+            <Icon name="print" size={20} color={colors.muted} />
+          </View>
+          <AppText style={styles.printMeta}>
+            {t('billing.printSummary', {
+              name: bill.customerName,
+              count: bill.itemCount,
+              total: formatCurrency(bill.total),
+            })}
+          </AppText>
+          <AppText muted variant="helper">
+            {t('billing.printServiceNote')}
+          </AppText>
+        </View>
+      </BottomSheet>
+      <BottomSheet
+        visible={sheet === 'share'}
+        title={t('billing.shareCustomerBill')}
+        onClose={() => {
+          if (!busy) setSheet(null);
+        }}
+      >
+        <SheetOption
+          plain
+          trailing
+          label={t('billing.whatsApp')}
+          disabled={busy}
+          onPress={() => {
+            receipt.share('WHATSAPP').then(ok => {
+              if (ok) setSheet(null);
+            });
           }}
         />
-      </Screen>
-    );
-  if (!bill.order || !bill.bill) {
-    return (
-      <Screen>
-        <EmptyState
-          title={t('billing.visitCompleted')}
-          description={t('billing.thisOrderIsNoLongerActive')}
+        <SheetOption
+          plain
+          trailing
+          label={t('billing.email')}
+          disabled={busy}
+          onPress={() => {
+            receipt.share('EMAIL').then(ok => {
+              if (ok) setSheet(null);
+            });
+          }}
         />
-      </Screen>
-    );
-  }
-  return (
-    <Screen
-      header={
-        <AppHeader
-          title={t('billing.readyToPrint')}
-          subtitle={t('billing.receiptPreview')}
-          onBack={navigation.goBack}
+        <SheetOption
+          plain
+          trailing
+          label={t('billing.downloadPdf')}
+          disabled={busy}
+          onPress={handleDownload}
         />
-      }
-      footer={
-        <View style={layout.row}>
-          <AppButton
-            variant="secondary"
-            onPress={navigation.goBack}
-            style={styles.cancel}
-          >
-            {t('billing.cancel')}
-          </AppButton>
-          <AppButton
-            icon="print"
-            disabled={bill.isPrinting}
-            onPress={handlePrint}
-            style={styles.print}
-          >
-            {bill.isPrinting ? t('billing.opening') : t('billing.printBill')}
-          </AppButton>
-        </View>
-      }
-    >
-      <View style={styles.receipt}>
-        <View style={styles.heading}>
-          <AppText variant="section" style={styles.title}>
-            {bill.restaurant.name}
+        {busy && <ActivityIndicator color={colors.forest} />}
+        {!!(exportError || receipt.error) && (
+          <AppText accessibilityRole="alert" style={styles.error}>
+            {exportError || receipt.error}
           </AppText>
-          <AppText muted variant="helper">
-            {t('billing.tableValueValue', {
-              lng: 'en',
-              value0: bill.tableNumber,
-              value1: bill.order.name,
-            })}
-          </AppText>
-          <AppText muted variant="helper">
-            {formatDate(bill.issuedAt)} ·{' '}
-            {bill.issuedAt.toLocaleTimeString('en-IN', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </AppText>
-        </View>
-        <BillBreakdown bill={bill.bill} />
-        <AppText muted style={styles.thanks}>
-          {t('billing.thankYouForDiningWithUsWeHopeTo', { lng: 'en' })}
-        </AppText>
-        <View style={styles.perforations}>
-          {Array.from({ length: 32 }, (_, index) => (
-            <View key={index} style={styles.perforation} />
-          ))}
-        </View>
-      </View>
-      <AppText muted variant="small" style={styles.caption}>
-        {t('billing.printsThroughYourDeviceSPrintService')}
-      </AppText>
-    </Screen>
+        )}
+      </BottomSheet>
+    </>
   );
 }
 const styles = StyleSheet.create({
-  cancel: { width: 115 },
-  print: { flex: 1 },
-  receipt: {
-    paddingVertical: 25,
-    paddingHorizontal: 20,
-    backgroundColor: colors.white,
-    borderRadius: 7,
+  tablePaper: {
     marginHorizontal: 10,
-    marginTop: 12,
-    marginBottom: 25,
+    borderRadius: 7,
+    paddingHorizontal: 20,
+    paddingBottom: 28,
+  },
+  tableRestaurant: { fontSize: 19, lineHeight: 26.6 },
+  thanks: { textAlign: 'center', marginTop: 30 },
+  footerRow: { flexDirection: 'row', gap: 10 },
+  cancel: { flex: 1 },
+  printAction: { flex: 1.92 },
+  paper: {
+    backgroundColor: colors.white,
+    borderRadius: 24,
+    marginHorizontal: 17,
+    marginTop: 10,
+    paddingHorizontal: 18,
+    paddingTop: 22,
+    paddingBottom: 48,
+    minHeight: 537,
   },
   heading: {
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderStyle: 'dashed',
-    borderBottomColor: '#cbd5cb',
-    paddingBottom: 18,
-    marginBottom: 22,
-    gap: 4,
+    borderBottomColor: colors.line,
+    paddingBottom: 26,
+    gap: 10,
   },
-  title: { fontSize: 19, textAlign: 'center' },
-  thanks: { fontSize: 11, textAlign: 'center', marginTop: 28 },
-  caption: { textAlign: 'center' },
-  perforations: {
-    position: 'absolute',
-    bottom: -4,
-    left: 0,
-    right: 0,
+  restaurant: {
+    fontSize: 12,
+    lineHeight: 16.8,
+    color: colors.forest,
+    textAlign: 'center',
+  },
+  identity: { fontSize: 13, lineHeight: 18.2, textAlign: 'center' },
+  lines: { flexGrow: 1, minHeight: 270, paddingTop: 24 },
+  line: { marginBottom: 22 },
+  item: { flex: 1 },
+  amount: { color: colors.forest },
+  quantity: { marginTop: 4 },
+  totals: { borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 20 },
+  grand: { marginTop: 24 },
+  totalLabel: { fontSize: 17, lineHeight: 23.8 },
+  total: { color: colors.forest, fontSize: 26, lineHeight: 36.4 },
+  caption: { marginTop: 28, textAlign: 'center' },
+  printBody: { minHeight: 185, paddingBottom: 20 },
+  printer: {
+    borderRadius: 17,
+    backgroundColor: colors.white,
+    minHeight: 54,
+    padding: 16,
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    overflow: 'hidden',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 8,
   },
-  perforation: {
-    width: 6,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.paper,
-  },
+  printMeta: { color: colors.forest, marginTop: 28, marginBottom: 10 },
+  error: { color: colors.error, fontSize: 12, lineHeight: 18, marginTop: 12 },
 });

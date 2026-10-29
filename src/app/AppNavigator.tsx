@@ -19,6 +19,7 @@ import { RegistrationScreen } from '../features/auth/RegistrationScreen';
 import { DashboardScreen } from '../features/tables/DashboardScreen';
 import { CustomersScreen } from '../features/orders/CustomersScreen';
 import { OrderScreen } from '../features/orders/OrderScreen';
+import { BillOverviewScreen } from '../features/billing/BillOverviewScreen';
 import { BillScreen } from '../features/billing/BillScreen';
 import { ReceiptScreen } from '../features/billing/ReceiptScreen';
 import { PrintSuccessScreen } from '../features/billing/PrintSuccessScreen';
@@ -123,6 +124,7 @@ export function AppNavigator() {
               <Stack.Group navigationKey={session.phone}>
                 <Stack.Screen name="Home" component={HomeScreen} />
                 <Stack.Screen name="Customers" component={CustomersScreen} />
+                <Stack.Screen name="Order" component={OrderScreen} />
                 <Stack.Screen name="Language" component={LanguageScreen} />
                 <Stack.Screen
                   name="EditProfile"
@@ -132,11 +134,13 @@ export function AppNavigator() {
                   name="ChangePassword"
                   component={ChangePasswordScreen}
                 />
-                {session.role === 'waiter' ? (
-                  <Stack.Screen name="Order" component={OrderScreen} />
-                ) : (
+                {session.role === 'owner' && (
                   <>
                     <Stack.Screen name="Bill" component={BillScreen} />
+                    <Stack.Screen
+                      name="BillOverview"
+                      component={BillOverviewScreen}
+                    />
                     <Stack.Screen name="Receipt" component={ReceiptScreen} />
                     <Stack.Screen
                       name="PrintSuccess"

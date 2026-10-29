@@ -12,6 +12,7 @@ export function ConfirmationDialog({
   title,
   description,
   confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
 }: {
@@ -19,6 +20,7 @@ export function ConfirmationDialog({
   title: string;
   description: string;
   confirmLabel: string;
+  cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -28,6 +30,7 @@ export function ConfirmationDialog({
         title={title}
         description={description}
         confirmLabel={confirmLabel}
+        cancelLabel={cancelLabel}
         onConfirm={onConfirm}
         onCancel={onCancel}
       />
@@ -38,6 +41,7 @@ export function ConfirmationDialogContent({
   title,
   description,
   confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
   loading,
@@ -46,6 +50,7 @@ export function ConfirmationDialogContent({
   title: string;
   description: string;
   confirmLabel: string;
+  cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
   loading?: boolean;
@@ -84,7 +89,7 @@ export function ConfirmationDialogContent({
           disabled={loading}
           style={styles.action}
         >
-          {t('auth.cancel')}
+          {cancelLabel ?? t('auth.cancel')}
         </AppButton>
         <AppButton
           variant="danger"

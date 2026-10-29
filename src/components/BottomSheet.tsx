@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { ModalSurface } from './ModalSurface';
@@ -58,8 +51,7 @@ export function BottomSheetContent({
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <View
       accessibilityViewIsModal
       style={[
         styles.sheet,
@@ -88,6 +80,7 @@ export function BottomSheetContent({
         </Pressable>
       </View>
       <ScrollView
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         bounces={false}
         keyboardShouldPersistTaps="handled"
@@ -96,7 +89,7 @@ export function BottomSheetContent({
         {children}
       </ScrollView>
       {footer && <View style={styles.footer}>{footer}</View>}
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 const styles = StyleSheet.create({
@@ -104,6 +97,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: contentWidths.form,
     maxHeight: '100%',
+    flexShrink: 1,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     backgroundColor: colors.paper,
@@ -133,6 +127,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   content: { paddingHorizontal: 22, paddingBottom: 12, gap: 5 },
+  scroll: { flexShrink: 1 },
   tall: { height: '90%' },
   footer: { paddingHorizontal: 22, paddingTop: 12 },
 });

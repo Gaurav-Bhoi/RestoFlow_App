@@ -11,9 +11,21 @@ import { RegistrationScreen } from '../src/features/auth/RegistrationScreen';
 import { FloatingTabBar } from '../src/app/FloatingTabBar';
 import { SettingsRow } from '../src/features/settings/SettingsRow';
 import { TableTile } from '../src/features/tables/TableTile';
-import { account, subscription, tableId } from './support/apiFixtures';
+import { CustomersScreen } from '../src/features/orders/CustomersScreen';
+import { CustomerCard } from '../src/features/orders/CustomerCard';
+import { OrderScreen } from '../src/features/orders/OrderScreen';
+import { OrderDishRow } from '../src/features/orders/OrderDishRow';
+import { AppHeader } from '../src/components/AppHeader';
+import { EmptyState } from '../src/components/EmptyState';
+import {
+  account,
+  subscription,
+  tableId,
+  dishId,
+  orderId,
+} from './support/apiFixtures';
 import { sourceVersion } from '../src/localization/catalogMetadata';
-import type { ApiWaiter } from '../src/api/types';
+import type { ApiDish, ApiOrder, ApiWaiter } from '../src/api/types';
 const originalAdapter = apiClient.defaults.adapter;
 let role: 'OWNER' | 'WAITER';
 let serverTables: {
@@ -25,6 +37,8 @@ let serverTables: {
 }[];
 let adapter: jest.Mock;
 let serverWaiters: ApiWaiter[];
+let serverMenu: ApiDish[];
+let serverOrders: ApiOrder[];
 let registrationFails: boolean;
 let phoneCheckFails: boolean;
 let phoneCheckInvalid: boolean;
@@ -35,6 +49,8 @@ beforeEach(() => {
   phoneCheckInvalid = false;
   serverTables = [];
   serverWaiters = [];
+  serverMenu = [];
+  serverOrders = [];
   adapter = jest.fn(async (config: InternalAxiosRequestConfig) => {
     const path = config.url!;
     const login = {
@@ -132,8 +148,72 @@ beforeEach(() => {
       serverWaiters.push(data as ApiWaiter);
       status = 201;
     } else if (path.endsWith('/waiters')) data = serverWaiters;
-    else if (path.endsWith('/menu/dishes') || path.endsWith('/orders'))
-      data = [];
+    else if (path.endsWith('/customers')) {
+      const orders = serverOrders.filter(order =>
+        path.includes(`/tables/${order.tableId}/`),
+      );
+      data = {
+        table: { id: tableId, name: 'Table 1' },
+        guestCount: orders.length,
+        customers: orders.map(order => ({
+          orderId: order.id,
+          name: order.customerName,
+          createdAt: order.createdAt,
+          items: order.items,
+          orderItems: order.items,
+          itemCount: order.itemCount,
+          orderItemCount: order.itemCount,
+          total: order.total,
+          orderTotal: order.total,
+          orderChanged: false,
+        })),
+        pagination: { hasMore: false, total: orders.length },
+      };
+    } else if (path.endsWith('/orders') && config.method === 'post') {
+      const input = JSON.parse(config.data);
+      const items = input.items.map(
+        (item: { dishId: string; quantity: number }) => {
+          const dish = serverMenu.find(value => value.id === item.dishId)!;
+          return {
+            id: 'order-line',
+            dishId: dish.id,
+            name: dish.name,
+            quantity: item.quantity,
+            unitPrice: dish.price,
+            lineTotal: (Number(dish.price) * item.quantity).toFixed(2),
+            note: null,
+          };
+        },
+      );
+      const total = items
+        .reduce(
+          (sum: number, item: { lineTotal: string }) =>
+            sum + Number(item.lineTotal),
+          0,
+        )
+        .toFixed(2);
+      const order: ApiOrder = {
+        id: orderId,
+        tableId: input.tableId,
+        customerName: input.customerName,
+        table: { id: input.tableId, name: 'Table 1' },
+        items,
+        createdAt: '2026-10-29T10:00:00.000000Z',
+        orderUpdatedAt: '2026-10-29T10:00:00.000000Z',
+        closedAt: null,
+        itemCount: input.items.reduce(
+          (sum: number, item: { quantity: number }) => sum + item.quantity,
+          0,
+        ),
+        subtotal: total,
+        total,
+        currency: 'INR',
+      };
+      serverOrders.push(order);
+      data = order;
+      status = 201;
+    } else if (path.endsWith('/menu/dishes')) data = serverMenu;
+    else if (path.endsWith('/orders')) data = serverOrders;
     else if (path.endsWith(account.restaurants[0].id))
       data = { name: account.restaurants[0].name, owner: account.user };
     else throw new Error(`Unexpected test request ${path}`);
@@ -221,6 +301,76 @@ async function fill(
     }
   });
 }
+
+test.each(['OWNER', 'WAITER'] as const)(
+  '%s adds a customer from an empty table and can add another after confirming the order',
+  async value => {
+    role = value;
+    serverTables = [
+      {
+        id: tableId,
+        tableNumber: 1,
+        name: 'Table 1',
+        occupied: false,
+        openOrderCount: 0,
+      },
+    ];
+    serverMenu = [
+      {
+        id: dishId,
+        name: 'Dal Tadka',
+        description: null,
+        category: 'Mains',
+        foodType: 'VEG',
+        available: true,
+        price: '180.00',
+        imageUrl: null,
+      },
+    ];
+    await saveTokens(account);
+    const renderer = await render();
+    await ReactTestRenderer.act(async () =>
+      renderer.root.findByType(TableTile).props.onPress(),
+    );
+    expect(renderer.root.findAllByType(CustomersScreen)).toHaveLength(1);
+    expect(renderer.root.findByType(EmptyState).props.description).toBe(
+      'Start an order. Each customer has a bill.',
+    );
+    await press(renderer, 'Add customer');
+    expect(renderer.root.findAllByType(OrderScreen)).toHaveLength(1);
+    expect(
+      renderer.root.findByType(OrderScreen).findByType(AppHeader).props
+        .subtitle,
+    ).toBe(`Table 1 · ${value === 'OWNER' ? 'Owner' : 'Waiter'}`);
+    await fill(renderer, { 'Customer name': 'Priya' });
+    await ReactTestRenderer.act(async () =>
+      renderer.root.findByType(OrderDishRow).props.onChange(1),
+    );
+    await press(renderer, 'Confirm order');
+    const request = adapter.mock.calls
+      .map(([config]) => config)
+      .find(
+        config => config.url.endsWith('/orders') && config.method === 'post',
+      );
+    expect(request).toBeDefined();
+    expect(JSON.parse(request.data)).toEqual({
+      tableId,
+      customerName: 'Priya',
+      items: [{ dishId, quantity: 1 }],
+    });
+    expect(renderer.root.findAllByType(OrderScreen)).toHaveLength(0);
+    expect(renderer.root.findByType(CustomerCard).props.order).toMatchObject({
+      name: 'Priya',
+      itemCount: 1,
+      total: '180.00',
+    });
+    await press(renderer, 'Add customer');
+    expect(renderer.root.findByType(OrderScreen).props.route.params).toEqual({
+      tableId,
+    });
+    await ReactTestRenderer.act(async () => renderer.unmount());
+  },
+);
 const authRequests = () =>
   adapter.mock.calls
     .map(([config]) => config)

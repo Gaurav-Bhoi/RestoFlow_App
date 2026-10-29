@@ -12,6 +12,7 @@ export function AppHeader({
   onBack,
   backDisabled,
   right,
+  wrap = false,
   maxWidth = contentWidths.screen,
 }: {
   title: string;
@@ -19,6 +20,7 @@ export function AppHeader({
   onBack?: () => void;
   backDisabled?: boolean;
   right?: React.ReactNode;
+  wrap?: boolean;
   maxWidth?: number;
 }) {
   const { t } = useTranslation();
@@ -46,9 +48,9 @@ export function AppHeader({
         <AppText
           variant="heading"
           accessibilityRole="header"
-          numberOfLines={1}
+          numberOfLines={wrap ? undefined : 1}
           ellipsizeMode="tail"
-          style={styles.title}
+          style={[styles.title, wrap && styles.wrapTitle]}
         >
           {title}
         </AppText>
@@ -56,7 +58,7 @@ export function AppHeader({
           <AppText
             variant="helper"
             muted
-            numberOfLines={1}
+            numberOfLines={wrap ? undefined : 1}
             ellipsizeMode="tail"
             style={styles.subtitle}
           >
@@ -80,6 +82,7 @@ const styles = StyleSheet.create({
   text: { flex: 1, minWidth: 0 },
   // Figma's 35px title line overhangs its 28.75px layout box by 6.25px.
   title: { marginTop: -1, marginBottom: -5.25 },
+  wrapTitle: { marginBottom: 0 },
   subtitle: { marginTop: 4, transform: [{ translateY: 1 }] },
   back: {
     flexShrink: 0,

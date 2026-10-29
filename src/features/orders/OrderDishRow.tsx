@@ -5,20 +5,25 @@ import { AppText } from '../../components/AppText';
 import { Icon } from '../../components/Icon';
 import { colors } from '../../theme/tokens';
 import { formatCurrency } from '../../utils/currency';
+import { useResponsiveLayout } from '../../hooks/useResponsiveLayout';
 import { DishImage } from '../menu/DishImage';
 
 export function OrderDishRow({
   dish,
   quantity,
   onChange,
+  disabled = false,
 }: {
   dish: { name: string; unitPrice: string; imageUrl?: string };
   quantity: number;
   onChange: (change: number) => void;
+  disabled?: boolean;
 }) {
   const { t } = useTranslation();
+  const { contentWidth, fontScale } = useResponsiveLayout();
+  const compact = contentWidth < 310 || fontScale > 1.15;
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, compact && styles.compact]}>
       <View style={styles.food}>
         <DishImage uri={dish.imageUrl} />
       </View>
@@ -28,45 +33,57 @@ export function OrderDishRow({
           {formatCurrency(dish.unitPrice)}
         </AppText>
       </View>
-      {quantity > 0 ? (
-        <View style={styles.quantity}>
+      <View style={compact && styles.controls}>
+        {quantity > 0 ? (
+          <View style={styles.quantity}>
+            <Pressable
+              disabled={disabled}
+              accessibilityState={{ disabled }}
+              onPress={() => onChange(-1)}
+              accessibilityRole="button"
+              accessibilityLabel={t('orders.removeOneValue', {
+                value0: dish.name,
+              })}
+              style={styles.quantityButton}
+            >
+              <Icon name="minus" size={16} />
+            </Pressable>
+            <AppText accessibilityLiveRegion="polite" style={styles.count}>
+              {quantity}
+            </AppText>
+            <Pressable
+              disabled={disabled || quantity >= 10000}
+              accessibilityState={{ disabled: disabled || quantity >= 10000 }}
+              onPress={() => onChange(1)}
+              accessibilityRole="button"
+              accessibilityLabel={t('orders.addOneValue', {
+                value0: dish.name,
+              })}
+              style={styles.quantityButton}
+            >
+              <Icon name="plus" size={16} />
+            </Pressable>
+          </View>
+        ) : (
           <Pressable
-            onPress={() => onChange(-1)}
-            accessibilityRole="button"
-            accessibilityLabel={t('orders.removeOneValue', {
-              value0: dish.name,
-            })}
-            style={styles.quantityButton}
-          >
-            <Icon name="minus" size={16} />
-          </Pressable>
-          <AppText accessibilityLiveRegion="polite" style={styles.count}>
-            {quantity}
-          </AppText>
-          <Pressable
+            disabled={disabled}
+            accessibilityState={{ disabled }}
             onPress={() => onChange(1)}
             accessibilityRole="button"
-            accessibilityLabel={t('orders.addOneValue', { value0: dish.name })}
-            style={styles.quantityButton}
+            accessibilityLabel={t('orders.addValue', { value0: dish.name })}
+            style={styles.add}
           >
-            <Icon name="plus" size={16} />
+            <Icon name="plus" size={14} />
+            <AppText style={styles.addLabel}>{t('orders.add')}</AppText>
           </Pressable>
-        </View>
-      ) : (
-        <Pressable
-          onPress={() => onChange(1)}
-          accessibilityRole="button"
-          accessibilityLabel={t('orders.addValue', { value0: dish.name })}
-          style={styles.add}
-        >
-          <Icon name="plus" size={14} />
-          <AppText style={styles.addLabel}>{t('orders.add')}</AppText>
-        </Pressable>
-      )}
+        )}
+      </View>
     </View>
   );
 }
 const styles = StyleSheet.create({
+  compact: { flexWrap: 'wrap' },
+  controls: { width: '100%', alignItems: 'flex-end' },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -82,8 +99,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#eeeadf',
     overflow: 'hidden',
   },
-  info: { flex: 1 },
-  name: { fontSize: 14, fontWeight: '700' },
+  info: { flex: 1, minWidth: 0 },
+  name: { fontSize: 14, lineHeight: 19.6 },
   price: { fontSize: 12, marginTop: 4 },
   quantity: {
     height: 44,
@@ -103,12 +120,11 @@ const styles = StyleSheet.create({
   count: {
     fontSize: 13,
     color: colors.forest,
-    fontWeight: '700',
     minWidth: 20,
     textAlign: 'center',
   },
   add: {
-    height: 44,
+    minHeight: 44,
     minWidth: 75,
     paddingHorizontal: 13,
     borderRadius: 23,
@@ -118,5 +134,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 5,
   },
-  addLabel: { color: colors.forest, fontSize: 12, fontWeight: '700' },
+  addLabel: { color: colors.forest, fontSize: 12 },
 });

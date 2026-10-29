@@ -99,6 +99,7 @@ export interface ApiOrderSummary {
   createdAt: string;
 }
 export interface ApiOrder extends ApiOrderSummary {
+  orderUpdatedAt: string;
   items: ApiOrderItem[];
   table: { id: string; name: string };
   subtotal: string;

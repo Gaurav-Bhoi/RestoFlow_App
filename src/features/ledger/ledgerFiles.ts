@@ -2,7 +2,7 @@ import { NativeModules } from 'react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import type { ExpenseReceipt } from './types';
 
-export interface ExpensePdfDocument {
+interface PdfDocument {
   restaurant: string;
   title: string;
   period: string;
@@ -10,6 +10,14 @@ export interface ExpensePdfDocument {
   columns: string[];
   rows: string[][];
   totals: string[][];
+}
+export interface ExpensePdfDocument extends PdfDocument {
+  layout?: 'expense';
+}
+export interface CustomerBillPdfDocument extends PdfDocument {
+  layout: 'receipt';
+  fileName: string;
+  notes: string[];
 }
 export interface ReceiptPreview {
   uri: string;
@@ -23,7 +31,9 @@ interface LedgerFilesModule {
     name: string,
     type: string,
   ): Promise<ExpenseReceipt>;
-  createPdf(document: ExpensePdfDocument): Promise<string>;
+  createPdf(
+    document: ExpensePdfDocument | CustomerBillPdfDocument,
+  ): Promise<string>;
   savePdf(uri: string, name: string): Promise<boolean>;
   sharePdf(uri: string, name: string, channel: string): Promise<void>;
   preview(uri: string, type: string): Promise<void>;
@@ -36,7 +46,7 @@ function nativeFiles(): LedgerFilesModule {
   return module;
 }
 export const ledgerFiles = {
-  createPdf: (document: ExpensePdfDocument) =>
+  createPdf: (document: ExpensePdfDocument | CustomerBillPdfDocument) =>
     nativeFiles().createPdf(document),
   savePdf: (uri: string, name: string) => nativeFiles().savePdf(uri, name),
   sharePdf: (uri: string, name: string, channel: string) =>

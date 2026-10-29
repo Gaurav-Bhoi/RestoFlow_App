@@ -20,7 +20,7 @@ import java.util.UUID
 import java.util.concurrent.Executors
 
 class LedgerFilesPackage : ReactPackage {
-  override fun createNativeModules(context: ReactApplicationContext): List<NativeModule> = listOf(LedgerFilesModule(context))
+  override fun createNativeModules(context: ReactApplicationContext): List<NativeModule> = listOf(LedgerFilesModule(context), BillPrinterModule(context))
   override fun createViewManagers(context: ReactApplicationContext): List<ViewManager<*, *>> = emptyList()
 }
 
@@ -84,6 +84,16 @@ class LedgerFilesModule(private val context: ReactApplicationContext) : ReactCon
   }
 
   private fun contentUri(file: File): Uri = FileProvider.getUriForFile(context, context.packageName + ".ledger.files", file)
+
+  private fun exportPdf(uri: String, name: String): File {
+    val source = safeFile(uri)
+    val filename = name.replace(Regex("[<>:\"/\\\\|?*\\p{Cc}]"), "_")
+    require(filename.endsWith(".pdf"))
+    if (source.name == filename) return source
+    // Receiving apps use the stream's filename; EXTRA_SUBJECT is only a title.
+    val directory = File(reportDirectory, UUID.randomUUID().toString()).apply { mkdirs() }
+    return source.copyTo(File(directory, filename))
+  }
 
   private fun copyReceipt(uri: Uri, name: String, type: String): WritableMap {
     val extension = types[type] ?: throw IllegalArgumentException("ledger.receiptType")
@@ -153,8 +163,11 @@ class LedgerFilesModule(private val context: ReactApplicationContext) : ReactCon
 
   @ReactMethod fun createPdf(document: ReadableMap, promise: Promise) {
     worker.execute {
-      reportDirectory.listFiles()?.filter { System.currentTimeMillis() - it.lastModified() > REPORT_LIFETIME }?.forEach { it.delete() }
-      val file = File(reportDirectory, "expense-report-${UUID.randomUUID()}.pdf")
+      reportDirectory.listFiles()?.filter { System.currentTimeMillis() - it.lastModified() > REPORT_LIFETIME }?.forEach { it.deleteRecursively() }
+      val requestedName = if (document.hasKey("fileName")) document.getString("fileName") else null
+      val directory = if (requestedName != null) File(reportDirectory, UUID.randomUUID().toString()).apply { mkdirs() } else reportDirectory
+      val name = requestedName?.replace(Regex("[<>:\"/\\\\|?*\\p{Cc}]"), "_")?.takeIf { it.endsWith(".pdf") } ?: "expense-report-${UUID.randomUUID()}.pdf"
+      val file = File(directory, name)
       try {
         ExpensePdf.write(document, file)
         promise.resolve(Uri.fromFile(file).toString())
@@ -167,11 +180,11 @@ class LedgerFilesModule(private val context: ReactApplicationContext) : ReactCon
 
   @ReactMethod fun savePdf(uri: String, name: String, promise: Promise) {
     try {
-      val file = safeFile(uri)
+      val file = exportPdf(uri, name)
       val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
         addCategory(Intent.CATEGORY_OPENABLE)
         type = "application/pdf"
-        putExtra(Intent.EXTRA_TITLE, name.substringAfterLast('/'))
+        putExtra(Intent.EXTRA_TITLE, file.name)
       }
       launchPicker(intent, SAVE_PDF, promise, file)
     } catch (error: Exception) { promise.reject("LEDGER_EXPORT", "ledger.actionFailed", error) }
@@ -180,7 +193,7 @@ class LedgerFilesModule(private val context: ReactApplicationContext) : ReactCon
   @ReactMethod fun sharePdf(uri: String, name: String, channel: String, promise: Promise) {
     UiThreadUtil.runOnUiThread {
       try {
-        val shared = contentUri(safeFile(uri))
+        val shared = contentUri(exportPdf(uri, name))
         val intent = Intent(Intent.ACTION_SEND).apply {
           type = "application/pdf"
           putExtra(Intent.EXTRA_STREAM, shared)
