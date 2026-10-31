@@ -43,6 +43,8 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>RestoFlow uses Bluetooth to find and connect to your receipt printer.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Take a photo of a dish for your restaurant menu.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

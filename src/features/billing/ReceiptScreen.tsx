@@ -11,10 +11,15 @@ import { Screen } from '../../components/Screen';
 import { EmptyState } from '../../components/EmptyState';
 import { BottomSheet } from '../../components/BottomSheet';
 import { SheetOption } from '../../components/SheetOption';
-import { Icon } from '../../components/Icon';
 import { colors, layout } from '../../theme/tokens';
 import { formatCurrency } from '../../utils/currency';
 import { useReceipt } from './useReceipt';
+import { BluetoothPrinterSheet } from './BluetoothPrinterSheet';
+import {
+  bluetoothPrinter,
+  bluetoothReceiptText,
+  printerErrorMessage,
+} from './bluetoothPrinter';
 import { BillIconButton } from './BillControls';
 import { BillStatus } from './BillStatus';
 import { ReadOnlyBill } from './ReadOnlyBill';
@@ -36,6 +41,8 @@ export function ReceiptScreen({
   const [exportError, setExportError] = useState('');
   const pendingExport = useRef(false);
   const [completedJob, setCompletedJob] = useState<string | null>(null);
+  const [skipped, setSkipped] = useState(false);
+  const [bluetoothPrinting, setBluetoothPrinting] = useState(false);
   const tablePresentation = route.params.presentation === 'table';
   const busy = receipt.busy || exporting;
   usePreventRemove(busy, () => undefined);
@@ -53,6 +60,42 @@ export function ReceiptScreen({
     route.params.tableId,
     route.params.customerId,
   ]);
+  useEffect(() => {
+    if (skipped && !busy) navigation.popTo('Home', { screen: 'Dashboard' });
+  }, [skipped, busy, navigation]);
+  async function handleBluetoothPrint(width: 58 | 80) {
+    setBluetoothPrinting(true);
+    try {
+      const id = await receipt.print(async snapshot => {
+        try {
+          await bluetoothPrinter.print(
+            bluetoothReceiptText(snapshot, t, i18n.language),
+            width,
+          );
+        } catch (cause) {
+          const message = printerErrorMessage(cause, t);
+          throw Object.assign(new Error(message), {
+            code:
+              'code' in Object(cause)
+                ? (cause as { code: string }).code
+                : 'UNKNOWN',
+          });
+        }
+      });
+      if (id) {
+        setSheet(null);
+        setCompletedJob(id);
+      }
+    } finally {
+      setBluetoothPrinting(false);
+    }
+  }
+  async function handleSkip() {
+    if (await receipt.continueWithoutPrinting()) {
+      setSheet(null);
+      setSkipped(true);
+    }
+  }
   async function handlePrint() {
     setSheet(null);
     const printJobId = await receipt.print();
@@ -81,7 +124,7 @@ export function ReceiptScreen({
     }
   }
   const bill = receipt.bill;
-  if (receipt.printing || downloadReady)
+  if ((receipt.printing && !bluetoothPrinting) || downloadReady)
     return (
       <Screen>
         <BillStatus
@@ -271,7 +314,7 @@ export function ReceiptScreen({
         <AppText muted variant="helper" style={styles.caption}>
           {t(
             tablePresentation
-              ? 'billing.printsThroughYourDeviceSPrintService'
+              ? 'bluetooth.previewNote'
               : 'billing.appliedWhenSaved',
           )}
         </AppText>
@@ -281,43 +324,28 @@ export function ReceiptScreen({
           </AppText>
         )}
       </Screen>
-      <BottomSheet
+      <BluetoothPrinterSheet
         visible={sheet === 'print'}
-        title={t('billing.printCustomerBill')}
+        busy={busy}
+        printing={bluetoothPrinting}
+        error={receipt.error}
+        summary={t('billing.printSummary', {
+          name: bill.customerName,
+          count: bill.itemCount,
+          total: formatCurrency(bill.total),
+        })}
         onClose={() => setSheet(null)}
-        footer={
-          <AppButton
-            wrapLabel
-            icon="print"
-            onPress={handlePrint}
-            disabled={busy}
-          >
-            {t('billing.printBill')}
-          </AppButton>
-        }
-      >
-        <View style={styles.printBody}>
-          <AppText muted variant="small">
-            {t('billing.printer')}
-          </AppText>
-          <View style={styles.printer}>
-            <AppText style={styles.item}>
-              {t('billing.devicePrintService')}
-            </AppText>
-            <Icon name="print" size={20} color={colors.muted} />
-          </View>
-          <AppText style={styles.printMeta}>
-            {t('billing.printSummary', {
-              name: bill.customerName,
-              count: bill.itemCount,
-              total: formatCurrency(bill.total),
-            })}
-          </AppText>
-          <AppText muted variant="helper">
-            {t('billing.printServiceNote')}
-          </AppText>
-        </View>
-      </BottomSheet>
+        onPrint={handleBluetoothPrint}
+        onSystemPrint={handlePrint}
+        onSkip={handleSkip}
+        skipSaveFailed={receipt.skipSaveFailed}
+        onKeepDraft={() => {
+          if (receipt.keepDraftOnPhone()) {
+            setSheet(null);
+            setSkipped(true);
+          }
+        }}
+      />
       <BottomSheet
         visible={sheet === 'share'}
         title={t('billing.shareCustomerBill')}
@@ -410,17 +438,5 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: 17, lineHeight: 23.8 },
   total: { color: colors.forest, fontSize: 26, lineHeight: 36.4 },
   caption: { marginTop: 28, textAlign: 'center' },
-  printBody: { minHeight: 185, paddingBottom: 20 },
-  printer: {
-    borderRadius: 17,
-    backgroundColor: colors.white,
-    minHeight: 54,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 8,
-  },
-  printMeta: { color: colors.forest, marginTop: 28, marginBottom: 10 },
   error: { color: colors.error, fontSize: 12, lineHeight: 18, marginTop: 12 },
 });

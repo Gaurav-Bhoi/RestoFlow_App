@@ -9,6 +9,7 @@ import { normalizeApiError } from '../../api/errors';
 import { useRestaurant } from '../restaurant/RestaurantProvider';
 import { useSession } from '../auth/SessionProvider';
 import { billDraft, billItemsEqual, calculateBill } from './billDraft';
+import { receiptDrafts } from './receiptDrafts';
 
 export function useBillDraft(tableId: string, customerId: string) {
   const { restaurant, refresh } = useRestaurant();
@@ -19,6 +20,7 @@ export function useBillDraft(tableId: string, customerId: string) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [conflict, setConflict] = useState(false);
+  const [localDraft, setLocalDraft] = useState(false);
   const pending = useRef(false);
   const dirty = !!original && !billItemsEqual(original.items, items);
   const dirtyRef = useRef(dirty);
@@ -34,6 +36,20 @@ export function useBillDraft(tableId: string, customerId: string) {
           throw new Error('The order does not belong to this table.');
         if (!signal?.aborted) {
           const previous = current.current;
+          const kept =
+            preserve && !previous.original
+              ? receiptDrafts.get(restaurant.id, customerId)
+              : undefined;
+          if (kept && kept.table.id === tableId && !value.closedAt) {
+            setOriginal(value);
+            setItems(kept.items);
+            setLocalDraft(true);
+            setConflict(
+              value.revision !== kept.revision ||
+                value.orderUpdatedAt !== kept.orderUpdatedAt,
+            );
+            return;
+          }
           if (
             preserve &&
             dirtyRef.current &&
@@ -54,6 +70,8 @@ export function useBillDraft(tableId: string, customerId: string) {
           setItems(value.items);
           setError('');
           setConflict(false);
+          setLocalDraft(false);
+          if (!preserve) receiptDrafts.clear(restaurant.id, customerId);
         }
       } catch (cause) {
         if (!signal?.aborted) setError(normalizeApiError(cause).message);
@@ -92,6 +110,8 @@ export function useBillDraft(tableId: string, customerId: string) {
       );
       setOriginal(saved);
       setItems(saved.items);
+      receiptDrafts.clear(restaurant.id, customerId);
+      setLocalDraft(false);
       refresh().catch(() => undefined);
       return true;
     } catch (cause) {
@@ -113,6 +133,7 @@ export function useBillDraft(tableId: string, customerId: string) {
     busy,
     error,
     conflict,
+    localDraft,
     dirty,
     load,
     save,

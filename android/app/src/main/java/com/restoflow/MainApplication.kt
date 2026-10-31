@@ -9,6 +9,7 @@ import com.facebook.react.common.assets.ReactFontManager
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.stallion.Stallion
 import com.restoflow.ledger.LedgerFilesPackage
+import com.restoflow.printing.BluetoothReceiptPrinterPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -18,6 +19,7 @@ class MainApplication : Application(), ReactApplication {
       packageList =
         PackageList(this).packages.apply {
           add(LedgerFilesPackage())
+          add(BluetoothReceiptPrinterPackage())
         },
       jsBundleFilePath = if (BuildConfig.DEBUG) null else Stallion.getJSBundleFile(applicationContext),
       useDevSupport = BuildConfig.DEBUG,

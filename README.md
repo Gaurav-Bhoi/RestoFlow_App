@@ -1,5 +1,7 @@
 RestoFlow is a native restaurant ordering and billing app with owner and waiter flows, phone and password authentication, restaurant setup, tables, customer orders, menu search, waiter management, language settings, and native receipt printing.
 
+Receipt preview supports Bluetooth printer discovery/selection, ESC/POS receipts over Android Classic and supported Android/iPhone BLE endpoints, paper/error recovery, and continuing to the dashboard without printing. Server save failures offer an explicit local-draft fallback. See [Bluetooth compatibility, recovery coverage and verification](docs/BLUETOOTH_PRINTING.md). This feature requires a native rebuild; real-printer and iOS device verification remain outstanding.
+
 ## Backend environments
 
 | Native build | API origin |

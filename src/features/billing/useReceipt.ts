@@ -12,6 +12,7 @@ import { useRestaurant } from '../restaurant/RestaurantProvider';
 import { useSession } from '../auth/SessionProvider';
 import { billDraft, billId } from './billDraft';
 import { billPdfLabels, shareBill } from './billExport';
+import { receiptDrafts } from './receiptDrafts';
 
 export function useReceipt(
   tableId: string,
@@ -26,6 +27,7 @@ export function useReceipt(
   const [busy, setBusy] = useState(false);
   const [printing, setPrinting] = useState(false);
   const [error, setError] = useState('');
+  const [skipSaveFailed, setSkipSaveFailed] = useState(false);
   const pending = useRef(false);
   const printRequest = useRef<{ id: string; draft: BillDraft } | null>(null);
   const printJob = useRef<BillPrintJob | null>(null);
@@ -56,7 +58,9 @@ export function useReceipt(
     load(controller.signal);
     return () => controller.abort();
   }, [load]);
-  async function print(): Promise<string | null> {
+  async function print(
+    dispatch?: (snapshot: CustomerBill) => Promise<void>,
+  ): Promise<string | null> {
     if (!bill || pending.current || session?.role !== 'owner') return null;
     pending.current = true;
     setBusy(true);
@@ -74,21 +78,30 @@ export function useReceipt(
           request.draft,
           request.id,
         ));
+      if (
+        job.receipt.table.id !== tableId ||
+        job.receipt.orderId !== customerId
+      )
+        throw new Error('The order does not belong to this table.');
       printJob.current = job;
       setBill(job.receipt);
+      receiptDrafts.clear(restaurant.id, customerId);
       if (job.status === 'SENT' || job.status === 'CONFIRMED') return job.id;
       if (!nativeDispatched.current) {
-        const html = await billingApi.printHtml(
-          restaurant.id,
-          customerId,
-          job.id,
-        );
-        await printCustomerBill(
-          html,
-          `${job.receipt.restaurantName} - ${
-            job.receipt.customerName ?? job.receipt.orderId
-          }`,
-        );
+        if (dispatch) await dispatch(job.receipt);
+        else {
+          const html = await billingApi.printHtml(
+            restaurant.id,
+            customerId,
+            job.id,
+          );
+          await printCustomerBill(
+            html,
+            `${job.receipt.restaurantName} - ${
+              job.receipt.customerName ?? job.receipt.orderId
+            }`,
+          );
+        }
         nativeDispatched.current = true;
       }
       const sent = await billingApi.updatePrintJob(
@@ -124,6 +137,46 @@ export function useReceipt(
       setPrinting(false);
     }
   }
+  async function continueWithoutPrinting() {
+    if (!bill || pending.current || session?.role !== 'owner') return false;
+    pending.current = true;
+    setBusy(true);
+    setError('');
+    setSkipSaveFailed(false);
+    try {
+      // Print-job creation already saved this exact revision. Do not overwrite it
+      // using the preview's stale expectedRevision after a failed print.
+      if (!printJob.current) {
+        const saved = await billingApi.save(
+          restaurant.id,
+          customerId,
+          billDraft(bill),
+        );
+        if (saved.table.id !== tableId || saved.orderId !== customerId)
+          throw new Error('The order does not belong to this table.');
+        setBill(saved);
+      }
+      receiptDrafts.clear(restaurant.id, customerId);
+      return true;
+    } catch (cause) {
+      setError(normalizeApiError(cause).message);
+      setSkipSaveFailed(true);
+      return false;
+    } finally {
+      pending.current = false;
+      setBusy(false);
+    }
+  }
+  function keepDraftOnPhone() {
+    if (!bill || pending.current || session?.role !== 'owner') return false;
+    try {
+      receiptDrafts.keep(restaurant.id, bill);
+      return true;
+    } catch {
+      setError(t('bluetooth.localSaveFailed'));
+      return false;
+    }
+  }
   async function share(channel: 'WHATSAPP' | 'EMAIL') {
     if (!bill || pending.current || session?.role !== 'owner') return false;
     pending.current = true;
@@ -137,6 +190,7 @@ export function useReceipt(
       );
       // Keep the saved revision even if the native share is dismissed or fails.
       setBill(saved);
+      receiptDrafts.clear(restaurant.id, customerId);
       printRequest.current = null;
       printJob.current = null;
       nativeDispatched.current = false;
@@ -150,5 +204,17 @@ export function useReceipt(
       setBusy(false);
     }
   }
-  return { bill, loading, busy, printing, error, load, print, share };
+  return {
+    bill,
+    loading,
+    busy,
+    printing,
+    error,
+    load,
+    print,
+    share,
+    continueWithoutPrinting,
+    skipSaveFailed,
+    keepDraftOnPhone,
+  };
 }

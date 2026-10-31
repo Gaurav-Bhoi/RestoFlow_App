@@ -75,6 +75,9 @@ export function PrintSuccessScreen({
           title={t('billing.billSentToPrinter')}
           description={t('billing.otherOrdersSaved')}
         >
+          <AppText muted style={styles.note}>
+            {t('bluetooth.statusNote')}
+          </AppText>
           <AppButton
             wrapLabel
             onPress={() =>
@@ -89,6 +92,13 @@ export function PrintSuccessScreen({
             onPress={() => setConfirmVisit(true)}
           >
             {t('billing.confirmReceipt')}
+          </AppButton>
+          <AppButton
+            wrapLabel
+            variant="ghost"
+            onPress={() => navigation.popTo('Home', { screen: 'Dashboard' })}
+          >
+            {t('bluetooth.goToDashboard')}
           </AppButton>
         </BillStatus>
       </Screen>
@@ -131,6 +141,14 @@ export function PrintSuccessScreen({
         <AppText muted style={styles.note}>
           {t('billing.otherGuestsAtThisTableStayActive')}
         </AppText>
+        <AppButton
+          wrapLabel
+          variant="ghost"
+          disabled={busy}
+          onPress={() => navigation.popTo('Home', { screen: 'Dashboard' })}
+        >
+          {t('bluetooth.goToDashboard')}
+        </AppButton>
       </SuccessState>
     </Screen>
   );

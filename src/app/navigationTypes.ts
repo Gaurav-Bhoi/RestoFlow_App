@@ -11,7 +11,7 @@ import type { BillDraft } from '../api/billing';
 export type RootStackParams = {
   Login: undefined;
   Registration: { phone: string };
-  Home: undefined;
+  Home: { screen?: keyof HomeTabsParams } | undefined;
   Customers: { tableId: string };
   Order: { tableId: string; customerId?: string };
   Bill: { tableId: string; customerId: string };

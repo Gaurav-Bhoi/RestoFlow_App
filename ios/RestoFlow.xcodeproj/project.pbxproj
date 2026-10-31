@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A73000000000000000000005 /* BluetoothReceiptPrinterBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = A73000000000000000000006 /* BluetoothReceiptPrinterBridge.m */; };
+		A73000000000000000000003 /* EscPosRaster.swift in Sources */ = {isa = PBXBuildFile; fileRef = A73000000000000000000004 /* EscPosRaster.swift */; };
+		A73000000000000000000001 /* BluetoothReceiptPrinter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A73000000000000000000002 /* BluetoothReceiptPrinter.swift */; };
 		A72000000000000000000001 /* LedgerFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = A72000000000000000000002 /* LedgerFiles.swift */; };
 		A72000000000000000000003 /* ExpensePdf.swift in Sources */ = {isa = PBXBuildFile; fileRef = A72000000000000000000004 /* ExpensePdf.swift */; };
 		A72000000000000000000005 /* LedgerFilesBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = A72000000000000000000006 /* LedgerFilesBridge.m */; };
@@ -21,6 +24,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A73000000000000000000006 /* BluetoothReceiptPrinterBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = BluetoothReceiptPrinterBridge.m; path = RestoFlow/BluetoothReceiptPrinterBridge.m; sourceTree = "<group>"; };
+		A73000000000000000000004 /* EscPosRaster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EscPosRaster.swift; path = RestoFlow/EscPosRaster.swift; sourceTree = "<group>"; };
+		A73000000000000000000002 /* BluetoothReceiptPrinter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BluetoothReceiptPrinter.swift; path = RestoFlow/BluetoothReceiptPrinter.swift; sourceTree = "<group>"; };
 		A72000000000000000000002 /* LedgerFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LedgerFiles.swift; path = RestoFlow/LedgerFiles.swift; sourceTree = "<group>"; };
 		A72000000000000000000004 /* ExpensePdf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExpensePdf.swift; path = RestoFlow/ExpensePdf.swift; sourceTree = "<group>"; };
 		A72000000000000000000006 /* LedgerFilesBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = LedgerFilesBridge.m; path = RestoFlow/LedgerFilesBridge.m; sourceTree = "<group>"; };
@@ -62,6 +68,9 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				A72000000000000000000002 /* LedgerFiles.swift */,
+				A73000000000000000000006 /* BluetoothReceiptPrinterBridge.m */,
+				A73000000000000000000004 /* EscPosRaster.swift */,
+				A73000000000000000000002 /* BluetoothReceiptPrinter.swift */,
 				A72000000000000000000004 /* ExpensePdf.swift */,
 				A72000000000000000000006 /* LedgerFilesBridge.m */,
 
@@ -314,6 +323,9 @@ if [ -f \"$SRCROOT/.xcode.env.local\" ]; then . \"$SRCROOT/.xcode.env.local\"; f
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
 				A72000000000000000000001 /* LedgerFiles.swift in Sources */,
+				A73000000000000000000005 /* BluetoothReceiptPrinterBridge.m in Sources */,
+				A73000000000000000000003 /* EscPosRaster.swift in Sources */,
+				A73000000000000000000001 /* BluetoothReceiptPrinter.swift in Sources */,
 				A72000000000000000000003 /* ExpensePdf.swift in Sources */,
 				A72000000000000000000005 /* LedgerFilesBridge.m in Sources */,
 

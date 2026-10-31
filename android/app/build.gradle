@@ -137,6 +137,7 @@ androidComponents {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     implementation("com.facebook.react:react-android")
     implementation("com.facebook.react:hermes-android")
 }

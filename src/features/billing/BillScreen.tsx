@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
   usePreventRemove,
+  useIsFocused,
   type NavigationAction,
 } from '@react-navigation/native';
 import type { RootScreenProps } from '../../app/navigationTypes';
@@ -33,6 +34,7 @@ import { billId } from './billDraft';
 export function BillScreen({ navigation, route }: RootScreenProps<'Bill'>) {
   const { t } = useTranslation();
   const draft = useBillDraft(route.params.tableId, route.params.customerId);
+  const focused = useIsFocused();
   const feedback = useFeedback();
   const [editor, setEditor] = useState<{ id: string; field: BillField } | null>(
     null,
@@ -49,9 +51,12 @@ export function BillScreen({ navigation, route }: RootScreenProps<'Bill'>) {
   useEffect(() => {
     setReviewed(false);
   }, [draft.original]);
-  usePreventRemove((draft.dirty || draft.busy) && !canLeave, ({ data }) => {
-    if (!draft.busy) setPendingAction(data.action);
-  });
+  usePreventRemove(
+    (draft.busy || (focused && draft.dirty)) && !canLeave,
+    ({ data }) => {
+      if (!draft.busy) setPendingAction(data.action);
+    },
+  );
   useEffect(() => {
     if (canLeave && pendingAction) navigation.dispatch(pendingAction);
   }, [canLeave, navigation, pendingAction]);
@@ -167,6 +172,7 @@ export function BillScreen({ navigation, route }: RootScreenProps<'Bill'>) {
             {draft.error}
           </AppText>
         )}
+        {draft.localDraft && <Notice>{t('bluetooth.restoredDraft')}</Notice>}
         {draft.conflict && (
           <AppButton
             wrapLabel

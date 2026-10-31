@@ -52,6 +52,7 @@ jest.mock('@react-navigation/native', () => ({
     require('react').useEffect(callback, [callback]);
   },
   usePreventRemove: jest.fn(),
+  useIsFocused: jest.fn(() => true),
 }));
 let renderer: ReactTestRenderer.ReactTestRenderer;
 let bill: CustomerBill;
@@ -695,4 +696,235 @@ test('PDF export preserves edited amounts and does not report a cancelled file p
     'file:///bill.pdf',
     'Saffron Kitchen bill 8 Oct 2026.pdf',
   );
+});
+
+test('Bluetooth printing uses the immutable job snapshot and does not open a system dialog', async () => {
+  const snapshot = {
+    ...bill,
+    billNumber: 'RF-BT',
+    revision: 1,
+    isDraft: false,
+  };
+  const job = {
+    id: 'bluetooth-1',
+    status: 'PENDING' as const,
+    receipt: snapshot,
+  };
+  jest.spyOn(billingApi, 'createPrintJob').mockResolvedValue(job);
+  jest
+    .spyOn(billingApi, 'updatePrintJob')
+    .mockResolvedValue({ ...job, status: 'SENT' });
+  jest.spyOn(billingApi, 'printHtml');
+  const send = jest.fn(async () => undefined);
+  let hook!: ReturnType<typeof useReceipt>;
+  function Harness() {
+    hook = useReceipt('table-1', 'order-rahul');
+    return null;
+  }
+  await render(<Harness />);
+  await act(async () => {
+    expect(await hook.print(send)).toBe('bluetooth-1');
+  });
+  expect(send).toHaveBeenCalledWith(snapshot);
+  expect(billingApi.printHtml).not.toHaveBeenCalled();
+  expect(RNPrint.print).not.toHaveBeenCalled();
+});
+
+test.each([
+  'PAPER_OUT',
+  'COVER_OPEN',
+  'PRINT_UNCERTAIN',
+  'PRINTER_DISCONNECTED',
+])('%s never confirms a job or closes a visit', async code => {
+  const job = {
+    id: 'bluetooth-1',
+    status: 'PENDING' as const,
+    receipt: { ...bill, revision: 1, isDraft: false },
+  };
+  jest.spyOn(billingApi, 'createPrintJob').mockResolvedValue(job);
+  jest
+    .spyOn(billingApi, 'updatePrintJob')
+    .mockResolvedValue({ ...job, status: 'FAILED' });
+  jest.spyOn(billingApi, 'finish');
+  let hook!: ReturnType<typeof useReceipt>;
+  function Harness() {
+    hook = useReceipt('table-1', 'order-rahul');
+    return null;
+  }
+  await render(<Harness />);
+  await act(async () => {
+    expect(
+      await hook.print(async () => {
+        throw Object.assign(new Error('Check printer'), { code });
+      }),
+    ).toBeNull();
+  });
+  expect(billingApi.updatePrintJob).toHaveBeenCalledWith(
+    'restaurant-1',
+    'order-rahul',
+    'bluetooth-1',
+    'FAILED',
+  );
+  expect(billingApi.finish).not.toHaveBeenCalled();
+  expect(hook.bill?.revision).toBe(1);
+  expect(hook.error).toBe('Check printer');
+});
+
+test('a lost Bluetooth SENT acknowledgement retries without sending a second receipt', async () => {
+  const job = { id: 'bluetooth-1', status: 'PENDING' as const, receipt: bill };
+  jest.spyOn(billingApi, 'createPrintJob').mockResolvedValue(job);
+  jest
+    .spyOn(billingApi, 'updatePrintJob')
+    .mockRejectedValueOnce(new Error('offline'))
+    .mockResolvedValue({ ...job, status: 'SENT' });
+  const send = jest.fn(async () => undefined);
+  let hook!: ReturnType<typeof useReceipt>;
+  function Harness() {
+    hook = useReceipt('table-1', 'order-rahul');
+    return null;
+  }
+  await render(<Harness />);
+  await act(async () => {
+    expect(await hook.print(send)).toBeNull();
+  });
+  await act(async () => {
+    expect(await hook.print(send)).toBe('bluetooth-1');
+  });
+  expect(send).toHaveBeenCalledTimes(1);
+});
+
+test('skip printing saves edited values and never creates a fake print confirmation', async () => {
+  const draft = billDraft(
+    bill,
+    bill.items.map(line => ({ ...line, quantity: 2 })),
+  );
+  jest.spyOn(billingApi, 'createPrintJob');
+  jest.spyOn(billingApi, 'finish');
+  let hook!: ReturnType<typeof useReceipt>;
+  function Harness() {
+    hook = useReceipt('table-1', 'order-rahul', draft);
+    return null;
+  }
+  await render(<Harness />);
+  await act(async () => {
+    expect(await hook.continueWithoutPrinting()).toBe(true);
+  });
+  expect(billingApi.save).toHaveBeenCalledWith(
+    'restaurant-1',
+    'order-rahul',
+    expect.objectContaining({ items: draft.items }),
+  );
+  expect(billingApi.createPrintJob).not.toHaveBeenCalled();
+  expect(billingApi.finish).not.toHaveBeenCalled();
+  expect(RNPrint.print).not.toHaveBeenCalled();
+});
+
+test('skip printing preserves the bill on a save failure and allows retry', async () => {
+  jest.mocked(billingApi.save).mockRejectedValueOnce(new Error('offline'));
+  let hook!: ReturnType<typeof useReceipt>;
+  function Harness() {
+    hook = useReceipt('table-1', 'order-rahul');
+    return null;
+  }
+  await render(<Harness />);
+  await act(async () => {
+    expect(await hook.continueWithoutPrinting()).toBe(false);
+  });
+  expect(hook.error).toBe('offline');
+  expect(hook.bill).toEqual(bill);
+  await act(async () => {
+    expect(await hook.continueWithoutPrinting()).toBe(true);
+  });
+});
+
+test('skip printing from the receipt sheet returns to the dashboard', async () => {
+  await render(<ReceiptScreen {...screenProps()} />);
+  await button('Print bill');
+  await button('Continue without printing');
+  expect(navigation.popTo).toHaveBeenCalledWith('Home', {
+    screen: 'Dashboard',
+  });
+});
+
+test('a job for another customer cannot be sent over Bluetooth', async () => {
+  jest.spyOn(billingApi, 'createPrintJob').mockResolvedValue({
+    id: 'wrong-job',
+    status: 'PENDING',
+    receipt: { ...bill, orderId: 'someone-else' },
+  });
+  const send = jest.fn(async () => undefined);
+  let hook!: ReturnType<typeof useReceipt>;
+  function Harness() {
+    hook = useReceipt('table-1', 'order-rahul');
+    return null;
+  }
+  await render(<Harness />);
+  await act(async () => {
+    expect(await hook.print(send)).toBeNull();
+  });
+  expect(send).not.toHaveBeenCalled();
+});
+
+test('a failed server save can keep a local draft and restore it without closing the visit', async () => {
+  const { receiptDrafts } = require('../src/features/billing/receiptDrafts');
+  jest.mocked(billingApi.save).mockRejectedValueOnce(new Error('offline'));
+  jest.spyOn(billingApi, 'finish');
+  const draft = billDraft(
+    bill,
+    bill.items.map(line => ({ ...line, quantity: 2 })),
+  );
+  let receipt!: ReturnType<typeof useReceipt>;
+  let editor!: ReturnType<typeof useBillDraft>;
+  function ReceiptHarness() {
+    receipt = useReceipt('table-1', 'order-rahul', draft);
+    return null;
+  }
+  function EditorHarness() {
+    editor = useBillDraft('table-1', 'order-rahul');
+    return null;
+  }
+  await render(<ReceiptHarness />);
+  await act(async () => {
+    expect(await receipt.continueWithoutPrinting()).toBe(false);
+  });
+  expect(receipt.skipSaveFailed).toBe(true);
+  await act(async () => {
+    expect(receipt.keepDraftOnPhone()).toBe(true);
+  });
+  expect(
+    receiptDrafts.get('restaurant-1', 'order-rahul').items[0].quantity,
+  ).toBe(2);
+  await act(async () => {
+    renderer.update(
+      <SafeAreaProvider>
+        <EditorHarness />
+      </SafeAreaProvider>,
+    );
+  });
+  expect(editor.localDraft).toBe(true);
+  expect(editor.items[0].quantity).toBe(2);
+  expect(editor.conflict).toBe(false);
+  expect(billingApi.finish).not.toHaveBeenCalled();
+  await act(async () => {
+    expect(await editor.save()).toBe(true);
+  });
+  expect(receiptDrafts.get('restaurant-1', 'order-rahul')).toBeUndefined();
+});
+
+test('a restored local bill cannot overwrite a changed server revision', async () => {
+  const { receiptDrafts } = require('../src/features/billing/receiptDrafts');
+  receiptDrafts.keep('restaurant-1', { ...bill, revision: 0 });
+  bill.revision = 2;
+  let hook!: ReturnType<typeof useBillDraft>;
+  function Harness() {
+    hook = useBillDraft('table-1', 'order-rahul');
+    return null;
+  }
+  await render(<Harness />);
+  expect(hook.conflict).toBe(true);
+  expect(hook.localDraft).toBe(true);
+  await act(async () => {
+    expect(await hook.save()).toBe(false);
+  });
+  expect(billingApi.save).not.toHaveBeenCalled();
 });
